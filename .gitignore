@@ -1,0 +1,16 @@
+repos/
+__pycache__/
+.simvision/
+sim_build/
+*.svwf
+irun*
+libs/
+waves.shm/
+results.xml
+combined_results.xml
+*.egg-info/
+*.vcd
+*.vcd.hier
+*.fst
+dist/
+m3-dapswjdp/
