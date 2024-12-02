@@ -1,4 +1,4 @@
-from apb.apb_master import ApbMaster, ApbBus
+from . import ApbMaster, ApbBus
 
 # import math
 import logging
