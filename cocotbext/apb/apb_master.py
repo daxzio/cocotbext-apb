@@ -164,7 +164,7 @@ class ApbMaster(Region, Reset):
                 "pprot sideband signal value specified, but signal is not connected"
             )
 
-        self.log.info(f"Read start addr: 0x{address:08x} prot: {prot}")
+        self.log.info(f"Read addr: 0x{address:08x} prot: {prot}")
 
         if self.penable_present:
             self.bus.penable.value = 1
@@ -215,7 +215,7 @@ class ApbMaster(Region, Reset):
 
         data = int.from_bytes(data, byteorder="little")
         self.log.info(
-            f"Write start addr: 0x{address:08x} data: 0x{data:08x} prot: {prot}"
+            f"Write addr: 0x{address:08x} data: 0x{data:08x} prot: {prot}"
         )
 
         if self.penable_present:
