@@ -262,7 +262,7 @@ class StreamSource(StreamBase, StreamPause):
     #                 self.valid.value = 0
 
     async def _run(self):
-        has_ready = self.ready is not None
+#         has_ready = self.ready is not None
 
         clock_edge_event = RisingEdge(self.clock)
 
@@ -405,7 +405,7 @@ class StreamSink(StreamMonitor, StreamPause):
 
         clock_edge_event = RisingEdge(self.clock)
 
-        wake_event = self.wake_event.wait()
+#         wake_event = self.wake_event.wait()
 
         while True:
             pause_sample = bool(self.pause)
@@ -428,13 +428,13 @@ class StreamSink(StreamMonitor, StreamPause):
 
                 self.ready.value = not paused
 
-                if (not valid_sample or paused) and (pause_sample == bool(self.pause)):
-                    self.wake_event.clear()
-                    await wake_event
-            else:
-                if not valid_sample:
-                    self.wake_event.clear()
-                    await wake_event
+#                 if (not valid_sample or paused) and (pause_sample == bool(self.pause)):
+#                     self.wake_event.clear()
+#                     await wake_event
+#             else:
+#                 if not valid_sample:
+#                     self.wake_event.clear()
+#                     await wake_event
 
 
 def define_stream(

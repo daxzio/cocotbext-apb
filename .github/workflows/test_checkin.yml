@@ -90,7 +90,7 @@ jobs:
       - name: Run Tests
         run: |
           unset PYTHONHOME 
-#           make SIM=${CI_TARGET}
+          make SIM=${CI_TARGET}
 #           cd tests/test001 ; make clean sim ; cd ../..
 #           cd tests/test002 ; make clean sim ; cd ../..
 #           cd tests/hazard3 ; make clean sim ; cd ../..

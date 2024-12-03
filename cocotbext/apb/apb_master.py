@@ -1,14 +1,15 @@
 import logging
-import cocotb
-from cocotb.queue import Queue
-from cocotb.triggers import Event
-from cocotb.triggers import RisingEdge, FallingEdge
+# import cocotb
+# from cocotb.queue import Queue
+# from cocotb.triggers import Event
+from cocotb.triggers import RisingEdge
+# from cocotb.triggers import FallingEdge
 
 from .version import __version__
 from .constants import ApbProt
 from .address_space import Region
 from .reset import Reset
-from .apb_bus import ApbBus
+# from .apb_bus import ApbBus
 
 
 class ApbMaster(Region, Reset):
@@ -233,8 +234,8 @@ class ApbMaster(Region, Reset):
 
         while not self.bus.pready.value:
             await RisingEdge(self.clock)
-        data = int(self.bus.prdata.value)
-        self.log.info(f"Value read: 0x{data:08x}")
+#         data = int(self.bus.prdata.value)
+#         self.log.info(f"Value read: 0x{data:08x}")
 
         if self.penable_present:
             self.bus.penable.value = 0
