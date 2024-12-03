@@ -28,7 +28,7 @@ class BuddyAllocator:
         self.size = size
         self.min_alloc = min_alloc
 
-        self.free_lists = [[] for x in range((self.size-1).bit_length())]
+        self.free_lists = [[] for x in range((self.size - 1).bit_length())]
         self.free_lists.append([0])
         self.allocations = {}
 
@@ -38,7 +38,7 @@ class BuddyAllocator:
 
         size = max(size, self.min_alloc)
 
-        bucket = (size-1).bit_length()
+        bucket = (size - 1).bit_length()
         orig_bucket = bucket
 
         while bucket < len(self.free_lists):
@@ -52,7 +52,7 @@ class BuddyAllocator:
                 block = self.free_lists[bucket].pop(0)
                 bucket -= 1
                 self.free_lists[bucket].append(block)
-                self.free_lists[bucket].append(block+2**bucket)
+                self.free_lists[bucket].append(block + 2**bucket)
 
             if self.free_lists[bucket]:
                 # allocate

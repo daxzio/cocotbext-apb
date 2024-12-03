@@ -1,0 +1,37 @@
+name: Build Verilator
+
+on: 
+  #push: 
+  schedule:
+    - cron: '0 0 * * *'
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+  
+jobs:
+  build_dep:
+    #uses: daxzio/setup-eda/.github/workflows/setup_verilator.yml@main
+    uses: ./.github/workflows/setup_verilator.yml
+#     with:
+#       githash: "c7cb13d302e13cac77701045fd7935a9b81b9e89"
+#       githash: "v11_0"
+
+  build:
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    needs: [build_dep]
+    steps:
+      - name: Cache Verilator
+        uses: actions/cache@v4
+        with:
+          path: ${{ needs.build_dep.outputs.cache_dir }}
+          key: ${{ needs.build_dep.outputs.cache_key }}
+      - name: Add to PATH
+        run: |
+          echo "${{ needs.build_dep.outputs.cache_dir }}/bin" >> $GITHUB_PATH
+      
+      - name: Report Verilator
+        run: |
+          which verilator

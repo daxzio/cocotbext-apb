@@ -1,0 +1,5 @@
+cocotb
+cocotb-bus
+pytest
+pyflakes
+mypy

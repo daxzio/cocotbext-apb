@@ -33,16 +33,22 @@ def hexdump_line(data, offset, row_size=16):
 
 
 def hexdump(data, start=0, length=None, row_size=16, prefix="", offset=0):
-    stop = min(start+length, len(data)) if length else len(data)
+    stop = min(start + length, len(data)) if length else len(data)
     for k in range(start, stop, row_size):
-        print(prefix+hexdump_line(data[k:min(k+row_size, stop)], k+offset, row_size))
+        print(
+            prefix
+            + hexdump_line(data[k : min(k + row_size, stop)], k + offset, row_size)
+        )
 
 
 def hexdump_lines(data, start=0, length=None, row_size=16, prefix="", offset=0):
     lines = []
-    stop = min(start+length, len(data)) if length else len(data)
+    stop = min(start + length, len(data)) if length else len(data)
     for k in range(start, stop, row_size):
-        lines.append(prefix+hexdump_line(data[k:min(k+row_size, stop)], k+offset, row_size))
+        lines.append(
+            prefix
+            + hexdump_line(data[k : min(k + row_size, stop)], k + offset, row_size)
+        )
     return lines
 
 

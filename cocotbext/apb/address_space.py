@@ -55,14 +55,14 @@ class MemoryInterface:
             raise ValueError("address out of range")
         if length < 0:
             raise ValueError("invalid length")
-        if address+length > self.size:
+        if address + length > self.size:
             raise ValueError("operation out of range")
 
     def get_absolute_address(self, address):
         if self.base is None:
             return None
         self.check_range(address)
-        return address+self.base
+        return address + self.base
 
     async def _read(self, address, length, **kwargs):
         raise NotImplementedError()
@@ -71,29 +71,29 @@ class MemoryInterface:
         self.check_range(address, length)
         return await self._read(address, length, **kwargs)
 
-    async def read_words(self, address, count, byteorder='little', ws=2, **kwargs):
-        data = bytes(await self.read(address, count*ws, **kwargs))
+    async def read_words(self, address, count, byteorder="little", ws=2, **kwargs):
+        data = bytes(await self.read(address, count * ws, **kwargs))
         words = []
         for k in range(count):
-            words.append(int.from_bytes(data[ws*k:ws*(k+1)], byteorder))
+            words.append(int.from_bytes(data[ws * k : ws * (k + 1)], byteorder))
         return words
 
-    async def read_dwords(self, address, count, byteorder='little', **kwargs):
+    async def read_dwords(self, address, count, byteorder="little", **kwargs):
         return await self.read_words(address, count, byteorder, 4, **kwargs)
 
-    async def read_qwords(self, address, count, byteorder='little', **kwargs):
+    async def read_qwords(self, address, count, byteorder="little", **kwargs):
         return await self.read_words(address, count, byteorder, 8, **kwargs)
 
     async def read_byte(self, address, **kwargs):
         return (await self.read(address, 1, **kwargs)).data[0]
 
-    async def read_word(self, address, byteorder='little', ws=2, **kwargs):
+    async def read_word(self, address, byteorder="little", ws=2, **kwargs):
         return (await self.read_words(address, 1, byteorder, ws, **kwargs))[0]
 
-    async def read_dword(self, address, byteorder='little', **kwargs):
+    async def read_dword(self, address, byteorder="little", **kwargs):
         return (await self.read_dwords(address, 1, byteorder, **kwargs))[0]
 
-    async def read_qword(self, address, byteorder='little', **kwargs):
+    async def read_qword(self, address, byteorder="little", **kwargs):
         return (await self.read_qwords(address, 1, byteorder, **kwargs))[0]
 
     async def _write(self, address, data, **kwargs):
@@ -103,29 +103,29 @@ class MemoryInterface:
         self.check_range(address, len(data))
         await self._write(address, data, **kwargs)
 
-    async def write_words(self, address, data, byteorder='little', ws=2, **kwargs):
+    async def write_words(self, address, data, byteorder="little", ws=2, **kwargs):
         words = data
         data = bytearray()
         for w in words:
             data.extend(w.to_bytes(ws, byteorder))
         await self.write(address, data, **kwargs)
 
-    async def write_dwords(self, address, data, byteorder='little', **kwargs):
+    async def write_dwords(self, address, data, byteorder="little", **kwargs):
         await self.write_words(address, data, byteorder, 4, **kwargs)
 
-    async def write_qwords(self, address, data, byteorder='little', **kwargs):
+    async def write_qwords(self, address, data, byteorder="little", **kwargs):
         await self.write_words(address, data, byteorder, 8, **kwargs)
 
     async def write_byte(self, address, data, **kwargs):
         await self.write(address, [data], **kwargs)
 
-    async def write_word(self, address, data, byteorder='little', ws=2, **kwargs):
+    async def write_word(self, address, data, byteorder="little", ws=2, **kwargs):
         await self.write_words(address, [data], byteorder, ws, **kwargs)
 
-    async def write_dword(self, address, data, byteorder='little', **kwargs):
+    async def write_dword(self, address, data, byteorder="little", **kwargs):
         await self.write_dwords(address, [data], byteorder, **kwargs)
 
-    async def write_qword(self, address, data, byteorder='little', **kwargs):
+    async def write_qword(self, address, data, byteorder="little", **kwargs):
         await self.write_qwords(address, [data], byteorder, **kwargs)
 
     def create_window(self, offset, size=None, window_type=None):
@@ -135,7 +135,9 @@ class MemoryInterface:
         self.check_range(offset, size)
         return window_type(self, offset, size, base=self.get_absolute_address(offset))
 
-    def create_window_pool(self, offset=None, size=None, window_pool_type=None, window_type=None):
+    def create_window_pool(
+        self, offset=None, size=None, window_pool_type=None, window_type=None
+    ):
         if offset is None:
             offset = 0
         if size is None:
@@ -143,7 +145,13 @@ class MemoryInterface:
         window_pool_type = window_pool_type or self.window_pool_type or WindowPool
         window_type = window_type or self.window_type
         self.check_range(offset, size)
-        return window_pool_type(self, offset, size, base=self.get_absolute_address(offset), window_type=window_type)
+        return window_pool_type(
+            self,
+            offset,
+            size,
+            base=self.get_absolute_address(offset),
+            window_type=window_type,
+        )
 
     def __len__(self):
         return self._size
@@ -161,10 +169,12 @@ class Window(MemoryInterface):
     def get_parent_address(self, address):
         if address < 0 or address >= self.size:
             raise ValueError("address out of range")
-        return address+self.offset
+        return address + self.offset
 
     async def _read(self, address, length, **kwargs):
-        return await self.parent.read(self.get_parent_address(address), length, **kwargs)
+        return await self.parent.read(
+            self.get_parent_address(address), length, **kwargs
+        )
 
     async def _write(self, address, data, **kwargs):
         await self.parent.write(self.get_parent_address(address), data, **kwargs)
@@ -193,19 +203,23 @@ class MemoryRegion(Region):
         self.mem = mem
 
     async def _read(self, address, length, **kwargs):
-        return self.mem[address:address+length]
+        return self.mem[address : address + length]
 
     async def _write(self, address, data, **kwargs):
-        self.mem[address:address+len(data)] = data
+        self.mem[address : address + len(data)] = data
 
     def hexdump(self, address, length, prefix=""):
-        hexdump(self.mem[address:address+length], prefix=prefix, offset=address)
+        hexdump(self.mem[address : address + length], prefix=prefix, offset=address)
 
     def hexdump_lines(self, address, length, prefix=""):
-        return hexdump_lines(self.mem[address:address+length], prefix=prefix, offset=address)
+        return hexdump_lines(
+            self.mem[address : address + length], prefix=prefix, offset=address
+        )
 
     def hexdump_str(self, address, length, prefix=""):
-        return hexdump_str(self.mem[address:address+length], prefix=prefix, offset=address)
+        return hexdump_str(
+            self.mem[address : address + length], prefix=prefix, offset=address
+        )
 
     def __getitem__(self, key):
         return self.mem[key]
@@ -277,8 +291,8 @@ class AddressSpace(Region):
         if length < 0:
             raise ValueError("invalid length")
         length = max(length, 1)
-        for (base, size, translate, region) in self.regions:
-            if address < base+size and base < address+length:
+        for base, size, translate, region in self.regions:
+            if address < base + size and base < address + length:
                 regions.append((base, size, translate, region))
         regions.sort()
         return regions
@@ -304,11 +318,11 @@ class AddressSpace(Region):
             if base > address:
                 raise Exception("Invalid address")
             seg_addr = address - base
-            seg_len = min(size-seg_addr, length)
+            seg_len = min(size - seg_addr, length)
             if offset is None:
                 seg_addr = address
                 offset = 0
-            data.extend(bytes(await region.read(seg_addr+offset, seg_len, **kwargs)))
+            data.extend(bytes(await region.read(seg_addr + offset, seg_len, **kwargs)))
             address += seg_len
             length -= seg_len
         if length > 0:
@@ -325,11 +339,13 @@ class AddressSpace(Region):
             if base > address:
                 raise Exception("Invalid address")
             seg_addr = address - base
-            seg_len = min(size-seg_addr, length)
+            seg_len = min(size - seg_addr, length)
             if offset is None:
                 seg_addr = address
                 offset = 0
-            await region.write(seg_addr+offset, data[start:start+seg_len], **kwargs)
+            await region.write(
+                seg_addr + offset, data[start : start + seg_len], **kwargs
+            )
             address += seg_len
             start += seg_len
             length -= seg_len

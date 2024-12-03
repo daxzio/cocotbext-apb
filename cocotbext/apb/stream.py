@@ -32,14 +32,19 @@ from cocotb.types import LogicArray
 from .reset import Reset
 
 
-
 class StreamBus(Bus):
 
-    _signals = ["data"]
-    _optional_signals = []
+    _signals: list = ["data"]
+    _optional_signals: list = []
 
     def __init__(self, entity=None, prefix=None, **kwargs):
-        super().__init__(entity, prefix, self._signals, optional_signals=self._optional_signals, **kwargs)
+        super().__init__(
+            entity,
+            prefix,
+            self._signals,
+            optional_signals=self._optional_signals,
+            **kwargs,
+        )
 
     @classmethod
     def from_entity(cls, entity, **kwargs):
@@ -52,7 +57,7 @@ class StreamBus(Bus):
 
 class StreamTransaction:
 
-    _signals = ["data"]
+    _signals: list = ["data"]
 
     def __init__(self, *args, **kwargs):
         for sig in self._signals:
@@ -70,8 +75,8 @@ class StreamTransaction:
 
 class StreamBase(Reset):
 
-    _signals = ["data", "ready"]
-    _optional_signals = []
+    _signals: list = ["data", "ready"]
+    _optional_signals: list = []
 
     _signal_widths = {"ready": 1}
 
@@ -85,7 +90,9 @@ class StreamBase(Reset):
     _transaction_obj = StreamTransaction
     _bus_obj = StreamBus
 
-    def __init__(self, bus, clock, reset=None, reset_active_level=True, *args, **kwargs):
+    def __init__(
+        self, bus, clock, reset=None, reset_active_level=True, *args, **kwargs
+    ):
         self.bus = bus
         self.clock = clock
         self.reset = reset
@@ -103,26 +110,26 @@ class StreamBase(Reset):
         self.wake_event = Event()
 
         self.ready = None
-#         self.valid = None
+        #         self.valid = None
 
         if self._ready_signal is not None and hasattr(self.bus, self._ready_signal):
             self.ready = getattr(self.bus, self._ready_signal)
             if self._ready_init is not None:
                 self.ready.setimmediatevalue(self._ready_init)
 
-#         if self._valid_signal is not None and hasattr(self.bus, self._valid_signal):
-#             self.valid = getattr(self.bus, self._valid_signal)
-#             if self._valid_init is not None:
-#                 self.valid.setimmediatevalue(self._valid_init)
+        #         if self._valid_signal is not None and hasattr(self.bus, self._valid_signal):
+        #             self.valid = getattr(self.bus, self._valid_signal)
+        #             if self._valid_init is not None:
+        #                 self.valid.setimmediatevalue(self._valid_init)
 
-        for sig in self._signals+self._optional_signals:
+        for sig in self._signals + self._optional_signals:
             if hasattr(self.bus, sig):
                 if sig in self._signal_widths:
                     assert len(getattr(self.bus, sig)) == self._signal_widths[sig]
-#                 if self._init_x and sig not in (self._valid_signal, self._ready_signal):
+                #                 if self._init_x and sig not in (self._valid_signal, self._ready_signal):
                 if self._init_x and sig not in (self._ready_signal):
                     v = getattr(self.bus, sig).value
-                    w = 'x'*len(v)
+                    w = "x" * len(v)
                     getattr(self.bus, sig).setimmediatevalue(LogicArray(w))
 
         self._run_cr = None
@@ -210,7 +217,9 @@ class StreamSource(StreamBase, StreamPause):
 
     _ready_init = None
 
-    def __init__(self, bus, clock, reset=None, reset_active_level=True, *args, **kwargs):
+    def __init__(
+        self, bus, clock, reset=None, reset_active_level=True, *args, **kwargs
+    ):
         super().__init__(bus, clock, reset, reset_active_level, *args, **kwargs)
 
         self.queue_occupancy_limit = -1
@@ -231,7 +240,10 @@ class StreamSource(StreamBase, StreamPause):
         self.active_event.set()
 
     def full(self):
-        if self.queue_occupancy_limit > 0 and self.count() >= self.queue_occupancy_limit:
+        if (
+            self.queue_occupancy_limit > 0
+            and self.count() >= self.queue_occupancy_limit
+        ):
             return True
         else:
             return False
@@ -242,12 +254,12 @@ class StreamSource(StreamBase, StreamPause):
     async def wait(self):
         await self.idle_event.wait()
 
-#     def _handle_reset(self, state):
-#         super()._handle_reset(state)
-# 
-#         if state:
-#             if self.valid is not None:
-#                 self.valid.value = 0
+    #     def _handle_reset(self, state):
+    #         super()._handle_reset(state)
+    #
+    #         if state:
+    #             if self.valid is not None:
+    #                 self.valid.value = 0
 
     async def _run(self):
         has_ready = self.ready is not None
@@ -258,9 +270,9 @@ class StreamSource(StreamBase, StreamPause):
             await clock_edge_event
 
             if not self.queue.empty() and not self.pause:
-               self.bus.drive(self.queue.get_nowait())
-               self.dequeue_event.set()
-               self.active = True
+                self.bus.drive(self.queue.get_nowait())
+                self.dequeue_event.set()
+                self.active = True
             else:
                 self.active = not self.queue.empty()
                 if self.queue.empty():
@@ -270,7 +282,6 @@ class StreamSource(StreamBase, StreamPause):
                     await self.active_event.wait()
 
 
-
 class StreamMonitor(StreamBase):
 
     _init_x = False
@@ -278,11 +289,13 @@ class StreamMonitor(StreamBase):
     _valid_init = None
     _ready_init = None
 
-    def __init__(self, bus, clock, reset=None, reset_active_level=True, *args, **kwargs):
+    def __init__(
+        self, bus, clock, reset=None, reset_active_level=True, *args, **kwargs
+    ):
         super().__init__(bus, clock, reset, reset_active_level, *args, **kwargs)
 
-#         if self.valid is not None:
-#             cocotb.start_soon(self._run_valid_monitor())
+        #         if self.valid is not None:
+        #             cocotb.start_soon(self._run_valid_monitor())
         if self.ready is not None:
             cocotb.start_soon(self._run_ready_monitor())
 
@@ -355,15 +368,20 @@ class StreamSink(StreamMonitor, StreamPause):
     _init_x = False
 
     _valid_init = None
-    _ready_init = 0
+    _ready_init = None
 
-    def __init__(self, bus, clock, reset=None, reset_active_level=True, *args, **kwargs):
+    def __init__(
+        self, bus, clock, reset=None, reset_active_level=True, *args, **kwargs
+    ):
         super().__init__(bus, clock, reset, reset_active_level, *args, **kwargs)
 
         self.queue_occupancy_limit = -1
 
     def full(self):
-        if self.queue_occupancy_limit > 0 and self.count() >= self.queue_occupancy_limit:
+        if (
+            self.queue_occupancy_limit > 0
+            and self.count() >= self.queue_occupancy_limit
+        ):
             return True
         else:
             return False
@@ -382,7 +400,7 @@ class StreamSink(StreamMonitor, StreamPause):
         self.wake_event.set()
 
     async def _run(self):
-#         has_valid = self.valid is not None
+        #         has_valid = self.valid is not None
         has_ready = self.ready is not None
 
         clock_edge_event = RisingEdge(self.clock)
@@ -396,9 +414,9 @@ class StreamSink(StreamMonitor, StreamPause):
 
             # read handshake signals
             ready_sample = not has_ready or self.ready.value
-#             valid_sample = not has_valid or self.valid.value
+            #             valid_sample = not has_valid or self.valid.value
 
-#             if ready_sample and valid_sample:
+            #             if ready_sample and valid_sample:
             if ready_sample:
                 obj = self._transaction_obj()
                 self.bus.sample(obj)
@@ -419,7 +437,9 @@ class StreamSink(StreamMonitor, StreamPause):
                     await wake_event
 
 
-def define_stream(name, signals, optional_signals=None, ready_signal=None, signal_widths=None):
+def define_stream(
+    name, signals, optional_signals=None, ready_signal=None, signal_widths=None
+):
     all_signals = signals.copy()
 
     if optional_signals is None:
@@ -427,16 +447,16 @@ def define_stream(name, signals, optional_signals=None, ready_signal=None, signa
     else:
         all_signals += optional_signals
 
-#     if valid_signal is None:
-#         for s in all_signals:
-#             if s.lower().endswith('valid'):
-#                 valid_signal = s
-#     if valid_signal not in all_signals:
-#         signals += valid_signal
+    #     if valid_signal is None:
+    #         for s in all_signals:
+    #             if s.lower().endswith('valid'):
+    #                 valid_signal = s
+    #     if valid_signal not in all_signals:
+    #         signals += valid_signal
 
     if ready_signal is None:
         for s in all_signals:
-            if s.lower().endswith('ready'):
+            if s.lower().endswith("ready"):
                 ready_signal = s
     else:
         if ready_signal not in all_signals:
@@ -445,8 +465,8 @@ def define_stream(name, signals, optional_signals=None, ready_signal=None, signa
     if signal_widths is None:
         signal_widths = {}
 
-#     if valid_signal not in signal_widths:
-#         signal_widths[valid_signal] = 1
+    #     if valid_signal not in signal_widths:
+    #         signal_widths[valid_signal] = 1
 
     if ready_signal not in signal_widths:
         signal_widths[ready_signal] = 1
@@ -458,26 +478,26 @@ def define_stream(name, signals, optional_signals=None, ready_signal=None, signa
             filtered_signals.append(s)
 
     attrib = {}
-    attrib['_signals'] = signals
-    attrib['_optional_signals'] = optional_signals
-    bus = type(name+"Bus", (StreamBus,), attrib)
+    attrib["_signals"] = signals
+    attrib["_optional_signals"] = optional_signals
+    bus = type(name + "Bus", (StreamBus,), attrib)
 
     attrib = {s: 0 for s in filtered_signals}
-    attrib['_signals'] = filtered_signals
+    attrib["_signals"] = filtered_signals
 
-    transaction = type(name+"Transaction", (StreamTransaction,), attrib)
+    transaction = type(name + "Transaction", (StreamTransaction,), attrib)
 
     attrib = {}
-    attrib['_signals'] = signals
-    attrib['_optional_signals'] = optional_signals
-    attrib['_signal_widths'] = signal_widths
-    attrib['_ready_signal'] = ready_signal
-#     attrib['_valid_signal'] = valid_signal
-    attrib['_transaction_obj'] = transaction
-    attrib['_bus_obj'] = bus
+    attrib["_signals"] = signals
+    attrib["_optional_signals"] = optional_signals
+    attrib["_signal_widths"] = signal_widths
+    attrib["_ready_signal"] = ready_signal
+    #     attrib['_valid_signal'] = valid_signal
+    attrib["_transaction_obj"] = transaction
+    attrib["_bus_obj"] = bus
 
-    source = type(name+"Source", (StreamSource,), attrib)
-    sink = type(name+"Sink", (StreamSink,), attrib)
-    monitor = type(name+"Monitor", (StreamMonitor,), attrib)
+    source = type(name + "Source", (StreamSource,), attrib)
+    sink = type(name + "Sink", (StreamSink,), attrib)
+    monitor = type(name + "Monitor", (StreamMonitor,), attrib)
 
     return bus, transaction, source, sink, monitor

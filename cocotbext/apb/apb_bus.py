@@ -8,12 +8,37 @@ from cocotb_bus.bus import Bus
 # )
 # apb5 'pwakeup', 'pauser', 'pwuser', 'pruser', 'pbuser', 'pnse',
 
+
 class ApbBus(Bus):
-    _signals = ['psel', 'pwrite', 'paddr', 'pwdata', 'pready', 'prdata', ]
-    _optional_signals = ['penable', 'pstrb', 'pprot', 'pslverr', 'pwakeup', 'pauser', 'pwuser', 'pruser', 'pbuser', 'pnse',]
+    _signals = [
+        "psel",
+        "pwrite",
+        "paddr",
+        "pwdata",
+        "pready",
+        "prdata",
+    ]
+    _optional_signals = [
+        "penable",
+        "pstrb",
+        "pprot",
+        "pslverr",
+        "pwakeup",
+        "pauser",
+        "pwuser",
+        "pruser",
+        "pbuser",
+        "pnse",
+    ]
 
     def __init__(self, entity=None, prefix=None, **kwargs):
-        super().__init__(entity, prefix, self._signals, optional_signals=self._optional_signals, **kwargs)
+        super().__init__(
+            entity,
+            prefix,
+            self._signals,
+            optional_signals=self._optional_signals,
+            **kwargs
+        )
 
     @classmethod
     def from_entity(cls, entity, **kwargs):

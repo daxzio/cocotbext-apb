@@ -35,18 +35,18 @@ class SparseMemory:
             raise ValueError("address out of range")
         if length < 0:
             raise ValueError("invalid length")
-        if address+length > self.size:
+        if address + length > self.size:
             raise ValueError("operation out of range")
         data = bytearray()
         while length > 0:
-            block_offset = address & 0xfff
+            block_offset = address & 0xFFF
             block_addr = address - block_offset
             block_len = min(4096 - block_offset, length)
             try:
                 block = self.segs[block_addr]
             except KeyError:
-                block = b'\x00'*4096
-            data.extend(block[block_offset:block_offset+block_len])
+                block = b"\x00" * 4096
+            data.extend(block[block_offset : block_offset + block_len])
             address += block_len
             length -= block_len
         return bytes(data)
@@ -54,12 +54,12 @@ class SparseMemory:
     def write(self, address, data, **kwargs):
         if address < 0 or address >= self.size:
             raise ValueError("address out of range")
-        if address+len(data) > self.size:
+        if address + len(data) > self.size:
             raise ValueError("operation out of range")
         offset = 0
         length = len(data)
         while length > 0:
-            block_offset = address & 0xfff
+            block_offset = address & 0xFFF
             block_addr = address - block_offset
             block_len = min(4096 - block_offset, length)
             try:
@@ -67,7 +67,9 @@ class SparseMemory:
             except KeyError:
                 block = bytearray(4096)
                 self.segs[block_addr] = block
-            block[block_offset:block_offset+block_len] = data[offset:offset+block_len]
+            block[block_offset : block_offset + block_len] = data[
+                offset : offset + block_len
+            ]
             address += block_len
             offset += block_len
             length -= block_len
@@ -93,7 +95,7 @@ class SparseMemory:
         elif isinstance(key, slice):
             start, stop, step = key.indices(self.size)
             if step == 1:
-                return self.read(start, stop-start)
+                return self.read(start, stop - start)
             else:
                 raise IndexError("specified step size is not supported")
 
@@ -104,7 +106,7 @@ class SparseMemory:
             start, stop, step = key.indices(self.size)
             if step == 1:
                 value = bytes(value)
-                if stop-start != len(value):
+                if stop - start != len(value):
                     raise IndexError("slice assignment is wrong size")
                 return self.write(start, value)
             else:
