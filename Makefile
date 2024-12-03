@@ -1,7 +1,7 @@
 SIM?=icarus
 
 default:
-	cd tests/test_basic ; make clean sim ; ../../rtlflo/combine_results.py
+	cd tests/test_basic ; make clean sim ; ../rtlflo/combine_results.py
 
 lint:
 	pyflakes cocotbext
