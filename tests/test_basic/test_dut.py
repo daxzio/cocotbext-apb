@@ -4,7 +4,7 @@ from cocotb import test
 from interfaces.clkrst import ClkReset
 
 from cocotbext.apb import ApbMaster
-from cocotbext.apb import ApbBus
+from cocotbext.apb import Apb4Bus
 
 def returned_val(read_op):
     return int.from_bytes(read_op, byteorder='little')
@@ -21,7 +21,7 @@ class testbench:
         self.dut = dut
         
         apb_prefix="s_apb"
-        self.bus = ApbBus.from_prefix(dut, apb_prefix)
+        self.bus = Apb4Bus.from_prefix(dut, apb_prefix)
         clk_name="clk"
         self.intf = ApbMaster(dut, self.bus, getattr(dut, clk_name))
 
@@ -60,6 +60,11 @@ async def test_dut_basic(dut):
         read_op = await tb.intf.read(0x0000 + (z*tb.incr))
         ret = returned_val(read_op)
         assert y == ret
+    for i in range(tb.n_regs):
+        z = randint(0, tb.n_regs-1)
+        y = x[z] & tb.mask
+        read_op = await tb.intf.read(0x0000 + (z*tb.incr), y.to_bytes(len(tb.bus.prdata), "little"))
+
     for i in range(tb.n_regs):
         y = x[i] & tb.mask
         read_op = await tb.intf.read(0x0000 + (i*tb.incr))

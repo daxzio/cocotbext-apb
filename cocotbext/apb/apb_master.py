@@ -1,22 +1,27 @@
 import logging
-# import cocotb
-# from cocotb.queue import Queue
-# from cocotb.triggers import Event
+
+from cocotb import start_soon
 from cocotb.triggers import RisingEdge
-# from cocotb.triggers import FallingEdge
+
+from collections import deque
+from cocotb.triggers import Event
+from typing import Deque
+from typing import Tuple
 
 from .version import __version__
 from .constants import ApbProt
-from .address_space import Region
-from .reset import Reset
-# from .apb_bus import ApbBus
+# from .address_space import Region
+# from .reset import Reset
 
+#         self, dut, bus, clock, reset=None, reset_active_level=True, **kwargs
 
-class ApbMaster(Region, Reset):
-    def __init__(self, dut, bus, clock, reset=None, reset_active_level=True, **kwargs):
+class ApbMaster():
+    def __init__(
+        self, dut, bus, clock, **kwargs
+    ) -> None:
         self.bus = bus
         self.clock = clock
-        self.reset = reset
+#         self.reset = reset
         if bus._name:
             self.log = logging.getLogger(f"cocotb.{bus._entity._name}.{bus._name}")
         else:
@@ -39,8 +44,6 @@ class ApbMaster(Region, Reset):
         self.pprot_present = hasattr(self.bus, "pprot")
         self.pslverr_present = hasattr(self.bus, "pslverr")
 
-        super().__init__(2**self.address_width, **kwargs)
-
         self.log.info("APB master configuration:")
         self.log.info(f"  Address width: {self.address_width} bits")
         self.log.info(f"  Byte size: {self.byte_size} bits")
@@ -59,22 +62,13 @@ class ApbMaster(Region, Reset):
             assert self.byte_lanes == len(self.bus.pstrb)
         assert self.byte_lanes * self.byte_size == self.width
 
-        #         self.channel = ApbSource(bus, clock, reset, reset_active_level)
-        #         self.channel.queue_occupancy_limit = 2
-        #
-        #         self.command_queue = Queue()
-        #         self.command_queue.queue_occupancy_limit = 2
-        #         self.current_command = None
-        #
-        #         self.int_resp_command_queue = Queue()
-        #         self.current_resp_command = None
-        #
-        #         self.in_flight_operations = 0
-        #         self._idle = Event()
-        #         self._idle.set()
-        #
-        #         self._process_cr = None
-        #         self._process_resp_cr = None
+        self.queue_tx: Deque[Tuple[bool, int, bytearray, int, ApbProt]] = deque()
+        self.queue_rx: Deque[bytearray] = deque()
+
+        self.sync = Event()
+
+        self._idle = Event()
+        self._idle.set()
 
         if self.penable_present:
             self.bus.penable.value = 0
@@ -87,162 +81,145 @@ class ApbMaster(Region, Reset):
         self.bus.pwrite.value = 0
         self.bus.pwdata.value = 0
 
-        self._init_reset(reset, reset_active_level)
+#         self._init_reset(reset, reset_active_level)
 
-    #     def _handle_reset(self, state):
-    #         if state:
-    #             self.log.info("Reset asserted")
-    #             if self._process_cr is not None:
-    #                 self._process_cr.kill()
-    #                 self._process_cr = None
-    # #             if self._process_read_resp_cr is not None:
-    # #                 self._process_read_resp_cr.kill()
-    # #                 self._process_read_resp_cr = None
-    # #
-    #             self.achannel.clear()
-    # #             self.r_channel.clear()
-    # #
-    # #             def flush_cmd(cmd):
-    # #                 self.log.warning("Flushed read operation during reset: %s", cmd)
-    # #                 if cmd.event:
-    # #                     cmd.event.set(None)
-    # #
-    # #             while not self.read_command_queue.empty():
-    # #                 cmd = self.read_command_queue.get_nowait()
-    # #                 flush_cmd(cmd)
-    # #
-    # #             if self.current_read_command:
-    # #                 cmd = self.current_read_command
-    # #                 self.current_read_command = None
-    # #                 flush_cmd(cmd)
-    # #
-    # #             while not self.int_read_resp_command_queue.empty():
-    # #                 cmd = self.int_read_resp_command_queue.get_nowait()
-    # #                 flush_cmd(cmd)
-    # #
-    # #             if self.current_read_resp_command:
-    # #                 cmd = self.current_read_resp_command
-    # #                 self.current_read_resp_command = None
-    # #                 flush_cmd(cmd)
-    # #
-    #             self.in_flight_operations = 0
-    #             self._idle.set()
-    #         else:
-    #             self.log.info("Reset de-asserted")
-    #             if self._process_cr is None:
-    #                 self._process_cr = cocotb.start_soon(self._process_cmd())
-    # #             if self._process_resp_cr is None:
-    # #                 self._process_resp_cr = cocotb.start_soon(self._process_cmd_resp())
-    #
-    #     async def _process_cmd(self):
-    #         while True:
-    #             cmd = await self.command_queue.get()
-    #             self.current_read_command = cmd
-    #
-    # #             word_addr = (cmd.address // self.byte_lanes) * self.byte_lanes
-    #
-    # #             cycles = (cmd.length + self.byte_lanes-1 + (cmd.address % self.byte_lanes)) // self.byte_lanes
-    #
-    # #             resp_cmd = ApbReadRespCmd(cmd.address, cmd.length, cycles, cmd.prot, cmd.event)
-    # #             await self.int_read_resp_command_queue.put(resp_cmd)
-    #
-    #             self.log.info(f"Read start addr: 0x{cmd.address:08x} prot: {cmd.prot}")
-    #
-    #             c = self.channel._transaction_obj()
-    #             c.paddr = cmd.address
-    #             c.pprot = cmd.prot
-    #
-    #             await self.channel.send(c)
-    #             self.current_command = None
+        self._run_coroutine_obj = None
+        self._restart()
 
-    async def read(self, address, prot=ApbProt.NONSECURE):
-        if address < 0 or address >= 2**self.address_width:
-            raise ValueError("Address out of range")
+    async def write(
+        self,
+        addr: int,
+        data: bytearray,
+        strb: int = -1,
+        prot: ApbProt = ApbProt.NONSECURE,
+    ) -> None:
+        self.write_nowait(addr, data, strb, prot)
+        await self._idle.wait()
 
-        if not self.pprot_present and prot != ApbProt.NONSECURE:
-            raise ValueError(
-                "pprot sideband signal value specified, but signal is not connected"
-            )
+    def write_nowait(
+        self,
+        addr: int,
+        data: bytearray,
+        strb: int = -1,
+        prot: ApbProt = ApbProt.NONSECURE,
+    ) -> None:
+        """ """
+        self.queue_tx.append((True, addr, data, strb, prot))
+        self.sync.set()
+        self._idle.clear()
 
-        self.log.info(f"Read addr: 0x{address:08x} prot: {prot}")
+    async def read(
+        self,
+        addr: int,
+        data: bytearray = bytearray(),
+        prot: ApbProt = ApbProt.NONSECURE,
+    ) -> bytearray:
+        self.read_nowait(addr, data, prot)
+        while not self.queue_rx:
+            await RisingEdge(self.clock)
+        await self._idle.wait()
+        ret = self.queue_rx.popleft()
+        return ret
 
-        if self.penable_present:
-            self.bus.penable.value = 1
-        self.bus.psel.value = 1
-        self.bus.paddr.value = address
-        if self.pprot_present:
+    def read_nowait(
+        self,
+        addr: int,
+        data: bytearray = bytearray(),
+        prot: ApbProt = ApbProt.NONSECURE,
+    ) -> None:
+        self.queue_tx.append((False, addr, data, -1, prot))
+        self.sync.set()
+        self._idle.clear()
+
+    def _restart(self) -> None:
+        if self._run_coroutine_obj is not None:
+            self._run_coroutine_obj.kill()
+        self._run_coroutine_obj = start_soon(self._run())
+
+    def count_tx(self) -> int:
+        return len(self.queue_tx)
+
+    def empty_tx(self) -> bool:
+        return not self.queue_tx
+
+    def count_rx(self) -> int:
+        return len(self.queue_rx)
+
+    def empty_rx(self) -> bool:
+        return not self.queue_rx
+
+    def idle(self) -> bool:
+        return self.empty_tx() and self.empty_rx()
+
+    def clear(self) -> None:
+        """Clears the RX and TX queues"""
+        self.queue_tx.clear()
+        self.queue_rx.clear()
+
+    async def wait(self) -> None:
+        """Wait for idle"""
+        await self._idle.wait()
+
+    async def _run(self):
+        while True:
+            while not self.queue_tx:
+                self._idle.set()
+                self.sync.clear()
+                await self.sync.wait()
+
+            write, addr, data, strb, prot = self.queue_tx.popleft()
+
+            if addr < 0 or addr >= 2**self.address_width:
+                raise ValueError("Address out of range")
+
+            if not self.pprot_present and prot != ApbProt.NONSECURE:
+                raise ValueError(
+                    "pprot sideband signal value specified, but signal is not connected"
+                )
+
+            self.bus.psel.value = 1
+            self.bus.paddr.value = addr
             self.bus.pprot.value = prot
-        self.bus.pwrite.value = 0
-        if self.pstrb_present:
-            self.bus.pstrb.value = 0
-        await RisingEdge(self.clock)
-
-        while not self.bus.pready.value:
-            await RisingEdge(self.clock)
-        data = int(self.bus.prdata.value)
-        self.log.info(f"Value read: 0x{data:08x}")
-
-        if self.penable_present:
-            self.bus.penable.value = 0
-        self.bus.psel.value = 0
-        self.bus.paddr.value = 0
-        if self.pprot_present:
-            self.bus.pprot.value = 0
-        self.bus.pwrite.value = 0
-        if self.pstrb_present:
-            self.bus.pstrb.value = 0
-
-        return data.to_bytes(len(self.bus.prdata), "little")
-
-    #         event = Event()
-    #
-    #         self.in_flight_operations += 1
-    #         self._idle.clear()
-    #
-    #         await self.command_queue.put(ApbReadCmd(address, prot, event))
-    #
-    #         await event.wait()
-    #         return event.data
-
-    async def write(self, address, data, strb=None, prot=ApbProt.NONSECURE):
-        if address < 0 or address >= 2**self.address_width:
-            raise ValueError("Address out of range")
-
-        if not self.pprot_present and prot != ApbProt.NONSECURE:
-            raise ValueError(
-                "pprot sideband signal value specified, but signal is not connected"
-            )
-
-        data = int.from_bytes(data, byteorder="little")
-        self.log.info(
-            f"Write addr: 0x{address:08x} data: 0x{data:08x} prot: {prot}"
-        )
-
-        if self.penable_present:
-            self.bus.penable.value = 1
-        self.bus.psel.value = 1
-        self.bus.paddr.value = address
-        self.bus.pprot.value = prot
-        self.bus.pwdata.value = data & self.data_mask
-        self.bus.pwrite.value = 1
-        if self.pstrb_present:
-            if strb is None:
-                self.bus.pstrb.value = self.strb_mask
+            if write:
+                data = int.from_bytes(data, byteorder="little")
+                self.log.info(
+                    f"Write addr: 0x{addr:08x} data: 0x{data:08x} prot: {prot}"
+                )
+                self.bus.pwdata.value = data & self.data_mask
+                self.bus.pwrite.value = 1
+                if self.pstrb_present:
+                    if -1 == strb:
+                        self.bus.pstrb.value = self.strb_mask
+                    else:
+                        self.bus.pstrb.value = strb
             else:
-                self.bus.pstrb.value = strb
-        await RisingEdge(self.clock)
-
-        while not self.bus.pready.value:
+                self.log.info(f"Read addr: 0x{addr:08x} prot: {prot}")
             await RisingEdge(self.clock)
-#         data = int(self.bus.prdata.value)
-#         self.log.info(f"Value read: 0x{data:08x}")
+            if self.penable_present:
+                self.bus.penable.value = 1
+                await RisingEdge(self.clock)
 
-        if self.penable_present:
-            self.bus.penable.value = 0
-        self.bus.psel.value = 0
-        self.bus.paddr.value = 0
-        self.bus.pprot.value = 0
-        self.bus.pwrite.value = 0
-        self.bus.pwdata.value = 0
-        if self.pstrb_present:
-            self.bus.pstrb.value = 0
+            while not self.bus.pready.value:
+                await RisingEdge(self.clock)
+            if not write:
+                ret = int(self.bus.prdata.value)
+                self.log.info(f"Value read: 0x{ret:08x}")
+                if not data == bytearray():
+                    data_int = int.from_bytes(data, byteorder="little")
+                    if not data_int == ret:
+                        raise Exception(
+                            f"Expected 0x{data_int:08x} doesn't match returned 0x{ret:08x}"
+                        )
+                self.queue_rx.append(ret.to_bytes(len(self.bus.prdata), "little"))
+
+            if self.penable_present:
+                self.bus.penable.value = 0
+            self.bus.psel.value = 0
+            self.bus.paddr.value = 0
+            self.bus.pprot.value = 0
+            self.bus.pwrite.value = 0
+            self.bus.pwdata.value = 0
+            if self.pstrb_present:
+                self.bus.pstrb.value = 0
+
+            self.sync.set()

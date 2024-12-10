@@ -1,4 +1,4 @@
-from cocotbext.apb import ApbMaster, ApbBus
+from cocotbext.apb import ApbMaster, Apb4Bus
 
 # import math
 import logging
@@ -8,7 +8,7 @@ class ApbDriver:
     def __init__(self, dut, apb_prefix="s_apb", clk_name="clk", reset_name=None, seednum=None):
         self.log = logging.getLogger(f"cocotb.ApbDriver")
         self.enable_logging()
-        self.bus = ApbBus.from_prefix(dut, apb_prefix)
+        self.bus = Apb4Bus.from_prefix(dut, apb_prefix)
         if reset_name is None:
             self.intf = ApbMaster(dut, self.bus, getattr(dut, clk_name))
         else:
