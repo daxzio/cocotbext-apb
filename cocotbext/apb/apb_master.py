@@ -10,18 +10,18 @@ from typing import Tuple
 
 from .version import __version__
 from .constants import ApbProt
+
 # from .address_space import Region
 # from .reset import Reset
 
 #         self, dut, bus, clock, reset=None, reset_active_level=True, **kwargs
 
-class ApbMaster():
-    def __init__(
-        self, dut, bus, clock, **kwargs
-    ) -> None:
+
+class ApbMaster:
+    def __init__(self, dut, bus, clock, **kwargs) -> None:
         self.bus = bus
         self.clock = clock
-#         self.reset = reset
+        #         self.reset = reset
         if bus._name:
             self.log = logging.getLogger(f"cocotb.{bus._entity._name}.{bus._name}")
         else:
@@ -62,8 +62,9 @@ class ApbMaster():
             assert self.byte_lanes == len(self.bus.pstrb)
         assert self.byte_lanes * self.byte_size == self.width
 
-        self.queue_tx: Deque[Tuple[bool, int, bytearray, int, ApbProt]] = deque()
-        self.queue_rx: Deque[bytearray] = deque()
+        self.queue_tx: Deque[Tuple[bool, int, bytearray, int, ApbProt, int]] = deque()
+        self.queue_rx: Deque[Tuple[bytearray, int]] = deque()
+        self.tx_id = 0
 
         self.sync = Event()
 
@@ -81,7 +82,7 @@ class ApbMaster():
         self.bus.pwrite.value = 0
         self.bus.pwdata.value = 0
 
-#         self._init_reset(reset, reset_active_level)
+        #         self._init_reset(reset, reset_active_level)
 
         self._run_coroutine_obj = None
         self._restart()
@@ -104,7 +105,8 @@ class ApbMaster():
         prot: ApbProt = ApbProt.NONSECURE,
     ) -> None:
         """ """
-        self.queue_tx.append((True, addr, data, strb, prot))
+        self.tx_id += 1
+        self.queue_tx.append((True, addr, data, strb, prot, self.tx_id))
         self.sync.set()
         self._idle.clear()
 
@@ -114,11 +116,16 @@ class ApbMaster():
         data: bytearray = bytearray(),
         prot: ApbProt = ApbProt.NONSECURE,
     ) -> bytearray:
-        self.read_nowait(addr, data, prot)
-        while not self.queue_rx:
+        rx_id = self.read_nowait(addr, data, prot)
+        found = False
+        while not found:
+            while self.queue_rx:
+                ret, tx_id = self.queue_rx.popleft()
+                if rx_id == tx_id:
+                    found = True
+                    break
             await RisingEdge(self.clock)
         await self._idle.wait()
-        ret = self.queue_rx.popleft()
         return ret
 
     def read_nowait(
@@ -126,10 +133,12 @@ class ApbMaster():
         addr: int,
         data: bytearray = bytearray(),
         prot: ApbProt = ApbProt.NONSECURE,
-    ) -> None:
-        self.queue_tx.append((False, addr, data, -1, prot))
+    ) -> int:
+        self.tx_id += 1
+        self.queue_tx.append((False, addr, data, -1, prot, self.tx_id))
         self.sync.set()
         self._idle.clear()
+        return self.tx_id
 
     def _restart(self) -> None:
         if self._run_coroutine_obj is not None:
@@ -167,7 +176,7 @@ class ApbMaster():
                 self.sync.clear()
                 await self.sync.wait()
 
-            write, addr, data, strb, prot = self.queue_tx.popleft()
+            write, addr, data, strb, prot, tx_id = self.queue_tx.popleft()
 
             if addr < 0 or addr >= 2**self.address_width:
                 raise ValueError("Address out of range")
@@ -210,7 +219,9 @@ class ApbMaster():
                         raise Exception(
                             f"Expected 0x{data_int:08x} doesn't match returned 0x{ret:08x}"
                         )
-                self.queue_rx.append(ret.to_bytes(len(self.bus.prdata), "little"))
+                self.queue_rx.append(
+                    (ret.to_bytes(len(self.bus.prdata), "little"), tx_id)
+                )
 
             if self.penable_present:
                 self.bus.penable.value = 0

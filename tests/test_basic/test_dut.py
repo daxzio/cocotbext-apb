@@ -64,8 +64,15 @@ async def test_dut_basic(dut):
         z = randint(0, tb.n_regs-1)
         y = x[z] & tb.mask
         read_op = await tb.intf.read(0x0000 + (z*tb.incr), y.to_bytes(len(tb.bus.prdata), "little"))
-
     for i in range(tb.n_regs):
+        z = randint(0, tb.n_regs-1)
+        y = x[z] & tb.mask
+        tb.intf.read_nowait(0x0000 + (z*tb.incr), y.to_bytes(len(tb.bus.prdata), "little"))
+
+#     print('break')
+#     await tb.cr.wait_clkn(20)
+    for i in range(tb.n_regs):
+#         print(i)
         y = x[i] & tb.mask
         read_op = await tb.intf.read(0x0000 + (i*tb.incr))
         ret = returned_val(read_op)
