@@ -5,6 +5,7 @@ from interfaces.clkrst import ClkReset
 
 from cocotbext.apb import ApbMaster
 from cocotbext.apb import Apb4Bus
+from cocotbext.apb import ApbMonitor
 
 def returned_val(read_op):
     return int.from_bytes(read_op, byteorder='little')
@@ -23,7 +24,9 @@ class testbench:
         apb_prefix="s_apb"
         self.bus = Apb4Bus.from_prefix(dut, apb_prefix)
         clk_name="clk"
-        self.intf = ApbMaster(dut, self.bus, getattr(dut, clk_name))
+        self.intf = ApbMaster(self.bus, getattr(dut, clk_name))
+        self.apb_mon = ApbMonitor(self.bus, getattr(dut, "clk"))
+        self.apb_mon.enable_logging()
 
 #         self.intf = ApbDriver(dut)
 
@@ -45,6 +48,41 @@ async def test_dut_basic(dut):
     read_op = await tb.intf.read(0x0000)
     ret = returned_val(read_op)
     assert x == ret
+    
+    await tb.intf.read(0x0000, bytesdata)
+    await tb.intf.read(0x0000, x)
+
+    x = 0x12345679
+    bytesdata = x.to_bytes(len(tb.bus.pwdata), 'little')
+    await tb.intf.write(0x0000, x)
+
+    await tb.intf.read(0x0000, x)
+    await tb.intf.read(0x0000, 0x12345679)
+
+    await tb.intf.write(0x0000, 0x12)
+    await tb.intf.read(0x0000, 0x12)
+    
+    await tb.intf.write(0x0000, 0x0)
+    await tb.intf.write(0x0000, 0x87654321, 0x8)
+    await tb.intf.read(0x0000, 0x87000000)
+    await tb.intf.write(0x0000, 0x56346456, 0x4)
+    await tb.intf.read(0x0000, 0x87340000)
+    await tb.intf.write(0x0000, 0x69754233, 0x2)
+    await tb.intf.read(0x0000, 0x87344200)
+    await tb.intf.write(0x0000, 0x21454568, 0x1)
+    await tb.intf.read(0x0000, 0x87344268)
+    await tb.intf.write(0x0000, 0x0)
+    await tb.intf.read(0x0000, 0x0)
+
+    await tb.intf.write(0x0002, 0x87654321)
+    await tb.intf.read(0x0000, 0x87654321)
+
+    await tb.intf.write(0x0004, 0x97654321)
+    await tb.cr.wait_clkn(2)
+    await tb.intf.read(0x0006, 0x97654321)
+
+    await tb.intf.write(0x0014, 0x77654321)
+    await tb.intf.read(0x0016, 0x77654321)
 
     x = []
     for i in range(tb.n_regs):
