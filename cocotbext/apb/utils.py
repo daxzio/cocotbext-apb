@@ -1,6 +1,6 @@
 """
 
-Copyright (c) 2020 Alex Forencich
+Copyright (c) 2024 Daxzio
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -25,44 +25,8 @@ THE SOFTWARE.
 import re
 
 
-# def hexdump_line(data, offset, row_size=16):
-#     h = ""
-#     c = ""
-#     for ch in data[0:row_size]:
-#         h += f"{ch:02x} "
-#         c += chr(ch) if 32 < ch < 127 else "."
-#     return f"{offset:08x}: {h:{row_size*3}} {c}"
-# 
-# 
-# def hexdump(data, start=0, length=None, row_size=16, prefix="", offset=0):
-#     stop = min(start + length, len(data)) if length else len(data)
-#     for k in range(start, stop, row_size):
-#         print(
-#             prefix
-#             + hexdump_line(data[k : min(k + row_size, stop)], k + offset, row_size)
-#         )
-# 
-# 
-# def hexdump_lines(data, start=0, length=None, row_size=16, prefix="", offset=0):
-#     lines = []
-#     stop = min(start + length, len(data)) if length else len(data)
-#     for k in range(start, stop, row_size):
-#         lines.append(
-#             prefix
-#             + hexdump_line(data[k : min(k + row_size, stop)], k + offset, row_size)
-#         )
-#     return lines
-# 
-# 
-# def hexdump_str(data, start=0, length=None, row_size=16, prefix="", offset=0):
-#     return "\n".join(hexdump_lines(data, start, length, row_size, prefix, offset))
-
-
 def resolve_x_int(x):
     if re.search("[xz]", str(x)):
         y = re.sub("[xz]", "0", str(x))
         return int(y)
-#     if re.search("z", str(x)):
-#         y = re.sub("z", "0", str(x))
-#         return int(y)
     return int(x.value)

@@ -13,12 +13,6 @@ from .version import __version__
 from .constants import ApbProt
 from .utils import resolve_x_int
 
-# from .address_space import Region
-# from .reset import Reset
-
-#         self, dut, bus, clock, reset=None, reset_active_level=True, **kwargs
-
-
 class ApbBase:
     def __init__(self, bus, clock, name="monitor", **kwargs) -> None:
         self.name = name
@@ -37,8 +31,8 @@ class ApbBase:
         self.address_width = len(self.bus.paddr)
         self.wwidth = len(self.bus.pwdata)
         self.rwidth = len(self.bus.prdata)
-        self.rbytes = int(self.rwidth/4)
-        self.wbytes = int(self.wwidth/4)
+        self.rbytes = int(self.rwidth / 4)
+        self.wbytes = int(self.wwidth / 4)
         self.byte_size = 8
         self.byte_lanes = self.wwidth // self.byte_size
         self.rdata_mask = 2**self.rwidth - 1
@@ -69,9 +63,10 @@ class ApbBase:
 
     def enable_logging(self):
         self.log.setLevel(logging.DEBUG)
-    
+
     def disable_logging(self):
         self.log.setLevel(logging.INFO)
+
 
 class ApbMonitor(ApbBase):
     def __init__(self, bus, clock, **kwargs) -> None:
@@ -119,9 +114,9 @@ class ApbMonitor(ApbBase):
                     )
                 if 1 == self.penable:
                     self.log.critical(
-                        f"penable is asserted in the same first cycle with psel"
+                        "penable is asserted in the same first cycle with psel"
                     )
-                
+
                 pwrite = self.pwrite
                 paddr = self.paddr
                 pprot = self.pprot
@@ -139,7 +134,7 @@ class ApbMonitor(ApbBase):
                             f"pready wait has exceed timout {self.timeout_max}"
                         )
                 apb = ""
-                if not 0 == len(self.bus.psel)-1:
+                if not 0 == len(self.bus.psel) - 1:
                     apb = f"({index}) "
                 if pwrite:
                     self.log.debug(
@@ -157,8 +152,8 @@ class ApbMaster(ApbBase):
     def __init__(self, bus, clock, **kwargs) -> None:
         super().__init__(bus, clock, name="master", **kwargs)
 
-        self.queue_tx: Deque[Tuple[bool, int, bytearray, int, ApbProt, int]] = deque()
-        self.queue_rx: Deque[Tuple[bytearray, int]] = deque()
+        self.queue_tx: Deque[Tuple[bool, int, bytes, int, ApbProt, int]] = deque()
+        self.queue_rx: Deque[Tuple[bytes, int]] = deque()
         self.tx_id = 0
 
         self.sync = Event()
@@ -185,7 +180,7 @@ class ApbMaster(ApbBase):
     async def write(
         self,
         addr: int,
-        data: int | bytearray,
+        data: int | bytes,
         strb: int = -1,
         prot: ApbProt = ApbProt.NONSECURE,
     ) -> None:
@@ -195,24 +190,26 @@ class ApbMaster(ApbBase):
     def write_nowait(
         self,
         addr: int,
-        data: int | bytearray,
+        data: int | bytes,
         strb: int = -1,
         prot: ApbProt = ApbProt.NONSECURE,
     ) -> None:
         """ """
         self.tx_id += 1
         if isinstance(data, int):
-            data = data.to_bytes(self.wbytes, 'little')
-        self.queue_tx.append((True, addr, data, strb, prot, self.tx_id))
+            datab = data.to_bytes(self.wbytes, "little")
+        else:
+            datab = data
+        self.queue_tx.append((True, addr, datab, strb, prot, self.tx_id))
         self.sync.set()
         self._idle.clear()
 
     async def read(
         self,
         addr: int,
-        data: int | bytearray = bytearray(),
+        data: int | bytes = bytes(),
         prot: ApbProt = ApbProt.NONSECURE,
-    ) -> bytearray:
+    ) -> bytes:
         rx_id = self.read_nowait(addr, data, prot)
         found = False
         while not found:
@@ -228,17 +225,19 @@ class ApbMaster(ApbBase):
     def read_nowait(
         self,
         addr: int,
-        data: int | bytearray = bytearray(),
+        data: int | bytes = bytes(),
         prot: ApbProt = ApbProt.NONSECURE,
     ) -> int:
         if isinstance(data, int):
             if data > self.rdata_mask:
                 self.log.warning(
                     f"Read data 0x{data:08x} exceeds width expected 0x{self.rdata_mask:08x}"
-                )            
-            data = data.to_bytes(self.rbytes, 'little')
+                )
+            datab = data.to_bytes(self.rbytes, "little")
+        else:
+            datab = data
         self.tx_id += 1
-        self.queue_tx.append((False, addr, data, -1, prot, self.tx_id))
+        self.queue_tx.append((False, addr, datab, -1, prot, self.tx_id))
         self.sync.set()
         self._idle.clear()
         return self.tx_id
@@ -292,8 +291,8 @@ class ApbMaster(ApbBase):
             self.bus.psel.value = 1
             self.bus.paddr.value = addr
             self.bus.pprot.value = prot
-#             if self.penable_present:
-#                 self.bus.penable.value = 1
+            #             if self.penable_present:
+            #                 self.bus.penable.value = 1
             if write:
                 data = int.from_bytes(data, byteorder="little")
                 self.log.info(
@@ -318,7 +317,7 @@ class ApbMaster(ApbBase):
             if not write:
                 ret = int(self.bus.prdata.value)
                 self.log.info(f"Value read: 0x{ret:08x}")
-                if not data == bytearray():
+                if not data == bytes():
                     data_int = int.from_bytes(data, byteorder="little")
                     if not data_int == ret:
                         raise Exception(
@@ -337,6 +336,6 @@ class ApbMaster(ApbBase):
             self.bus.pwdata.value = 0
             if self.pstrb_present:
                 self.bus.pstrb.value = 0
-#             await RisingEdge(self.clock)
+            #             await RisingEdge(self.clock)
 
             self.sync.set()
