@@ -25,8 +25,9 @@ THE SOFTWARE.
 import re
 
 
+
 def resolve_x_int(x):
-    if re.search("[xz]", str(x)):
-        y = re.sub("[xz]", "0", str(x))
+    if re.search("[xz]", str(x.value), re.I):
+        y = re.sub("[xz]", "0", str(x.value), flags=re.I)
         return int(y)
     return int(x.value)

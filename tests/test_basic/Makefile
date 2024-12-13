@@ -14,7 +14,3 @@ COCOTB_SOURCES = \
     ./dut.sv
 
 include ${WORK_BASE}/rtlflo/cocotb_helper.mak
-
-# make clean sim"
-# make clean sim"
-# make clean sim"
