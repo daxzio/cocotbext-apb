@@ -14,3 +14,4 @@ combined_results.xml
 *.fst
 dist/
 m3-dapswjdp/
+*tests/*/cocotbext
