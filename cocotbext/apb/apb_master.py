@@ -1,6 +1,3 @@
-import math
-import logging
-
 from cocotb import start_soon
 from cocotb.triggers import RisingEdge
 
@@ -9,143 +6,9 @@ from cocotb.triggers import Event
 from typing import Deque
 from typing import Tuple
 
-from .version import __version__
-from .constants import ApbProt
 from .utils import resolve_x_int
-
-class ApbBase:
-    def __init__(self, bus, clock, name="monitor", **kwargs) -> None:
-        self.name = name
-        self.bus = bus
-        self.clock = clock
-        if bus._name:
-            self.log = logging.getLogger(f"cocotb.apb_{name}.{bus._name}")
-        else:
-            self.log = logging.getLogger(f"cocotb.apb_{name}")
-        self.log.setLevel(logging.INFO)
-        self.log.info(f"APB {self.name}")
-        self.log.info(f"cocotbext-apb version {__version__}")
-        self.log.info("Copyright (c) 2024 Daxzio")
-        self.log.info("https://github.com/daxzio/cocotbext-apb")
-
-        self.address_width = len(self.bus.paddr)
-        self.wwidth = len(self.bus.pwdata)
-        self.rwidth = len(self.bus.prdata)
-        self.rbytes = int(self.rwidth / 4)
-        self.wbytes = int(self.wwidth / 4)
-        self.byte_size = 8
-        self.byte_lanes = self.wwidth // self.byte_size
-        self.rdata_mask = 2**self.rwidth - 1
-        self.wdata_mask = 2**self.wwidth - 1
-        self.strb_mask = 2**self.byte_lanes - 1
-
-        self.penable_present = hasattr(self.bus, "penable")
-        self.pstrb_present = hasattr(self.bus, "pstrb")
-        self.pprot_present = hasattr(self.bus, "pprot")
-        self.pslverr_present = hasattr(self.bus, "pslverr")
-        if self.pstrb_present:
-            assert self.byte_lanes == len(self.bus.pstrb)
-        assert self.byte_lanes * self.byte_size == self.wwidth
-
-        self.log.info(f"APB {self.name} configuration:")
-        self.log.info(f"  Address width: {self.address_width} bits")
-        self.log.info(f"  Byte size: {self.byte_size} bits")
-        self.log.info(f"  Data width: {self.wwidth} bits ({self.byte_lanes} bytes)")
-
-        self.log.info("APB monitor signals:")
-        for sig in sorted(
-            list(set().union(self.bus._signals, self.bus._optional_signals))
-        ):
-            if hasattr(self.bus, sig):
-                self.log.info(f"  {sig} width: {len(getattr(self.bus, sig))} bits")
-            else:
-                self.log.info(f"  {sig}: not present")
-
-    def enable_logging(self):
-        self.log.setLevel(logging.DEBUG)
-
-    def disable_logging(self):
-        self.log.setLevel(logging.INFO)
-
-
-class ApbMonitor(ApbBase):
-    def __init__(self, bus, clock, **kwargs) -> None:
-        super().__init__(bus, clock, name="monitor", **kwargs)
-        self.disable_logging()
-        self.timeout_max = 1000
-        self.timeout = 0
-
-        for i, j in self.bus._signals.items():
-            setattr(self, i, 0)
-
-        self._run_coroutine_obj = None
-        self._resolve_coroutine_obj = None
-        self._restart()
-
-    def _restart(self) -> None:
-        if self._run_coroutine_obj is not None:
-            self._run_coroutine_obj.kill()
-        if self._resolve_coroutine_obj is not None:
-            self._resolve_coroutine_obj.kill()
-        self._run_coroutine_obj = start_soon(self._run())
-        self._resolve_coroutine_obj = start_soon(self._resolve_signals())
-
-    async def _resolve_signals(self):
-        while True:
-            for i, j in self.bus._signals.items():
-                setattr(self, i, resolve_x_int(getattr(self.bus, i)))
-            await RisingEdge(self.clock)
-
-    async def _run(self):
-        while True:
-            self.timeout = 0
-
-            if not 0 == self.psel:
-                index = int(math.log2(self.psel))
-                if not self.psel == 2**index:
-                    self.log.critical(f"incorrect formatted psel {self.psel}")
-
-                if self.paddr < 0 or self.paddr >= 2**self.address_width:
-                    raise ValueError("Address out of range")
-
-                if not self.pprot_present and self.pprot != ApbProt.NONSECURE:
-                    raise ValueError(
-                        "pprot sideband signal value specified, but signal is not connected"
-                    )
-                if 1 == self.penable:
-                    self.log.critical(
-                        "penable is asserted in the same first cycle with psel"
-                    )
-
-                pwrite = self.pwrite
-                paddr = self.paddr
-                pprot = self.pprot
-                wdata = self.pwdata
-                await RisingEdge(self.clock)
-                if 0 == self.penable:
-                    self.log.critical(
-                        f"penable is not asserted in the second cycle after psel {self.penable}"
-                    )
-                while 0 == (self.pready and self.psel):
-                    await RisingEdge(self.clock)
-                    self.timeout += 1
-                    if self.timeout >= self.timeout_max:
-                        raise Exception(
-                            f"pready wait has exceed timout {self.timeout_max}"
-                        )
-                apb = ""
-                if not 0 == len(self.bus.psel) - 1:
-                    apb = f"({index}) "
-                if pwrite:
-                    self.log.debug(
-                        f"Write {apb}0x{paddr:08x}: 0x{wdata:08x} prot: {pprot}"
-                    )
-                else:
-                    rdata = (self.prdata >> 32 * index) & self.wdata_mask
-                    self.log.debug(
-                        f"Read  {apb}0x{paddr:08x}: 0x{rdata:08x} prot: {pprot}"
-                    )
-            await RisingEdge(self.clock)
+from .constants import ApbProt
+from .apb_base import ApbBase
 
 
 class ApbMaster(ApbBase):
@@ -315,7 +178,8 @@ class ApbMaster(ApbBase):
             while not self.bus.pready.value:
                 await RisingEdge(self.clock)
             if not write:
-                ret = int(self.bus.prdata.value)
+                #                 ret = int(self.bus.prdata.value)
+                ret = resolve_x_int(self.bus.prdata)
                 self.log.info(f"Value read: 0x{ret:08x}")
                 if not data == bytes():
                     data_int = int.from_bytes(data, byteorder="little")

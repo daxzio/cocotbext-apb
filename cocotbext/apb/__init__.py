@@ -26,7 +26,7 @@ from .version import __version__
 
 from .apb_bus import ApbBus, Apb3Bus, Apb4Bus, Apb5Bus
 from .apb_master import ApbMaster
-from .apb_master import ApbMonitor
+from .apb_monitor import ApbMonitor
 
 __all__ = [
     "__version__",
