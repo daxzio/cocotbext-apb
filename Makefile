@@ -1,8 +1,8 @@
 SIM?=icarus
 
 default:
-	cd tests/test_basic ; make clean sim ; ../rtlflo/combine_results.py
-	cd tests/test_basic_64 ; make clean sim ; ../rtlflo/combine_results.py
+	cd tests/test_basic ; make clean sim WAVES=0 ; ../rtlflo/combine_results.py
+	cd tests/test_basic_64 ; make clean sim WAVES=0 ; ../rtlflo/combine_results.py
 
 lint:
 	pyflakes cocotbext
@@ -30,3 +30,8 @@ release:
 	git tag -f v${GIT_TAG}
 	git push && git push --tags
 
+git_align:
+	mkdir -p repos
+	cd repos ; git clone git@github.com:daxzio/rtlflo.git 2> /dev/null || (cd rtlflo ; git pull)
+	rsync -artu --exclude .git repos/rtlflo/ tests/rtlflo
+# 	rsync -artu --exclude .git tests/rtlflo/ repos/rtlflo
