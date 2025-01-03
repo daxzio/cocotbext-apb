@@ -6,6 +6,7 @@ from cocotb.triggers import Event
 from typing import Deque
 from typing import Tuple
 from typing import Any
+from typing import Union
 
 from .utils import resolve_x_int
 from .constants import ApbProt
@@ -44,7 +45,7 @@ class ApbMaster(ApbBase):
     async def write(
         self,
         addr: int,
-        data: int | bytes,
+        data: Union[int, bytes],
         strb: int = -1,
         prot: ApbProt = ApbProt.NONSECURE,
     ) -> None:
@@ -54,7 +55,7 @@ class ApbMaster(ApbBase):
     def write_nowait(
         self,
         addr: int,
-        data: int | bytes,
+        data: Union[int, bytes],
         strb: int = -1,
         prot: ApbProt = ApbProt.NONSECURE,
     ) -> None:
@@ -71,7 +72,7 @@ class ApbMaster(ApbBase):
     async def read(
         self,
         addr: int,
-        data: int | bytes = bytes(),
+        data: Union[int, bytes] = bytes(),
         prot: ApbProt = ApbProt.NONSECURE,
     ) -> bytes:
         rx_id = self.read_nowait(addr, data, prot)
@@ -89,7 +90,7 @@ class ApbMaster(ApbBase):
     def read_nowait(
         self,
         addr: int,
-        data: int | bytes = bytes(),
+        data: Union[int, bytes] = bytes(),
         prot: ApbProt = ApbProt.NONSECURE,
     ) -> int:
         if isinstance(data, int):
