@@ -5,6 +5,7 @@ from collections import deque
 from cocotb.triggers import Event
 from typing import Deque
 from typing import Tuple
+from typing import Any
 
 from .utils import resolve_x_int
 from .constants import ApbProt
@@ -37,7 +38,7 @@ class ApbMaster(ApbBase):
 
         #         self._init_reset(reset, reset_active_level)
 
-        self._run_coroutine_obj = None
+        self._run_coroutine_obj : Any = None
         self._restart()
 
     async def write(
