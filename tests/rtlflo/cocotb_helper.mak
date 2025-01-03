@@ -1,6 +1,6 @@
 TOPLEVEL_LANG?=verilog
 TOPLEVEL?=dut
-MODULE?=test_dut
+COCOTB_TEST_MODULES?=test_dut
 
 ifeq ($(TOPLEVEL_LANG),verilog)
     WAVES=1
@@ -40,13 +40,19 @@ ifeq ($(TOPLEVEL_LANG),verilog)
 	else ifeq ($(SIM),verilator)
         DEFINES += COCOTB_VERILATOR=1
 		COMPILE_ARGS += --no-timing -Wno-WIDTHEXPAND -Wno-WIDTHTRUNC -Wno-STMTDLY
+# 		COMPILE_ARGS += --public
+# 		COMPILE_ARGS += --public-flat-rw
+# 		COMPILE_ARGS += --public-depth 10 --hierarchical -j 8 --public-flat-rw
+# 	    EXTRA_ARGS += --public-depth 10
+# 		PLUSARGS += --public-depth 10
 	endif
 endif
 
 ifeq ($(WAVES),1)
     DEFINES += COCOTB_WAVES=1
+#     WAVES=1
 	ifeq ($(SIM),verilator)
-		PLUSARGS += --trace
+		COCOTB_PLUSARGS += --trace
 		EXTRA_ARGS += --trace # vcd format
 		EXTRA_ARGS += --trace-fst
 		EXTRA_ARGS += --trace-structs
