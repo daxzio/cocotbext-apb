@@ -2,4 +2,5 @@ cocotb
 cocotb-bus
 pytest
 pyflakes
+ruff
 mypy

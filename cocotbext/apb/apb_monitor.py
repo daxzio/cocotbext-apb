@@ -19,8 +19,8 @@ class ApbMonitor(ApbBase):
         for i, j in self.bus._signals.items():
             setattr(self, i, 0)
 
-        self._run_coroutine_obj : Any = None
-        self._resolve_coroutine_obj : Any= None
+        self._run_coroutine_obj: Any = None
+        self._resolve_coroutine_obj: Any = None
         self._restart()
 
     def _restart(self) -> None:

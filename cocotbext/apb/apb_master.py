@@ -38,7 +38,7 @@ class ApbMaster(ApbBase):
 
         #         self._init_reset(reset, reset_active_level)
 
-        self._run_coroutine_obj : Any = None
+        self._run_coroutine_obj: Any = None
         self._restart()
 
     async def write(

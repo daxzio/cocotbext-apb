@@ -6,12 +6,15 @@ default:
 
 lint:
 	pyflakes cocotbext
+	ruff check cocotbext
 
 mypy:
 	mypy cocotbext
 
 format:
 	black cocotbext
+
+checks: format lint mypy
 
 dist:
 	rm -rf MANIFEST 
@@ -34,4 +37,4 @@ git_align:
 	mkdir -p repos
 	cd repos ; git clone git@github.com:daxzio/rtlflo.git 2> /dev/null || (cd rtlflo ; git pull)
 	rsync -artu --exclude .git repos/rtlflo/ tests/rtlflo
-# 	rsync -artu --exclude .git tests/rtlflo/ repos/rtlflo
+	rsync -artu --exclude .git tests/rtlflo/ repos/rtlflo
