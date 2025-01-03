@@ -57,6 +57,8 @@ ifneq (${XILINX_BASE},)
         ifneq ($(XILINX_SIM_SOURCES),)
 			COMPILE_ARGS += -y${XILINX_BASE}/verilog/src/unisims
 			COMPILE_ARGS += -s glbl
+		    VERILOG_SOURCES += \
+			    ${XILINX_BASE}/verilog/src/glbl.v
 		endif
 	else ifeq ($(SIM),xcelium)
 		COMPILE_ARGS += -top glbl
@@ -130,7 +132,6 @@ all_libs:: xilinx_library
 
 all_libs_clean:: xilinx_library_clean
 
-# FPGA_DESIGN = ${XILINX_SYNTH_SOURCES} ${RTL_SOURCES} ${IMPORT_SOURCES} ${VHDL_SOURCES}
 FPGA_DESIGN:=\
     ${XILINX_SYNTH_SOURCES} \
     ${INT_VERILOG_SOURCES} \
@@ -138,17 +139,6 @@ FPGA_DESIGN:=\
     ${INT_VHDL_SOURCES} \
     ${EXT_VHDL_SOURCES}
     
-VERILOG_DESIGN?=\
-    ${INT_VERILOG_SOURCES} \
-    ${SIM_VERILOG_SOURCES} \
-    ${EXT_VERILOG_SOURCES} \
-    ${XILINX_SIM_SOURCES}
-
-VERILOG_SOURCES?=\
-    ${VERILOG_DESIGN} \
-    ${COCOTB_SOURCES}
-
-
 vivado_build:
 	@ export XILINX_PART="${XILINX_PART}" ; \
 	export XILINX_CONSTRAINTS="${XILINX_CONSTRAINTS}" ; \

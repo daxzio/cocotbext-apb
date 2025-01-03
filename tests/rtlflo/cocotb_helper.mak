@@ -2,6 +2,9 @@ TOPLEVEL_LANG?=verilog
 TOPLEVEL?=dut
 MODULE?=test_dut
 
+ifeq ($(TOPLEVEL_LANG),verilog)
+    WAVES=1
+endif
 # COCOTB_RESOLVE_X?=ZEROS
 # export COCOTB_RESOLVE_X
 
@@ -20,7 +23,6 @@ include ${WORK_BASE}/rtlflo/git_helper.mak
 # DEFINES += COCOTB_RUNNING=1
 export COCOTB_RUNNING
 ifeq ($(TOPLEVEL_LANG),verilog)
-    WAVES=1
 	ifeq ($(SIM), icarus)
         DEFINES += COCOTB_ICARUS=1
 	else ifeq ($(SIM), ius)
@@ -43,7 +45,6 @@ endif
 
 ifeq ($(WAVES),1)
     DEFINES += COCOTB_WAVES=1
-#     WAVES=1
 	ifeq ($(SIM),verilator)
 		PLUSARGS += --trace
 		EXTRA_ARGS += --trace # vcd format
@@ -101,12 +102,12 @@ else
 endif
 
 VERILOG_DESIGN?=\
-    ${INT_VERILOG_SOURCES} \
     ${SIM_VERILOG_SOURCES} \
+    ${XILINX_SIM_SOURCES} \
     ${EXT_VERILOG_SOURCES} \
-    ${XILINX_SIM_SOURCES}
+    ${INT_VERILOG_SOURCES} 
 
-VERILOG_SOURCES?=\
+VERILOG_SOURCES+=\
     ${VERILOG_DESIGN} \
     ${COCOTB_SOURCES}
 
@@ -124,7 +125,7 @@ all_libs_clean::
 
 waves:
 ifeq ($(SIM), icarus)
-	gtkwave dut.vcd &
+	gtkwave sim_build/*.fst &
 else ifeq ($(SIM), ius)
 	simvision -waves waves.shm &
 else ifeq ($(SIM),verilator)
@@ -132,5 +133,5 @@ else ifeq ($(SIM),verilator)
 endif
 
 clean::
-	rm -rf __pycache__/ .simvision/ .Xil/ results.xml *.trn *.dsn vivado* *.vcd *.out irun* simvision* xrun* .bpad/ waves.shm/ *.err INCA_libs/ *.fst* ncvlog.log *.blif
+	rm -rf __pycache__/ .simvision/ .Xil/ results.xml *.trn *.dsn vivado* *.vcd *.out irun* simvision* xrun* .bpad/ waves.shm/ *.err INCA_libs/ *.fst* ncvlog.log
 
