@@ -1,8 +1,8 @@
 SIM?=icarus
 
 default:
-	cd tests/test_basic ; make clean sim WAVES=0 ; ../rtlflo/combine_results.py
-	cd tests/test_basic_64 ; make clean sim WAVES=0 ; ../rtlflo/combine_results.py
+	cd tests/test_basic ; make clean sim WAVES=0 && ../rtlflo/combine_results.py
+	cd tests/test_basic_64 ; make clean sim WAVES=0 && ../rtlflo/combine_results.py
 
 lint:
 	pyflakes cocotbext
