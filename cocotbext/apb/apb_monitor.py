@@ -1,5 +1,6 @@
 import math
-from typing import Any
+from typing import Any, Deque, Tuple
+from collections import deque
 
 from cocotb import start_soon
 from cocotb.triggers import RisingEdge
@@ -19,6 +20,9 @@ class ApbMonitor(ApbBase):
         for i, j in self.bus._signals.items():
             setattr(self, i, 0)
 
+        self.queue_txn: Deque[Tuple[bool, int, bytes, int, ApbProt, int]] = deque()
+        self.txn_id = 0
+
         self._run_coroutine_obj: Any = None
         self._resolve_coroutine_obj: Any = None
         self._restart()
@@ -36,6 +40,10 @@ class ApbMonitor(ApbBase):
             for i, j in self.bus._signals.items():
                 setattr(self, i, resolve_x_int(getattr(self.bus, i)))
             await RisingEdge(self.clock)
+
+    @property
+    def empty_txn(self) -> bool:
+        return not self.queue_txn
 
     async def _run(self):
         while True:
@@ -60,11 +68,15 @@ class ApbMonitor(ApbBase):
 
                 pwrite = self.pwrite
                 paddr = self.paddr
+                pstrb = self.strb_mask
+                if self.pstrb_present:
+                    pstrb = self.pstrb
                 if self.pprot_present:
                     pprot = self.pprot
                     pprot_text = f"prot: {pprot}"
                 else:
                     pprot_text = ""
+                    pprot = ApbProt.NONSECURE
 
                 wdata = self.pwdata
                 await RisingEdge(self.clock)
@@ -82,13 +94,17 @@ class ApbMonitor(ApbBase):
                 apb = ""
                 if not 0 == len(self.bus.psel) - 1:
                     apb = f"({index}) "
+
                 if pwrite:
+                    data = wdata
                     self.log.debug(
-                        f"Write {apb}0x{paddr:08x}: 0x{wdata:08x} {pprot_text}"
+                        f"Write {apb}0x{paddr:08x}: 0x{data:08x} {pprot_text}"
                     )
                 else:
-                    rdata = (self.prdata >> 32 * index) & self.wdata_mask
+                    data = (self.prdata >> 32 * index) & self.rdata_mask
                     self.log.debug(
-                        f"Read  {apb}0x{paddr:08x}: 0x{rdata:08x} {pprot_text}"
+                        f"Read  {apb}0x{paddr:08x}: 0x{data:08x} {pprot_text}"
                     )
+                self.queue_txn.append((pwrite, paddr, data, pstrb, pprot, self.txn_id))
+                self.txn_id += 1
             await RisingEdge(self.clock)
