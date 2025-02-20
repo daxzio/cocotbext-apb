@@ -155,7 +155,8 @@ class ApbMaster(ApbBase):
 
             self.bus.psel.value = 1
             self.bus.paddr.value = addr
-            self.bus.pprot.value = prot
+            if self.pprot_present:
+                self.bus.pprot.value = prot
             #             if self.penable_present:
             #                 self.bus.penable.value = 1
             if write:
@@ -197,7 +198,8 @@ class ApbMaster(ApbBase):
                 self.bus.penable.value = 0
             self.bus.psel.value = 0
             self.bus.paddr.value = 0
-            self.bus.pprot.value = 0
+            if self.pprot_present:
+                self.bus.pprot.value = 0
             self.bus.pwrite.value = 0
             self.bus.pwdata.value = 0
             if self.pstrb_present:
