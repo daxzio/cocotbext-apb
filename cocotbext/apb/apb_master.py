@@ -112,20 +112,25 @@ class ApbMaster(ApbBase):
             self._run_coroutine_obj.kill()
         self._run_coroutine_obj = start_soon(self._run())
 
+    @property
     def count_tx(self) -> int:
         return len(self.queue_tx)
 
+    @property
     def empty_tx(self) -> bool:
         return not self.queue_tx
 
+    @property
     def count_rx(self) -> int:
         return len(self.queue_rx)
 
+    @property
     def empty_rx(self) -> bool:
         return not self.queue_rx
 
+    @property
     def idle(self) -> bool:
-        return self.empty_tx() and self.empty_rx()
+        return self.empty_tx and self.empty_rx
 
     def clear(self) -> None:
         """Clears the RX and TX queues"""
@@ -137,6 +142,7 @@ class ApbMaster(ApbBase):
         await self._idle.wait()
 
     async def _run(self):
+        await RisingEdge(self.clock)
         while True:
             while not self.queue_tx:
                 self._idle.set()
@@ -157,8 +163,8 @@ class ApbMaster(ApbBase):
             self.bus.paddr.value = addr
             if self.pprot_present:
                 self.bus.pprot.value = prot
-            #             if self.penable_present:
-            #                 self.bus.penable.value = 1
+            if self.penable_present:
+                self.bus.penable.value = 0
             if write:
                 data = int.from_bytes(data, byteorder="little")
                 self.log.info(
@@ -204,6 +210,5 @@ class ApbMaster(ApbBase):
             self.bus.pwdata.value = 0
             if self.pstrb_present:
                 self.bus.pstrb.value = 0
-            #             await RisingEdge(self.clock)
 
             self.sync.set()

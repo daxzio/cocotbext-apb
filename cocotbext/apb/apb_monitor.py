@@ -47,6 +47,7 @@ class ApbMonitor(ApbBase):
 
     async def _run(self):
         while True:
+            await RisingEdge(self.clock)
             self.timeout = 0
 
             if not 0 == self.psel:
@@ -107,4 +108,6 @@ class ApbMonitor(ApbBase):
                     )
                 self.queue_txn.append((pwrite, paddr, data, pstrb, pprot, self.txn_id))
                 self.txn_id += 1
-            await RisingEdge(self.clock)
+
+
+#             await RisingEdge(self.clock)
