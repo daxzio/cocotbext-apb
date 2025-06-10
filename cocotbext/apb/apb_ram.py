@@ -1,6 +1,6 @@
 """
 
-Copyright (c) 2024-2205 Daxzio
+Copyright (c) 2024-2025 Daxzio
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -22,22 +22,26 @@ THE SOFTWARE.
 
 """
 
-from .version import __version__
-
-from .apb_bus import ApbBus, Apb3Bus, Apb4Bus, Apb5Bus
-from .apb_master import ApbMaster
-from .apb_monitor import ApbMonitor
 from .apb_slave import ApbSlave
-from .apb_ram import ApbRam
+from .memory import Memory
 
-__all__ = [
-    "__version__",
-    "ApbBus",
-    "Apb3Bus",
-    "Apb4Bus",
-    "Apb5Bus",
-    "ApbMaster",
-    "ApbMonitor",
-    "ApbSlave",
-    "ApbRam",
-]
+
+class ApbRam(ApbSlave, Memory):
+    def __init__(
+        self,
+        bus,
+        clock,
+        reset=None,
+        reset_active_level=True,
+        size=2**64,
+        mem=None,
+        **kwargs
+    ):
+        Memory.__init__(self, size, mem, **kwargs)
+        ApbSlave.__init__(self, bus, clock, **kwargs)
+
+    async def _write(self, address, data):
+        self.write(address % self.size, data)
+
+    async def _read(self, address, length):
+        return self.read(address % self.size, length)
