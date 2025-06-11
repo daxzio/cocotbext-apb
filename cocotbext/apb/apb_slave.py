@@ -42,8 +42,6 @@ class ApbSlave(ApbBase):
         self.bus.prdata.value = 0
         self.bus.pslverr.value = 0
 
-        self.delay = 0
-
         self._run_coroutine_obj: Any = None
         self._restart()
 

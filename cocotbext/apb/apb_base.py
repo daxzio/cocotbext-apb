@@ -24,12 +24,13 @@ THE SOFTWARE.
 
 import logging
 import datetime
+from random import randint, seed
 
 from .version import __version__
 
 
 class ApbBase:
-    def __init__(self, bus, clock, name="monitor", **kwargs) -> None:
+    def __init__(self, bus, clock, name="monitor", seednum=None) -> None:
         self.name = name
         self.bus = bus
         self.clock = clock
@@ -76,8 +77,50 @@ class ApbBase:
             else:
                 self.log.info(f"  {sig}: not present")
 
+        self.backpressure = False
+        if seednum is not None:
+            self.base_seed = seednum
+        else:
+            self.base_seed = randint(0, 0xFFFFFF)
+        seed(self.base_seed)
+        self.log.debug(f"Seed is set to {self.base_seed}")
+
+    @property
+    def delay(self):
+        if self.backpressure:
+            if 0 == randint(0, 0x3):
+                return randint(0, 0x8)
+            else:
+                return 0
+        else:
+            return 0
+
     def enable_logging(self):
         self.log.setLevel(logging.DEBUG)
 
     def disable_logging(self):
         self.log.setLevel(logging.INFO)
+
+    def enable_backpressure(self, seednum=None):
+        self.backpressure = True
+        if seednum is not None:
+            self.base_seed = seednum
+
+    def disable_backpressure(self):
+        self.backpressure = False
+
+
+#     def _handle_reset(self, state):
+#         if state:
+#             self.log.info("Reset asserted")
+#             if self._process_write_cr is not None:
+#                 self._process_write_cr.kill()
+#                 self._process_write_cr = None
+#
+#             self.aw_channel.clear()
+#             self.w_channel.clear()
+#             self.b_channel.clear()
+#         else:
+#             self.log.info("Reset de-asserted")
+#             if self._process_write_cr is None:
+#                 self._process_write_cr = cocotb.start_soon(self._process_write())
