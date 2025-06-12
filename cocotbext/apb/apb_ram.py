@@ -42,7 +42,7 @@ class ApbRam(ApbSlave, Memory):
 
     async def _write(self, address, data, strb):
         for i in range(self.byte_lanes):
-            if 1 == ((strb.value >> i) & 0x1):
+            if 1 == ((int(strb.value) >> i) & 0x1):
                 self.write_byte((address % self.size) + i, data[i])
 
     async def _read(self, address, length):

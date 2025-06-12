@@ -52,7 +52,7 @@ class ApbSlave(ApbBase):
 
     async def _write(self, address, data, strb):
         for i in range(self.byte_lanes):
-            if 1 == ((strb.value >> i) & 0x1):
+            if 1 == ((int(strb.value) >> i) & 0x1):
                 await self.target.write_byte(address + i, data[i].to_bytes(1, "little"))
 
     async def _read(self, address, length):
