@@ -30,6 +30,10 @@ from .apb_monitor import ApbMonitor
 from .apb_slave import ApbSlave
 from .apb_ram import ApbRam
 
+from .address_space import MemoryInterface, Window, WindowPool
+from .address_space import Region, MemoryRegion, SparseMemoryRegion, PeripheralRegion
+from .address_space import AddressSpace, Pool
+
 __all__ = [
     "__version__",
     "ApbBus",
@@ -40,4 +44,13 @@ __all__ = [
     "ApbMonitor",
     "ApbSlave",
     "ApbRam",
+    "MemoryInterface",
+    "Window",
+    "WindowPool",
+    "Region",
+    "MemoryRegion",
+    "SparseMemoryRegion",
+    "PeripheralRegion",
+    "AddressSpace",
+    "Pool",
 ]

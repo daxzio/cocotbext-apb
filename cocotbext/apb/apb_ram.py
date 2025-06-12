@@ -33,15 +33,17 @@ class ApbRam(ApbSlave, Memory):
         clock,
         reset=None,
         reset_active_level=True,
-        size=2**64,
+        size=2**32,
         mem=None,
         **kwargs
     ):
         Memory.__init__(self, size, mem, **kwargs)
         ApbSlave.__init__(self, bus, clock, **kwargs)
 
-    async def _write(self, address, data):
-        self.write(address % self.size, data)
+    async def _write(self, address, data, strb):
+        for i in range(self.byte_lanes):
+            if 1 == ((strb.value >> i) & 0x1):
+                self.write_byte((address % self.size) + i, data[i])
 
     async def _read(self, address, length):
         return self.read(address % self.size, length)

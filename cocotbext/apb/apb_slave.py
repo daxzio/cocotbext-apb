@@ -33,10 +33,10 @@ from typing import Any
 
 
 class ApbSlave(ApbBase):
-    def __init__(self, bus, clock, **kwargs):
+    def __init__(self, bus, clock, target=None, **kwargs):
         super().__init__(bus, clock, name="slave", **kwargs)
         #         self.reset = reset
-        #         self.target = target
+        self.target = target
 
         self.bus.pready.value = 0
         self.bus.prdata.value = 0
@@ -49,6 +49,14 @@ class ApbSlave(ApbBase):
         if self._run_coroutine_obj is not None:
             self._run_coroutine_obj.kill()
         self._run_coroutine_obj = start_soon(self._run())
+
+    async def _write(self, address, data, strb):
+        for i in range(self.byte_lanes):
+            if 1 == ((strb.value >> i) & 0x1):
+                await self.target.write_byte(address + i, data[i].to_bytes(1, "little"))
+
+    async def _read(self, address, length):
+        return await self.target.read(address, length)
 
     async def _run(self):
         await RisingEdge(self.clock)
@@ -67,7 +75,9 @@ class ApbSlave(ApbBase):
                 self.bus.pready.value = 1
                 if pwrite:
                     wdata = int(self.bus.pwdata.value)
-                    await self._write(addr, wdata.to_bytes(self.byte_lanes, "little"))
+                    await self._write(
+                        addr, wdata.to_bytes(self.byte_lanes, "little"), self.bus.pstrb
+                    )
                     self.log.debug(f"Write 0x{addr:08x} 0x{wdata:08x}")
                 else:
                     x = await self._read(addr, self.byte_lanes)
