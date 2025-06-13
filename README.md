@@ -29,6 +29,14 @@ Installation for active development:
 
 See the `tests` directory for complete testbenches using these modules.
 
+### APB Write
+
+/images/apb_write.png
+
+### APB Read
+
+/images/apb_write.png
+
 ### APB Bus
 
 The `APBBus` is used to map to a APB interface on the `dut`.  Class methods `from_entity` and `from_prefix` are provided to facilitate signal default name matching. 
