@@ -59,7 +59,7 @@ class ApbSlave(ApbBase):
         self._run_coroutine_obj = start_soon(self._run())
 
     def check_address(self, address, prot, addresses, prot_type, exception):
-        if int(prot) != prot_type:
+        if prot is not None and int(prot) != prot_type:
             for addrs in addresses:
                 if isinstance(addrs, int):
                     if addrs == address:
@@ -88,13 +88,18 @@ class ApbSlave(ApbBase):
             APBInstructionErr,
         )
 
-    async def _write(self, address, data, strb, prot):
+    async def _write(self, address, data, strb=None, prot=None):
         self.check_permission(address, prot)
-        for i in range(self.byte_lanes):
-            if 1 == ((int(strb.value) >> i) & 0x1):
-                await self.target.write_byte(address + i, data[i].to_bytes(1, "little"))
+        if strb is None:
+            await self.target.write(address, data.to_bytes(self.byte_lanes, "little"))
+        else:
+            for i in range(self.byte_lanes):
+                if 1 == ((int(strb.value) >> i) & 0x1):
+                    await self.target.write_byte(
+                        address + i, data[i].to_bytes(1, "little")
+                    )
 
-    async def _read(self, address, length, prot):
+    async def _read(self, address, length, prot=None):
         self.check_permission(address, prot)
         return await self.target.read(address, length)
 
@@ -102,6 +107,11 @@ class ApbSlave(ApbBase):
         await RisingEdge(self.clock)
         while True:
             await RisingEdge(self.clock)
+            pprot = None
+            if self.pprot_present:
+                pprot = self.bus.pprot
+            if self.pstrb_present:
+                pstrb = self.bus.pstrb
             if bool(self.bus.psel.value):
                 addr = int(self.bus.paddr.value)
                 pwrite = bool(self.bus.pwrite.value)
@@ -119,13 +129,13 @@ class ApbSlave(ApbBase):
                         await self._write(
                             addr,
                             wdata.to_bytes(self.byte_lanes, "little"),
-                            self.bus.pstrb,
-                            self.bus.pprot,
+                            pstrb,
+                            pprot,
                         )
                         self.log.debug(f"Write 0x{addr:08x} 0x{wdata:08x}")
                     else:
                         self.bus.prdata.value = 0
-                        x = await self._read(addr, self.byte_lanes, self.bus.pprot)
+                        x = await self._read(addr, self.byte_lanes, pprot)
                         rdata = int.from_bytes(x, byteorder="little")
                         self.bus.prdata.value = rdata
                         self.log.debug(f"Read  0x{addr:08x} 0x{rdata:08x}")

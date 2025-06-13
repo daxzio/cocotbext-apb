@@ -40,10 +40,15 @@ class ApbRam(ApbSlave, Memory):
         Memory.__init__(self, size, mem, **kwargs)
         ApbSlave.__init__(self, bus, clock, **kwargs)
 
-    async def _write(self, address, data, strb, prot):
-        for i in range(self.byte_lanes):
-            if 1 == ((int(strb.value) >> i) & 0x1):
-                self.write_byte((address % self.size) + i, data[i])
+    async def _write(self, address, data, strb=None, prot=None):
+        self.check_permission(address, prot)
+        if strb is None:
+            self.write((address % self.size), data)
+        else:
+            for i in range(self.byte_lanes):
+                if 1 == ((int(strb.value) >> i) & 0x1):
+                    self.write_byte((address % self.size) + i, data[i])
 
-    async def _read(self, address, length, prot):
+    async def _read(self, address, length, prot=None):
+        self.check_permission(address, prot)
         return self.read(address % self.size, length)

@@ -25,7 +25,7 @@ class Reset:
         self.clk = clk
         self.finished = False
 
-        self.reset.setimmediatevalue(self.reset_sense)
+        self.reset.value = self.reset_sense
         start_soon(self.set_reset())
 
     async def set_reset(self):
