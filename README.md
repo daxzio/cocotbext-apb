@@ -8,7 +8,9 @@ GitHub repository: https://github.com/daxzio/cocotbext-apb
 
 ## Introduction
 
-APB simulation models for [cocotb](https://github.com/cocotb/cocotb).
+APB simulation models for [cocotb](https://github.com/cocotb/cocotb). 
+
+The APB protocol is cover in these documents [APB Protocol Specification](/assets/IHI0024D_amba_apb_protocol_spec.pdf) and [APB Architecture Specification](/assets/IHI0024E_amba_apb_architecture_spec.pdf)
 
 ## Installation
 
@@ -31,11 +33,11 @@ See the `tests` directory for complete testbenches using these modules.
 
 ### APB Write
 
-![](/images/apb_write.png)
+![APB Write](/assets/apb_write.png)
 
 ### APB Read
 
-![](/images/apb_write.png)
+![APB Read](/assets/apb_read.png)
 
 ### APB Bus
 
@@ -86,10 +88,10 @@ Once the module is instantiated, read and write operations can be initiated in a
 * `enable_backpressure(seednum=None)`: Enable random delays on the interface
 * `disable_backpressure()`: Disable random delays on the interface
 * `wait()`: blocking wait until all outstanding operations complete
-* `write(addr, data, strb=-1, prot=ApbProt.NONSECURE)`: write _data_ (bytes), to _addr_, wait for result
-* `write_nowait(addr, data, strb=-1, prot=ApbProt.NONSECURE)`:write _data_ (bytes), to _addr_, submit to queue
-* `read(addr, data=-1, prot=ApbProt.NONSECURE)`: read bytes, at _addr_, id _data_supplied check for match, wait for result
-* `read_nowait(addr, data, prot=ApbProt.NONSECURE)`: read bytes, at _addr_, id _data_supplied check for match, submit to queue
+* `write(addr, data, strb=-1, prot=ApbProt.NONSECURE, error_expected=False)`: write _data_ (bytes), to _addr_, wait for result.  If an slverr is experienced a critical warning will be issued by default, but will reduced this to an info warning if `error_expected=True`
+* `write_nowait(addr, data, strb=-1, prot=ApbProt.NONSECURE, error_expected=False)`:write _data_ (bytes), to _addr_, submit to queue. If an slverr is experienced a critical warning will be issued by default, but will reduced this to an info warning if `error_expected=True`
+* `read(addr, data=-1, prot=ApbProt.NONSECURE, error_expected=False)`: read bytes, at _addr_, id _data_supplied check for match, wait for result. If an slverr is experienced a critical warning will be issued by default, but will reduced this to an info warning if `error_expected=True`
+* `read_nowait(addr, data, prot=ApbProt.NONSECURE, error_expected=False)`: read bytes, at _addr_, id _data_supplied check for match, submit to queue. If an slverr is experienced a critical warning will be issued by default, but will reduced this to an info warning if `error_expected=True`
  
 ### APB slave
 
@@ -114,6 +116,24 @@ It is also possible to extend these modules; operation can be customized by over
 * _reset_: reset signal (optional)
 * _reset_active_level_: reset active level (optional, default `True`)
 * _target_: target region (optional, default `None`)
+
+#### `ApbSlave` editable attibutes
+
+It is possible to set area of addressable memory to be treated a priviledged address space or instruction address space.  If an APB master tries to access these regions, but has not set the correct `prot` value, `NONSECURE` for example, the `ApbSlave` will issue a `slverr` duting the `pready` phase of it response.
+
+The `ApbSlave` has two attributes that can be edited by the user to allocate addresses and/or address ranges to the priviledged or instruction space.
+
+* _privileged_addrs_
+* _instruction_addrs_
+
+Both attributes are arrays, and each element can be a single address, or a two element list, with a low address to a high address:
+
+    tb.ram.privileged_addrs =  [[0x1000, 0x1fff], 0x3000]
+    tb.ram.instruction_addrs = [[0x2000, 0x2fff], 0x4000]
+
+If there is a read or a write with an address in this space, and the prot from the master does not match, it will report the type of error, as a warning, and assert `slverr`. The access will also be unsuccessful, the write will not occur and a read will result in all zeros being returned.
+
+![APB Write Error](/assets/apb_write_error.png)
 
 ### APB RAM
 
@@ -174,3 +194,6 @@ Multi-port memories can be constructed by passing the `mem` object of the first 
 * `hexdump(address, length, prefix='')`: print hex dump of _length_ bytes starting from _address_, prefix lines with optional _prefix_
 * `hexdump_line(address, length, prefix='')`: return hex dump (list of str) of _length_ bytes starting from _address_, prefix lines with optional _prefix_
 * `hexdump_str(address, length, prefix='')`: return hex dump (str) of _length_ bytes starting from _address_, prefix lines with optional _prefix_
+
+
+
