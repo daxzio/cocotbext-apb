@@ -10,7 +10,7 @@ GitHub repository: https://github.com/daxzio/cocotbext-apb
 
 APB simulation models for [cocotb](https://github.com/cocotb/cocotb). 
 
-The APB protocol is cover in these documents [APB Protocol Specification](/assets/IHI0024D_amba_apb_protocol_spec.pdf) and [APB Architecture Specification](/assets/IHI0024E_amba_apb_architecture_spec.pdf)
+The APB protocol is cover in these documents [APB Protocol Specification](https://github.com/daxzio/cocotbext-apb/blob/main/assets/IHI0024D_amba_apb_protocol_spec.pdf) and [APB Architecture Specification](https://github.com/daxzio/cocotbext-apb/blob/main/assets/IHI0024E_amba_apb_architecture_spec.pdf)
 
 ## Installation
 
@@ -33,11 +33,11 @@ See the `tests` directory for complete testbenches using these modules.
 
 ### APB Write
 
-![APB Write](/assets/apb_write.png)
+![APB Write](https://github.com/daxzio/cocotbext-apb/blob/main/assets/apb_write.png)
 
 ### APB Read
 
-![APB Read](/assets/apb_read.png)
+![APB Read](https://github.com/daxzio/cocotbext-apb/blob/main/assets/apb_read.png)
 
 ### APB Bus
 
@@ -133,7 +133,7 @@ Both attributes are arrays, and each element can be a single address, or a two e
 
 If there is a read or a write with an address in this space, and the prot from the master does not match, it will report the type of error, as a warning, and assert `slverr`. The access will also be unsuccessful, the write will not occur and a read will result in all zeros being returned.
 
-![APB Write Error](/assets/apb_write_error.png)
+![APB Write Error](https://github.com/daxzio/cocotbext-apb/blob/main/assets/apb_write_error.png)
 
 ### APB RAM
 
