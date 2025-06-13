@@ -186,11 +186,6 @@ class ApbMaster(ApbBase):
             if addr < 0 or addr >= 2**self.address_width:
                 raise ValueError("Address out of range")
 
-            if not self.pprot_present and prot != ApbProt.NONSECURE:
-                raise ValueError(
-                    "pprot sideband signal value specified, but signal is not connected"
-                )
-
             self.bus.psel.value = 1
             self.bus.paddr.value = addr
             if self.pprot_present:
@@ -219,7 +214,7 @@ class ApbMaster(ApbBase):
             while not self.bus.pready.value:
                 await RisingEdge(self.clock)
 
-            if bool(self.bus.pslverr.value):
+            if self.pslverr_present and bool(self.bus.pslverr.value):
                 msg = "PSLVERR detected!"
                 if self.pprot_present:
                     msg += f" PPROT - {ApbProt(self.bus.pprot.value).name}"

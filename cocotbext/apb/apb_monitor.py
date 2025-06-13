@@ -82,11 +82,7 @@ class ApbMonitor(ApbBase):
                 if self.paddr < 0 or self.paddr >= 2**self.address_width:
                     raise ValueError("Address out of range")
 
-                if not self.pprot_present and self.pprot != ApbProt.NONSECURE:
-                    raise ValueError(
-                        "pprot sideband signal value specified, but signal is not connected"
-                    )
-                if 1 == self.penable:
+                if self.penable_present and 1 == self.penable:
                     self.log.critical(
                         "penable is asserted in the same first cycle with psel"
                     )
@@ -105,7 +101,7 @@ class ApbMonitor(ApbBase):
 
                 wdata = self.pwdata
                 await RisingEdge(self.clock)
-                if 0 == self.penable:
+                if self.penable_present and 0 == self.penable:
                     self.log.critical(
                         f"penable is not asserted in the second cycle after psel {self.penable}"
                     )

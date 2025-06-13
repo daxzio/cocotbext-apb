@@ -4,6 +4,10 @@ default:
 	cd tests/test_basic ; make clean sim WAVES=0 && ../rtlflo/combine_results.py
 	cd tests/test_basic_64 ; make clean sim WAVES=0 && ../rtlflo/combine_results.py
 	cd tests/test_slave ; make clean sim WAVES=0 && ../rtlflo/combine_results.py
+	cd tests/test_slave_noenable ; make clean sim WAVES=0 && ../rtlflo/combine_results.py
+	cd tests/test_slave_noprot ; make clean sim WAVES=0 && ../rtlflo/combine_results.py
+	cd tests/test_slave_noslverr ; make clean sim WAVES=0 && ../rtlflo/combine_results.py
+	cd tests/test_slave_nostrb ; make clean sim WAVES=0 && ../rtlflo/combine_results.py
 
 lint:
 	pyflakes cocotbext

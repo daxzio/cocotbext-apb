@@ -48,7 +48,8 @@ class ApbSlave(ApbBase):
 
         self.bus.pready.value = 0
         self.bus.prdata.value = 0
-        self.bus.pslverr.value = 0
+        if self.pslverr_present:
+            self.bus.pslverr.value = 0
 
         self._run_coroutine_obj: Any = None
         self._restart()
@@ -91,7 +92,7 @@ class ApbSlave(ApbBase):
     async def _write(self, address, data, strb=None, prot=None):
         self.check_permission(address, prot)
         if strb is None:
-            await self.target.write(address, data.to_bytes(self.byte_lanes, "little"))
+            await self.target.write(address, data)
         else:
             for i in range(self.byte_lanes):
                 if 1 == ((int(strb.value) >> i) & 0x1):
@@ -110,6 +111,7 @@ class ApbSlave(ApbBase):
             pprot = None
             if self.pprot_present:
                 pprot = self.bus.pprot
+            pstrb = None
             if self.pstrb_present:
                 pstrb = self.bus.pstrb
             if bool(self.bus.psel.value):
@@ -141,11 +143,14 @@ class ApbSlave(ApbBase):
                         self.log.debug(f"Read  0x{addr:08x} 0x{rdata:08x}")
                 except APBPrivilegedErr:
                     self.log.warning(f"Access 0x{addr:08x} Invalid, PrivilegedErr")
-                    self.bus.pslverr.value = 1
+                    if self.pslverr_present:
+                        self.bus.pslverr.value = 1
                 except APBInstructionErr:
                     self.log.warning(f"Access 0x{addr:08x} Invalid, InstructionErr")
-                    self.bus.pslverr.value = 1
+                    if self.pslverr_present:
+                        self.bus.pslverr.value = 1
                 await RisingEdge(self.clock)
                 self.bus.pready.value = 0
                 self.bus.prdata.value = 0
-                self.bus.pslverr.value = 0
+                if self.pslverr_present:
+                    self.bus.pslverr.value = 0
