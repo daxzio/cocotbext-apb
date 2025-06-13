@@ -1,6 +1,18 @@
 import enum
 
 
+class APBSlvErr(Exception):
+    pass
+
+
+class APBPrivilegedErr(APBSlvErr):
+    pass
+
+
+class APBInstructionErr(APBSlvErr):
+    pass
+
+
 # Protection bits
 # PPROT
 class ApbProt(enum.IntFlag):

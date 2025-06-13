@@ -32,16 +32,16 @@ from typing import Tuple
 from typing import Any
 from typing import Union
 
-from .utils import resolve_x_int
-from .constants import ApbProt
 from .apb_base import ApbBase
+from .constants import ApbProt
+from .utils import resolve_x_int
 
 
 class ApbMaster(ApbBase):
     def __init__(self, bus, clock, **kwargs) -> None:
         super().__init__(bus, clock, name="master", **kwargs)
 
-        self.queue_tx: Deque[Tuple[bool, int, bytes, int, ApbProt, int]] = deque()
+        self.queue_tx: Deque[Tuple[bool, int, bytes, int, ApbProt, bool, int]] = deque()
         self.queue_rx: Deque[Tuple[bytes, int]] = deque()
         self.tx_id = 0
 
@@ -72,8 +72,9 @@ class ApbMaster(ApbBase):
         data: Union[int, bytes],
         strb: int = -1,
         prot: ApbProt = ApbProt.NONSECURE,
+        error_expected: bool = False,
     ) -> None:
-        self.write_nowait(addr, data, strb, prot)
+        self.write_nowait(addr, data, strb, prot, error_expected)
         await self._idle.wait()
 
     def write_nowait(
@@ -82,6 +83,7 @@ class ApbMaster(ApbBase):
         data: Union[int, bytes],
         strb: int = -1,
         prot: ApbProt = ApbProt.NONSECURE,
+        error_expected: bool = False,
     ) -> None:
         """ """
         self.tx_id += 1
@@ -89,7 +91,9 @@ class ApbMaster(ApbBase):
             datab = data.to_bytes(self.wbytes, "little")
         else:
             datab = data
-        self.queue_tx.append((True, addr, datab, strb, prot, self.tx_id))
+        self.queue_tx.append(
+            (True, addr, datab, strb, prot, error_expected, self.tx_id)
+        )
         self.sync.set()
         self._idle.clear()
 
@@ -98,8 +102,9 @@ class ApbMaster(ApbBase):
         addr: int,
         data: Union[int, bytes] = bytes(),
         prot: ApbProt = ApbProt.NONSECURE,
+        error_expected: bool = False,
     ) -> bytes:
-        rx_id = self.read_nowait(addr, data, prot)
+        rx_id = self.read_nowait(addr, data, prot, error_expected)
         found = False
         while not found:
             while self.queue_rx:
@@ -116,6 +121,7 @@ class ApbMaster(ApbBase):
         addr: int,
         data: Union[int, bytes] = bytes(),
         prot: ApbProt = ApbProt.NONSECURE,
+        error_expected: bool = False,
     ) -> int:
         if isinstance(data, int):
             if data > self.rdata_mask:
@@ -126,7 +132,7 @@ class ApbMaster(ApbBase):
         else:
             datab = data
         self.tx_id += 1
-        self.queue_tx.append((False, addr, datab, -1, prot, self.tx_id))
+        self.queue_tx.append((False, addr, datab, -1, prot, error_expected, self.tx_id))
         self.sync.set()
         self._idle.clear()
         return self.tx_id
@@ -173,7 +179,9 @@ class ApbMaster(ApbBase):
                 self.sync.clear()
                 await self.sync.wait()
 
-            write, addr, data, strb, prot, tx_id = self.queue_tx.popleft()
+            write, addr, data, strb, prot, error_expected, tx_id = (
+                self.queue_tx.popleft()
+            )
 
             if addr < 0 or addr >= 2**self.address_width:
                 raise ValueError("Address out of range")
@@ -210,8 +218,16 @@ class ApbMaster(ApbBase):
 
             while not self.bus.pready.value:
                 await RisingEdge(self.clock)
+
+            if bool(self.bus.pslverr.value):
+                msg = "PSLVERR detected!"
+                if self.pprot_present:
+                    msg += f" PPROT - {ApbProt(self.bus.pprot.value).name}"
+                if error_expected:
+                    self.log.info(msg)
+                else:
+                    self.log.critical(msg)
             if not write:
-                #                 ret = int(self.bus.prdata.value)
                 ret = resolve_x_int(self.bus.prdata)
                 self.log.info(f"Value read: 0x{ret:08x}")
                 if not data == bytes():

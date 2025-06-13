@@ -85,7 +85,7 @@ class MemoryInterface:
         return await self.read_words(address, count, byteorder, 8, **kwargs)
 
     async def read_byte(self, address, **kwargs):
-        return (await self.read(address, 1, **kwargs)).data[0]
+        return await self.read(address, 1, **kwargs)
 
     async def read_word(self, address, byteorder="little", ws=2, **kwargs):
         return (await self.read_words(address, 1, byteorder, ws, **kwargs))[0]

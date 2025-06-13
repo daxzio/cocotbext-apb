@@ -80,7 +80,7 @@ class Memory:
         return self.read_words(address, count, byteorder, 8)
 
     def read_byte(self, address):
-        return self.read(address, 1)[0]
+        return self.read(address, 1)
 
     def read_word(self, address, byteorder="little", ws=2):
         return self.read_words(address, 1, byteorder, ws)[0]

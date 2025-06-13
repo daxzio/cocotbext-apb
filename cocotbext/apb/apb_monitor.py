@@ -82,7 +82,7 @@ class ApbMonitor(ApbBase):
                 if self.paddr < 0 or self.paddr >= 2**self.address_width:
                     raise ValueError("Address out of range")
 
-                if self.pprot_present and self.pprot != ApbProt.NONSECURE:
+                if not self.pprot_present and self.pprot != ApbProt.NONSECURE:
                     raise ValueError(
                         "pprot sideband signal value specified, but signal is not connected"
                     )

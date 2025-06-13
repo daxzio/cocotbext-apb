@@ -26,10 +26,16 @@ from cocotb import start_soon
 from cocotb.triggers import RisingEdge
 
 from .apb_base import ApbBase
+from .constants import ApbProt
+from .constants import APBPrivilegedErr, APBInstructionErr
 
 # from .reset import Reset
 #
 from typing import Any
+
+
+class InvalidAccess(Exception):
+    pass
 
 
 class ApbSlave(ApbBase):
@@ -37,6 +43,8 @@ class ApbSlave(ApbBase):
         super().__init__(bus, clock, name="slave", **kwargs)
         #         self.reset = reset
         self.target = target
+        self.privileged_addrs = []
+        self.instruction_addrs = []
 
         self.bus.pready.value = 0
         self.bus.prdata.value = 0
@@ -50,12 +58,44 @@ class ApbSlave(ApbBase):
             self._run_coroutine_obj.kill()
         self._run_coroutine_obj = start_soon(self._run())
 
-    async def _write(self, address, data, strb):
+    def check_address(self, address, prot, addresses, prot_type, exception):
+        if prot != prot_type:
+            for addrs in addresses:
+                if isinstance(addrs, int):
+                    if addrs == address:
+                        raise exception
+                elif isinstance(addrs, (list, tuple)):
+                    if addrs[1] < addrs[0]:
+                        raise Exception(
+                            f"Address range needs to be increasing , {addrs}"
+                        )
+                    if not 2 == len(addrs):
+                        raise Exception(f"Address range needs to be 2 value , {addrs}")
+                    if addrs[0] <= address < addrs[1]:
+                        raise exception
+                else:
+                    raise Exception(f"Unknown addr type , {addrs}")
+
+    def check_permission(self, address, prot):
+        self.check_address(
+            address, prot, self.privileged_addrs, ApbProt.PRIVILEGED, APBPrivilegedErr
+        )
+        self.check_address(
+            address,
+            prot,
+            self.instruction_addrs,
+            ApbProt.INSTRUCTION,
+            APBInstructionErr,
+        )
+
+    async def _write(self, address, data, strb, prot):
+        self.check_permission(address, prot)
         for i in range(self.byte_lanes):
             if 1 == ((int(strb.value) >> i) & 0x1):
                 await self.target.write_byte(address + i, data[i].to_bytes(1, "little"))
 
-    async def _read(self, address, length):
+    async def _read(self, address, length, prot):
+        self.check_permission(address, prot)
         return await self.target.read(address, length)
 
     async def _run(self):
@@ -73,17 +113,29 @@ class ApbSlave(ApbBase):
                     await RisingEdge(self.clock)
 
                 self.bus.pready.value = 1
-                if pwrite:
-                    wdata = int(self.bus.pwdata.value)
-                    await self._write(
-                        addr, wdata.to_bytes(self.byte_lanes, "little"), self.bus.pstrb
-                    )
-                    self.log.debug(f"Write 0x{addr:08x} 0x{wdata:08x}")
-                else:
-                    x = await self._read(addr, self.byte_lanes)
-                    rdata = int.from_bytes(x, byteorder="little")
-                    self.bus.prdata.value = rdata
-                    self.log.debug(f"Read  0x{addr:08x} 0x{rdata:08x}")
+                try:
+                    if pwrite:
+                        wdata = int(self.bus.pwdata.value)
+                        await self._write(
+                            addr,
+                            wdata.to_bytes(self.byte_lanes, "little"),
+                            self.bus.pstrb,
+                            self.bus.pprot,
+                        )
+                        self.log.debug(f"Write 0x{addr:08x} 0x{wdata:08x}")
+                    else:
+                        self.bus.prdata.value = 0
+                        x = await self._read(addr, self.byte_lanes, self.bus.pprot)
+                        rdata = int.from_bytes(x, byteorder="little")
+                        self.bus.prdata.value = rdata
+                        self.log.debug(f"Read  0x{addr:08x} 0x{rdata:08x}")
+                except APBPrivilegedErr:
+                    self.log.warning(f"Access 0x{addr:08x} Invalid, PrivilegedErr")
+                    self.bus.pslverr.value = 1
+                except APBInstructionErr:
+                    self.log.warning(f"Access 0x{addr:08x} Invalid, InstructionErr")
+                    self.bus.pslverr.value = 1
                 await RisingEdge(self.clock)
                 self.bus.pready.value = 0
                 self.bus.prdata.value = 0
+                self.bus.pslverr.value = 0
