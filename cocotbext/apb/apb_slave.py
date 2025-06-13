@@ -59,7 +59,7 @@ class ApbSlave(ApbBase):
         self._run_coroutine_obj = start_soon(self._run())
 
     def check_address(self, address, prot, addresses, prot_type, exception):
-        if prot != prot_type:
+        if int(prot) != prot_type:
             for addrs in addresses:
                 if isinstance(addrs, int):
                     if addrs == address:
