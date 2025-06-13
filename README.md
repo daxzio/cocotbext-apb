@@ -31,11 +31,11 @@ See the `tests` directory for complete testbenches using these modules.
 
 ### APB Write
 
-/images/apb_write.png
+!/images/apb_write.png
 
 ### APB Read
 
-/images/apb_write.png
+!/images/apb_write.png
 
 ### APB Bus
 
