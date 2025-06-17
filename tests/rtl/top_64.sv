@@ -16,7 +16,7 @@ module top (
         output logic [63:0] s_apb_prdata,
         output logic s_apb_pslverr
 
-        
+
     );
 
     //--------------------------------------------------------------------------
@@ -92,7 +92,7 @@ module top (
     logic [63:0] decoded_wr_biten;
 
 //     always_comb begin
-    always @(*) begin 
+    always @(*) begin
         integer next_cpuif_addr;
         for(int i0=0; i0<32; i0++) begin
             next_cpuif_addr = 32'h0 + i0*8'h8;
@@ -109,14 +109,14 @@ module top (
     //--------------------------------------------------------------------------
     // Field logic
     //--------------------------------------------------------------------------
-    
+
     // Field: top.regs[].f
     logic [63:0] field_storage_regs_f_value [32] ;
     logic [63:0] field_combo_regs_f_next [32] ;
     logic field_combo_regs_f_load_next [32] ;
     for(genvar i0=0; i0<32; i0++) begin
         // always_comb begin
-        always @(*) begin 
+        always @(*) begin
             logic [63:0] next_c;
             logic load_next_c;
             next_c = field_storage_regs_f_value[i0];
@@ -162,7 +162,7 @@ module top (
 
     // Reduce the array
     // always_comb begin
-    always @(*) begin 
+    always @(*) begin
         logic [63:0] readback_data_var;
         readback_done = decoded_req & ~decoded_req_is_wr;
         readback_err = '0;

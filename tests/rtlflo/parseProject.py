@@ -143,17 +143,17 @@ class parseProject:
         if not "VIVADO_PATH" in os.environ.keys():
 
             if self.platform.startswith("win"):
-                os.environ["VIVADO_PATH"] = (
-                    f"C:\\\\Xilinx\\\\Vivado\\\\{os.environ['XILINX_REV']}"
-                )
+                os.environ[
+                    "VIVADO_PATH"
+                ] = f"C:\\\\Xilinx\\\\Vivado\\\\{os.environ['XILINX_REV']}"
             elif self.platform.startswith("linux"):
-                os.environ["VIVADO_PATH"] = (
-                    f"/opt/Xilinx/Vivado/{os.environ['XILINX_REV']}/bin/vivado"
-                )
+                os.environ[
+                    "VIVADO_PATH"
+                ] = f"/opt/Xilinx/Vivado/{os.environ['XILINX_REV']}/bin/vivado"
             else:
-                os.environ["VIVADO_PATH"] = (
-                    f"/cygdrive/c/Xilinx/Vivado/{os.environ['XILINX_REV']}"
-                )
+                os.environ[
+                    "VIVADO_PATH"
+                ] = f"/cygdrive/c/Xilinx/Vivado/{os.environ['XILINX_REV']}"
         if not self.external_libraries is None:
             for library, path in self.external_libraries.items():
                 self.external_libraries[library] = replaceEnvironVar(path)

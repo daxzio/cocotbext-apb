@@ -1,6 +1,6 @@
 name: Setup Verilator
 
-on: 
+on:
   workflow_call:
     inputs:
       githash:
@@ -26,7 +26,7 @@ jobs:
         if: ${{ inputs.githash != '' }}
         run: |
           echo "GITHEAD=${{ inputs.githash }}" >> $GITHUB_ENV
-      - name: Setup Verilator 
+      - name: Setup Verilator
         run: |
           export GITPATH=https://github.com/verilator/verilator.git
           if [ -z ${GITHEAD+x} ]; then
@@ -43,7 +43,7 @@ jobs:
           path: ${{ env.CACHE_DIR }}
           key: ${{ env.CACHE_KEY }}
       - if: ${{ steps.git-cache.outputs.cache-hit != 'true' }}
-        name: Compile Verilator 
+        name: Compile Verilator
         run: |
           mkdir -p ${{ env.CACHE_DIR }}
           git clone ${{ env.GITPATH }}

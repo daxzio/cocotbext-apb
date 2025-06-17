@@ -10,7 +10,7 @@ The contents of this directory is to be used in parallel.  First check out the d
 
     mkdir ../dut001
     cd ../dut001
-    
+
 In this directory you need a `Makefile`, to refer back to the flow:
 
     RTLFLOW_PATH ?= ../rtlflo

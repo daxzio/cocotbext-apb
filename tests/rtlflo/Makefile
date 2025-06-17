@@ -2,7 +2,7 @@ XILINX_REV ?= 2021.2
 MAKE_XILINX_LIB ?= C:\modelsim_lib
 XILINX_VIVADO?=C:\Xilinx\Vivado\${XILINX_REV}
 RTLFLOW_PATH?=../rtlflow
-TEST ?= 
+TEST ?=
 FPGA_BIT ?= $(shell ${RTLFLOW_PATH}/vivado_runner.py bitfile)
 FPGA_BIT_BCK ?= $(shell ${RTLFLOW_PATH}/vivado_runner.py date_fpga)
 BCK_DIR ?= ../bitstreams
@@ -21,14 +21,14 @@ build: vivado_build
 
 run:
 	python ${RTLFLOW_PATH}/run_tb.py ${TEST}
-    
+
 vunit_version:
 	python ${RTLFLOW_PATH}/run_tb.py --version
-    
+
 gui:
 	python ${RTLFLOW_PATH}/run_tb.py -g ${TEST}
 
-clean:	
+clean:
 	rm -rf *.bak *.log *.jou __pycache__ vunit_out work .Xil *.cbf .cxl* vivado*str *.tmp xpr*/
 	#python run_tb.py --clean
 
@@ -65,7 +65,7 @@ vivado:
 
 
 .PHONY : help
-help : 
+help :
 	@echo "    help               : List all commands"
 	@echo "    clean              : Clean up all working file"
 	@echo "    run <default>      : Compile and run command line all tests"
@@ -85,4 +85,3 @@ help :
 	@echo "    vivado_synth       : Synthesise the vivado project"
 	@echo "    vivado_run         : Compile and generate the vivado project"
 	@echo "    vivado             : A vivado_build followed by vivado_run"
-

@@ -1,0 +1,19 @@
+repos:
+-   repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v2.3.0
+    hooks:
+    -   id: check-yaml
+    -   id: end-of-file-fixer
+    -   id: trailing-whitespace
+-   repo: https://github.com/psf/black
+    rev: 22.10.0
+    hooks:
+    -   id: black
+-   repo: local
+    hooks:
+    -   id: update-copyright-year
+        name: Update copyright years
+        entry: python scripts/update_copyright_year.py
+        language: system
+        files: '\.(py|js|ts|java|c|cpp|h|hpp|md|txt|rst|yml|yaml|json|xml|html|css|sh|bat)$'
+        pass_filenames: true

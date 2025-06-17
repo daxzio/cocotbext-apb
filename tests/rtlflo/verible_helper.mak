@@ -44,7 +44,7 @@ format:
 
 # verible-verilog-format: usage: /tmp/verible-bin/verible-verilog-format [options] <file> [<file...>]
 # To pipe from stdin, use '-' as <file>.
-# 
+#
 #   Flags from common/formatting/basic_format_style_init.cc:
 #     --column_limit (Target line length limit to stay under when formatting.);
 #       default: 100;
@@ -59,8 +59,8 @@ format:
 #       first element after an open-group section is wrapped. Otherwise, the
 #       indentation level is set to the column position of the open-group
 #       operator.); default: 4;
-# 
-# 
+#
+#
 #   Flags from external/com_google_absl/absl/flags/parse.cc:
 #     --flagfile (comma-separated list of files to load flags from); default: ;
 #     --fromenv (comma-separated list of flags to set from the environment [use
@@ -70,8 +70,8 @@ format:
 #     --undefok (comma-separated list of flag names that it is okay to specify on
 #       the command line even if the program does not define a flag with that
 #       name); default: ;
-# 
-# 
+#
+#
 #   Flags from verilog/formatting/format_style_init.cc:
 #     --assignment_statement_alignment (Format various assignments:
 #       {align,flush-left,preserve,infer}); default: infer;
@@ -117,12 +117,12 @@ format:
 #       This is a short-term measure to reduce risk-of-harm.); default: false;
 #     --wrap_end_else_clauses (Split end and else keywords into separate lines);
 #       default: false;
-# 
-# 
+#
+#
 #   Flags from verilog/parser/verilog_parser.cc:
 #     --verilog_trace_parser (Trace verilog parser); default: false;
-# 
-# 
+#
+#
 #   Flags from verilog/tools/formatter/verilog_format.cc:
 #     --failsafe_success (If true, always exit with 0 status, even if there were
 #       input errors or internal errors. In all error conditions, the original
@@ -152,7 +152,7 @@ format:
 #     --verify_convergence (If true, and not incrementally formatting with
 #       --lines, verify that re-formatting the formatted output yields no further
 #       changes, i.e. formatting is convergent.); default: true;
-# 
+#
 # Try --helpfull to get a list of all flags or --help=substring shows help for
 # flags which include specified substring in either in the name, or description or
 # path.

@@ -9,7 +9,7 @@
 //   \ \  / /\ \  / /    [Description ] GW2A verilog functional simulation library
 //    \ \/ /  \ \/ /     [Timestamp   ] Wed February 24 11:00:30 2021
 //     \  /    \  /      [version     ] 1.9.11
-//      \/      \/       
+//      \/      \/
 //
 // ===========Oooo==========================================Oooo========
 
@@ -461,7 +461,7 @@ always @(posedge CLK) begin
 	if (SET)
 		Q_reg <= 1'b1;
 	else
-		Q_reg <= D;	
+		Q_reg <= D;
 end
 
 assign Q = Q_reg;
@@ -755,7 +755,7 @@ always @(negedge CLK) begin
 	if (SET)
 		Q_reg <= 1'b1;
 	else
-		Q_reg <= D;	
+		Q_reg <= D;
 end
 
 assign Q = Q_reg;
@@ -1270,7 +1270,7 @@ input  I;
 output O;
 
 assign O = !I;
-        
+
 endmodule // inv
 //IOBs
 module IBUF (O, I);
@@ -1279,7 +1279,7 @@ input  I;
 output O;
 
 buf IB (O, I);
-        
+
 endmodule //IBUF (input buffer)
 
 
@@ -1289,7 +1289,7 @@ input  I;
 output O;
 
 buf OB (O, I);
-    
+
 endmodule //OBUF (output buffer)
 
 
@@ -1298,7 +1298,7 @@ module TBUF (O, I, OEN);
 input I, OEN;
 output O;
 
-bufif0 TB (O, I, OEN); 
+bufif0 TB (O, I, OEN);
 
 endmodule // TBUF (output buffer with tri-state control)
 
@@ -1311,7 +1311,7 @@ inout IO;
 
 buf OB (O, IO);
 bufif0 IB (IO,I,OEN);
-    
+
 endmodule //IOBUF (inout buffer)
 
 
@@ -1452,7 +1452,7 @@ always @(posedge ICLK or negedge grstn or negedge lrstn)
       Dd0 <= 0;
    else if (!lrstn)
       Dd0 <= 0;
-   else 
+   else
       Dd0 <= D;
 
 always @(negedge ICLK or negedge grstn or negedge lrstn)
@@ -1460,7 +1460,7 @@ always @(negedge ICLK or negedge grstn or negedge lrstn)
       D0_mem <= 0;
    else if (!lrstn)
       D0_mem <= 0;
-   else 
+   else
       D0_mem[WADDR] <= Dd0;
 
 always @(negedge ICLK or negedge grstn or negedge lrstn)
@@ -1468,7 +1468,7 @@ always @(negedge ICLK or negedge grstn or negedge lrstn)
       D1_mem <= 0;
    else if (!lrstn)
       D1_mem <= 0;
-   else 
+   else
       D1_mem[WADDR] <= D;
 
 always @(posedge PCLK or negedge grstn or negedge lrstn)
@@ -1648,7 +1648,7 @@ end
 
 always @(negedge CLK) begin
 	Dd0_2 <= Dd0_1;
-    DT1 <= Ttx1;    
+    DT1 <= Ttx1;
 end
 
 assign Q0 = (CLK)? Dd0_2 : Dd1_2;
@@ -1755,7 +1755,7 @@ parameter LSREN = "true";    //"true"; "false"
 input D, FCLK, PCLK, CALIB, RESET;
 output Q0,Q1,Q2,Q3;
 wire grstn;
-wire lrstn; 
+wire lrstn;
 //synthesis translate_off
 
 assign grstn = (GSREN == "true") ? GSR.GSRO : 1'b1;
@@ -1854,7 +1854,7 @@ always @(posedge FCLK or negedge reset_delay) begin
             calib_state <= calib_state;
             Dd_sel <= Dd_sel;
         end
-        
+
         if (dcnt_en) begin
             D_en1 <= ~D_en1;
         end else begin
@@ -2021,7 +2021,7 @@ always @(posedge FCLK or negedge reset_delay) begin
             calib_state <= calib_state;
             Dd_sel <= Dd_sel;
         end
-        
+
         if (dcnt_en) begin
             D_en1 <= ~D_en1;
         end else begin
@@ -2077,7 +2077,7 @@ parameter LSREN = "true";   //"true"; "false"
 input D, FCLK, PCLK, CALIB, RESET;
 output Q0, Q1, Q2, Q3, Q4, Q5, Q6;
 wire grstn;
-wire lrstn; 
+wire lrstn;
 assign grstn = GSREN == "true" ? GSR.GSRO : 1'b1;
 assign lrstn = LSREN == "true" ? (~RESET) : 1'b1;
 
@@ -2144,20 +2144,20 @@ always @(posedge FCLK or negedge reset_delay) begin
         end else begin
             Dd_sel <= Dd_sel;
         end
-        
+
         if (dcnt_en) begin
             D_en0 <= ~(D_en0 | (Dd_sel & D_en1 & (~D_en0)));
         end else  begin
             D_en0 <= D_en0;
         end
-                                                                                   
+
         if (dcnt_en) begin
             D_en1 <= (~(Dd_sel & D_en1 & (~D_en0))) &(D_en0 ^ D_en1);
         end else begin
             D_en1 <= D_en1;
-        end    
-    end    
-        
+        end
+    end
+
 end
 
 always @(posedge FCLK or negedge grstn  or negedge lrstn) begin
@@ -2319,20 +2319,20 @@ always @(posedge FCLK or negedge reset_delay) begin
             calib_state <= calib_state;
             Dd_sel <= Dd_sel;
         end
-        
+
         if (dcnt_en) begin
             D_en0 <= ~D_en0;
         end else  begin
             D_en0 <= D_en0;
         end
-                                                                                   
+
         if (dcnt_en) begin
             D_en1 <= D_en0 ^ D_en1;
         end else begin
             D_en1 <= D_en1;
-        end    
-    end    
-        
+        end
+    end
+
 end
 
 always @(posedge FCLK or negedge grstn  or negedge lrstn) begin
@@ -2420,7 +2420,7 @@ input [2:0] RADDR;
 input RESET,CALIB;
 output  Q0, Q1, Q2, Q3, Q4, Q5, Q6, Q7;
 wire grstn;
-wire lrstn; 
+wire lrstn;
 //synthesis translate_off
 assign grstn = GSREN == "true" ? GSR.GSRO : 1'b1;
 assign lrstn = LSREN == "true" ? (~RESET) : 1'b1;
@@ -2508,20 +2508,20 @@ always @(posedge FCLK or negedge reset_delay) begin
             calib_state <= calib_state;
             Dd_sel <= Dd_sel;
         end
-        
+
         if (dcnt_en) begin
             D_en0 <= ~D_en0;
         end else  begin
             D_en0 <= D_en0;
         end
-                                                                                   
+
         if (dcnt_en) begin
             D_en1 <= D_en0 ^ D_en1;
         end else begin
             D_en1 <= D_en1;
-        end    
-    end    
-        
+        end
+    end
+
 end
 
 always @(posedge FCLK or negedge grstn  or negedge lrstn) begin
@@ -2691,27 +2691,27 @@ always @(posedge FCLK or negedge reset_delay) begin
             calib_state <= calib_state;
             Dd_sel <= Dd_sel;
         end
-        
+
         if (dcnt_en) begin
             D_en0 <= ~(dcnt_reset | D_en0);
         end else  begin
             D_en0 <= D_en0;
         end
-                                                                                   
+
         if (dcnt_en) begin
             D_en1 <= D_en0 ^ D_en1;
         end else begin
             D_en1 <= D_en1;
-        end    
+        end
 
         if (dcnt_en) begin
             D_en2 <= ((D_en0&D_en1) ^ D_en2) & (~dcnt_reset);
         end else begin
             D_en2 <= D_en2;
-        end    
+        end
 
-    end    
-        
+    end
+
 end
 
 always @(posedge FCLK or negedge grstn  or negedge lrstn) begin
@@ -2736,7 +2736,7 @@ always @(posedge FCLK or negedge grstn  or negedge lrstn) begin
         Dd1_reg1 <= 1'b0;
         Dd1_reg2 <= 1'b0;
         Dd1_reg3 <= 1'b0;
-        Dd1_reg4 <= 1'b0;        
+        Dd1_reg4 <= 1'b0;
     end else begin
         Dd0_reg0 <= Dd0;
         Dd0_reg1 <= Dd0_reg0;
@@ -2849,14 +2849,14 @@ begin
         rstn_dsel <= 1'b0;
     end
     else if (!lrstn) begin
-        rstn_dsel <= 1'b0;        
+        rstn_dsel <= 1'b0;
     end
     else begin
         rstn_dsel <= 1'b1;
     end
 end
 
-always @(posedge FCLK or negedge rstn_dsel) 
+always @(posedge FCLK or negedge rstn_dsel)
 begin
     if (!rstn_dsel) begin
         dsel <= 1'b0;
@@ -2933,10 +2933,10 @@ always @(negedge FCLK or negedge grstn or negedge lrstn)
 begin
     if (!grstn) begin
         Qq_n <= 1'b0;
-        Q_data_n <= 1'b0; 
+        Q_data_n <= 1'b0;
     end else if (!lrstn) begin
         Qq_n <= 1'b0;
-        Q_data_n <= 1'b0; 
+        Q_data_n <= 1'b0;
     end else begin
         Qq_n <= Dd3[0];
         Q_data_n <= Ttx3[0];
@@ -3027,14 +3027,14 @@ begin
         rstn_dsel0 <= 1'b0;
     end
     else if (!lrstn) begin
-        rstn_dsel0 <= 1'b0;        
+        rstn_dsel0 <= 1'b0;
     end
     else begin
         rstn_dsel0 <= 1'b1;
     end
 end
 
-always @(posedge FCLK or negedge rstn_dsel0) 
+always @(posedge FCLK or negedge rstn_dsel0)
 begin
     if (!rstn_dsel0) begin
         dsel0 <= 1'b0;
@@ -3045,7 +3045,7 @@ end
 
 assign d_en0 = ~dsel0;
 
-always @(posedge FCLK or negedge rstn_dsel0) 
+always @(posedge FCLK or negedge rstn_dsel0)
 begin
     if (!rstn_dsel0) begin
         d_up0 <= 1'b0;
@@ -3071,7 +3071,7 @@ begin
     end
 end
 
-always @(posedge tclk_sig or negedge rstn_dsel1) 
+always @(posedge tclk_sig or negedge rstn_dsel1)
 begin
     if (!rstn_dsel1) begin
         dsel1 <= 1'b0;
@@ -3082,7 +3082,7 @@ end
 
 assign d_en1 = (HWL == "true") ? ~dsel1 : dsel1;
 
-always @(posedge tclk_sig or negedge rstn_dsel1) 
+always @(posedge tclk_sig or negedge rstn_dsel1)
 begin
     if (!rstn_dsel1) begin
         d_up1 <= 1'b0;
@@ -3096,7 +3096,7 @@ begin
 end
 
 always @(posedge FCLK or negedge grstn or negedge lrstn)
-begin 
+begin
     if (!grstn) begin
         Dd2 <= 4'b0;
         Ttx2 <= 2'b0;
@@ -3140,10 +3140,10 @@ always @(negedge tclk_sig or negedge grstn or negedge lrstn)
 begin
     if (!grstn) begin
         Qq_n <= 1'b0;
-        Q_data_n <= 1'b0; 
+        Q_data_n <= 1'b0;
     end else if (!lrstn) begin
         Qq_n <= 1'b0;
-        Q_data_n <= 1'b0; 
+        Q_data_n <= 1'b0;
     end else begin
         Qq_n <= Dd3[0];
         Q_data_n <= Ttx3[0];
@@ -3153,9 +3153,9 @@ end
 always @(posedge tclk_sig or negedge grstn or negedge lrstn)
 begin
     if (!grstn) begin
-        Qq_p <= 1'b0; 
+        Qq_p <= 1'b0;
     end else if(!lrstn) begin
-        Qq_p <= 1'b0;   
+        Qq_p <= 1'b0;
     end else begin
         Qq_p <= Dd3[1];
     end
@@ -3164,9 +3164,9 @@ end
 always @(posedge tclk_sig or negedge grstn or negedge lrstn)
 begin
     if (!grstn) begin
-        Q_data_p <= 1'b0; 
+        Q_data_p <= 1'b0;
     end else if (!lrstn) begin
-        Q_data_p <= 1'b0; 
+        Q_data_p <= 1'b0;
     end else begin
         Q_data_p <= Q_data_n;
     end
@@ -3197,7 +3197,7 @@ reg d_up0,d_up1;
 reg [7:0] Dd2,Dd3,Dd4;
 reg Qq_p,Qq_n;
 wire grstn;
-wire lrstn; 
+wire lrstn;
 
 initial begin
     dcnt0 = 1'b0;
@@ -3225,7 +3225,7 @@ begin
         rstn_dsel <= 1'b0;
     end
     else if (!lrstn) begin
-        rstn_dsel <= 1'b0;        
+        rstn_dsel <= 1'b0;
     end
     else begin
         rstn_dsel <= 1'b1;
@@ -3253,7 +3253,7 @@ begin
         if(dsel_en) begin
             dsel <= ~dsel;
         end else begin
-            dsel <= dsel;        
+            dsel <= dsel;
         end
     end
 end
@@ -3261,7 +3261,7 @@ end
 assign dcnt_reset = (~dcnt0) & dcnt1 & dsel;
 assign d_en0 = ((~dsel) & (~dcnt1) & dcnt0) | (dsel & (~dcnt1) & (~dcnt0));
 
-always @(posedge FCLK or negedge rstn_dsel) 
+always @(posedge FCLK or negedge rstn_dsel)
 begin
     if (!rstn_dsel) begin
         d_up0 <= 1'b0;
@@ -3276,7 +3276,7 @@ end
 
 assign d_en1 = ((~dsel) & dcnt1 & (~dcnt0)) | (dsel & (~dcnt1) & dcnt0);
 
-always @(posedge FCLK or negedge rstn_dsel) 
+always @(posedge FCLK or negedge rstn_dsel)
 begin
     if (!rstn_dsel) begin
         d_up1 <= 1'b0;
@@ -3308,12 +3308,12 @@ begin
         Dd2[4] <= Dd1[4];
         Dd2[5] <= Dd1[5];
         Dd2[6] <= Dd1[6];
-        Dd2[7] <= 1'b0;    
+        Dd2[7] <= 1'b0;
     end
 end
 
 always @(posedge FCLK or negedge grstn or negedge lrstn)
-begin 
+begin
     if (!grstn) begin
         Dd3 <= 8'b0;
     end else if (!lrstn) begin
@@ -3328,7 +3328,7 @@ begin
 end
 
 always @(posedge FCLK or negedge grstn or negedge lrstn)
-begin 
+begin
     if (!grstn) begin
         Dd4 <= 8'b0;
     end else if (!lrstn) begin
@@ -3427,14 +3427,14 @@ begin
         rstn_dsel <= 1'b0;
     end
     else if (!lrstn) begin
-        rstn_dsel <= 1'b0;        
+        rstn_dsel <= 1'b0;
     end
     else begin
         rstn_dsel <= 1'b1;
     end
 end
 
-always @(posedge FCLK or negedge rstn_dsel) 
+always @(posedge FCLK or negedge rstn_dsel)
 begin
     if (!rstn_dsel) begin
         dcnt0 <= 1'b0;
@@ -3447,8 +3447,8 @@ end
 
 assign d_en0 = dcnt0 & (~dcnt1);
 assign d_en1 = (HWL == "true") ? (dcnt0 & (~dcnt1)) : ((~dcnt0) & (~dcnt1));
-   
-always @(posedge FCLK or negedge rstn_dsel) 
+
+always @(posedge FCLK or negedge rstn_dsel)
 begin
     if (!rstn_dsel) begin
         d_up0 <= 1'b0;
@@ -3461,7 +3461,7 @@ begin
     end
 end
 
-always @(posedge FCLK or negedge rstn_dsel) 
+always @(posedge FCLK or negedge rstn_dsel)
 begin
     if (!rstn_dsel) begin
         d_up1 <= 1'b0;
@@ -3475,7 +3475,7 @@ begin
 end
 
 always @(posedge FCLK or negedge grstn or negedge lrstn)
-begin 
+begin
     if (!grstn) begin
         Dd2 <= 8'b0;
         Ttx2 <= 4'b0;
@@ -3494,7 +3494,7 @@ begin
 end
 
 always @(posedge FCLK or negedge grstn or negedge lrstn)
-begin 
+begin
     if (!grstn) begin
         Dd3 <= 8'b0;
         Ttx3 <= 4'b0;
@@ -3615,14 +3615,14 @@ begin
         rstn_dsel0 <= 1'b0;
     end
     else if (!lrstn) begin
-        rstn_dsel0 <= 1'b0;        
+        rstn_dsel0 <= 1'b0;
     end
     else begin
         rstn_dsel0 <= 1'b1;
     end
 end
 
-always @(posedge FCLK or negedge rstn_dsel0) 
+always @(posedge FCLK or negedge rstn_dsel0)
 begin
     if (!rstn_dsel0) begin
         dcnt0 <= 1'b0;
@@ -3635,7 +3635,7 @@ end
 
 assign d_en0 = dcnt0 & (~dcnt1);
 
-always @(posedge FCLK or negedge rstn_dsel0) 
+always @(posedge FCLK or negedge rstn_dsel0)
 begin
     if (!rstn_dsel0) begin
         d_up0 <= 1'b0;
@@ -3654,14 +3654,14 @@ begin
         rstn_dsel1 <= 1'b0;
     end
     else if (!lrstn) begin
-        rstn_dsel1 <= 1'b0;        
+        rstn_dsel1 <= 1'b0;
     end
     else begin
         rstn_dsel1 <= 1'b1;
     end
 end
 
-always @(posedge tclk_sig or negedge rstn_dsel1) 
+always @(posedge tclk_sig or negedge rstn_dsel1)
 begin
     if (!rstn_dsel1) begin
         hcnt0 <= 1'b0;
@@ -3674,7 +3674,7 @@ end
 
 assign d_en1 = (HWL == "true") ? (hcnt0 & (~hcnt1)) : ((~hcnt0) & (~hcnt1));
 
-always @(posedge tclk_sig or negedge rstn_dsel1) 
+always @(posedge tclk_sig or negedge rstn_dsel1)
 begin
     if (!rstn_dsel1) begin
         d_up1 <= 1'b0;
@@ -3688,7 +3688,7 @@ begin
 end
 
 always @(posedge FCLK or negedge grstn or negedge lrstn)
-begin 
+begin
     if (!grstn) begin
         Dd2 <= 8'b0;
         Ttx2 <= 4'b0;
@@ -3707,7 +3707,7 @@ begin
 end
 
 always @(posedge tclk_sig or negedge grstn or negedge lrstn)
-begin 
+begin
     if (!grstn) begin
         Dd3 <= 8'b0;
         Ttx3 <= 4'b0;
@@ -3814,7 +3814,7 @@ begin
         rstn_dsel <= 1'b0;
     end
     else if (!lrstn) begin
-        rstn_dsel <= 1'b0;        
+        rstn_dsel <= 1'b0;
     end
     else begin
         rstn_dsel <= 1'b1;
@@ -3962,7 +3962,7 @@ assign #(0.025*delay_data) delay_out = DI;
 assign DO = (delay_data == 0) ? DI : delay_out;
 
 /*assign #0.025 delay_in[0] =  DI;
-generate 
+generate
    genvar i;
     for(i=1;i<128;i=i+1) begin: gen_delay
       assign #0.025 delay_in[i] = delay_in[i-1];
@@ -4088,7 +4088,7 @@ assign LEAD = LEAD_reg;
 assign LAG = LAG_reg;
 //synthesis translate_on
 
-endmodule // IEM 
+endmodule // IEM
 
 // RAM16S1
 module RAM16S1 (DO, DI, AD, WRE, CLK);
@@ -4162,7 +4162,7 @@ parameter INIT_1 = 16'h0000;
 parameter INIT_2 = 16'h0000;
 parameter INIT_3 = 16'h0000;
 
-reg [15:0] mem0; 
+reg [15:0] mem0;
 reg [15:0] mem1;
 reg [15:0] mem2;
 reg [15:0] mem3;
@@ -4171,7 +4171,7 @@ initial begin
 	mem0 = INIT_0;
 	mem1 = INIT_1;
 	mem2 = INIT_2;
-	mem3 = INIT_3;	
+	mem3 = INIT_3;
 end
 
 assign	DO[0] = mem0[AD];
@@ -4431,14 +4431,14 @@ end
 
 assign DO = (READ_MODE == 1'b0)? bp_reg : pl_reg;
 
-assign pce = CE && bs_en;   
+assign pce = CE && bs_en;
 always @ (BLKSEL)
 begin
 	if(BLKSEL == BLK_SEL) begin
 		bs_en = 1;
 	end else begin
 		bs_en = 0;
-	end  	
+	end
 end
 
 always@(awidth,AD,WRE,mc)begin
@@ -4493,14 +4493,14 @@ always @(posedge CLK) begin
 				if(AD[1] == 1'b1)
 					{ram_MEM[addr+15],ram_MEM[addr+14],ram_MEM[addr+13],ram_MEM[addr+12],ram_MEM[addr+11],ram_MEM[addr+10],ram_MEM[addr+9],ram_MEM[addr+8]}<=DI[15:8];
 				if(AD[2] == 1'b1)
-					{ram_MEM[addr+23],ram_MEM[addr+22],ram_MEM[addr+21],ram_MEM[addr+20],ram_MEM[addr+19],ram_MEM[addr+18],ram_MEM[addr+17],ram_MEM[addr+16]} <= DI[23:16];	
+					{ram_MEM[addr+23],ram_MEM[addr+22],ram_MEM[addr+21],ram_MEM[addr+20],ram_MEM[addr+19],ram_MEM[addr+18],ram_MEM[addr+17],ram_MEM[addr+16]} <= DI[23:16];
 				if(AD[3] == 1'b1)
-					{ram_MEM[addr+31],ram_MEM[addr+30],ram_MEM[addr+29],ram_MEM[addr+28],ram_MEM[addr+27],ram_MEM[addr+26],ram_MEM[addr+25],ram_MEM[addr+24]} <= DI[31:24];	
+					{ram_MEM[addr+31],ram_MEM[addr+30],ram_MEM[addr+29],ram_MEM[addr+28],ram_MEM[addr+27],ram_MEM[addr+26],ram_MEM[addr+25],ram_MEM[addr+24]} <= DI[31:24];
 			end
 		    mc <= ~mc;
         end
 	end
-end	
+end
 
 always @ (bp_reg_async or bp_reg_sync or pl_reg_async or pl_reg_sync) begin
     if(RESET_MODE == "ASYNC") begin
@@ -4518,7 +4518,7 @@ always @(posedge CLK or posedge RESET) begin
 		bp_reg_async <= 0;
 	end else begin
 		if (pce) begin
-    	    if(WRE) begin	
+    	    if(WRE) begin
 				if (WRITE_MODE == 2'b01) begin
 					bp_reg_async[BIT_WIDTH-1:0] <= mem_t[BIT_WIDTH-1:0];
                     if(dwidth <= 8) begin
@@ -4534,7 +4534,7 @@ always @(posedge CLK or posedge RESET) begin
 						if(AD[1] == 1'b1)
                             bp_reg_async[15:8] <= DI[15:8];
 						if(AD[2] == 1'b1)
-                            bp_reg_async[23:16] <= DI[23:16];	
+                            bp_reg_async[23:16] <= DI[23:16];
 						if(AD[3] == 1'b1)
                             bp_reg_async[31:24] <= DI[31:24];
 			        end
@@ -4543,36 +4543,36 @@ always @(posedge CLK or posedge RESET) begin
 				if (WRITE_MODE == 2'b10) begin
 					bp_reg_async[BIT_WIDTH-1:0] <= mem_t[BIT_WIDTH-1:0];
 				end
-				
+
 			end else begin // WRE==0, read
 				bp_reg_async[BIT_WIDTH-1:0] <= mem_t[BIT_WIDTH-1:0];
 			end
 		end
 	end
-end	
+end
 
 always @(posedge CLK) begin
 	if (RESET) begin
 		bp_reg_sync <= 0;
 	end else begin
 		if (pce) begin
-    	    if(WRE) begin	
+    	    if(WRE) begin
 				if (WRITE_MODE == 2'b01) begin
 					bp_reg_sync[BIT_WIDTH-1:0] <= mem_t[BIT_WIDTH-1:0];
                     if(dwidth <= 8) begin
-					    bp_reg_sync[BIT_WIDTH-1:0] <= DI[BIT_WIDTH-1:0];                       
+					    bp_reg_sync[BIT_WIDTH-1:0] <= DI[BIT_WIDTH-1:0];
                     end else if(dwidth==16) begin
 						if(AD[0] == 1'b1)
 							bp_reg_sync[7:0] <= DI[7:0];
 						if(AD[1] == 1'b1)
-                            bp_reg_sync[15:8] <= DI[15:8];                        
+                            bp_reg_sync[15:8] <= DI[15:8];
 				    end else if(dwidth==32) begin
 						if(AD[0] == 1'b1)
                             bp_reg_sync[7:0]  <= DI[7:0];
 						if(AD[1] == 1'b1)
                             bp_reg_sync[15:8] <= DI[15:8];
 						if(AD[2] == 1'b1)
-                            bp_reg_sync[23:16] <= DI[23:16];	
+                            bp_reg_sync[23:16] <= DI[23:16];
 						if(AD[3] == 1'b1)
                             bp_reg_sync[31:24] <= DI[31:24];
 			        end
@@ -4581,13 +4581,13 @@ always @(posedge CLK) begin
 				if (WRITE_MODE == 2'b10) begin
 					bp_reg_sync[BIT_WIDTH-1:0] <= mem_t[BIT_WIDTH-1:0];
 				end
-				
+
 			end else begin // WRE==0, read
 				bp_reg_sync[BIT_WIDTH-1:0] <= mem_t[BIT_WIDTH-1:0];
 			end
 		end
 	end
-end	
+end
 
 always @(posedge CLK or posedge RESET) begin
 	if (RESET) begin
@@ -4597,7 +4597,7 @@ always @(posedge CLK or posedge RESET) begin
 			pl_reg_async <= bp_reg;
 		end
 	end
-end	
+end
 
 always @(posedge CLK) begin
 	if (RESET) begin
@@ -4607,7 +4607,7 @@ always @(posedge CLK) begin
 			pl_reg_sync <= bp_reg;
 		end
 	end
-end	
+end
 
 endmodule  // SP: single port 16k Block SRAM
 
@@ -4618,7 +4618,7 @@ parameter WRITE_MODE = 2'b00; // 2'b00: normal mode; 2'b01: write-through mode; 
 parameter BIT_WIDTH = 36; // 9, 18, 36
 parameter BLK_SEL = 3'b000;
 parameter RESET_MODE = "SYNC"; // SYNC, ASYNC
-parameter INIT_RAM_00 = 288'h000000000000000000000000000000000000000000000000000000000000000000000000; 
+parameter INIT_RAM_00 = 288'h000000000000000000000000000000000000000000000000000000000000000000000000;
 parameter INIT_RAM_01 = 288'h000000000000000000000000000000000000000000000000000000000000000000000000;
 parameter INIT_RAM_02 = 288'h000000000000000000000000000000000000000000000000000000000000000000000000;
 parameter INIT_RAM_03 = 288'h000000000000000000000000000000000000000000000000000000000000000000000000;
@@ -4727,14 +4727,14 @@ end
 
 assign DO = (READ_MODE == 1'b0)? bp_reg : pl_reg;
 
-assign pce = CE && bs_en;   
+assign pce = CE && bs_en;
 always @ (BLKSEL)
 begin
 	if(BLKSEL == BLK_SEL) begin
 		bs_en = 1;
 	end else begin
 		bs_en = 0;
-	end  	
+	end
 end
 
 always@(AD,awidth,WRE,mc)begin
@@ -4744,11 +4744,11 @@ always@(AD,awidth,WRE,mc)begin
 	end
 	else if(awidth==10)begin
 		addr[14:0] = AD[13:4]*dwidth;
-		mem_t[17:0] = {ram_MEM[addr+17],ram_MEM[addr+16],ram_MEM[addr+15],ram_MEM[addr+14],ram_MEM[addr+13],ram_MEM[addr+12],ram_MEM[addr+11],ram_MEM[addr+10],ram_MEM[addr+9],ram_MEM[addr+8],ram_MEM[addr+7],ram_MEM[addr+6],ram_MEM[addr+5],ram_MEM[addr+4],ram_MEM[addr+3],ram_MEM[addr+2],ram_MEM[addr+1],ram_MEM[addr]};	
+		mem_t[17:0] = {ram_MEM[addr+17],ram_MEM[addr+16],ram_MEM[addr+15],ram_MEM[addr+14],ram_MEM[addr+13],ram_MEM[addr+12],ram_MEM[addr+11],ram_MEM[addr+10],ram_MEM[addr+9],ram_MEM[addr+8],ram_MEM[addr+7],ram_MEM[addr+6],ram_MEM[addr+5],ram_MEM[addr+4],ram_MEM[addr+3],ram_MEM[addr+2],ram_MEM[addr+1],ram_MEM[addr]};
 	end
 	else if(awidth==9)begin
 		addr[14:0] = AD[13:5]*dwidth;
-		mem_t[35:0]={ram_MEM[addr+35],ram_MEM[addr+34],ram_MEM[addr+33],ram_MEM[addr+32],ram_MEM[addr+31],ram_MEM[addr+30],ram_MEM[addr+29],ram_MEM[addr+28],ram_MEM[addr+27],ram_MEM[addr+26],ram_MEM[addr+25],ram_MEM[addr+24],ram_MEM[addr+23],ram_MEM[addr+22],ram_MEM[addr+21],ram_MEM[addr+20],ram_MEM[addr+19],ram_MEM[addr+18],ram_MEM[addr+17],ram_MEM[addr+16],ram_MEM[addr+15],ram_MEM[addr+14],ram_MEM[addr+13],ram_MEM[addr+12],ram_MEM[addr+11],ram_MEM[addr+10],ram_MEM[addr+9],ram_MEM[addr+8],ram_MEM[addr+7],ram_MEM[addr+6],ram_MEM[addr+5],ram_MEM[addr+4],ram_MEM[addr+3],ram_MEM[addr+2],ram_MEM[addr+1],ram_MEM[addr]};	
+		mem_t[35:0]={ram_MEM[addr+35],ram_MEM[addr+34],ram_MEM[addr+33],ram_MEM[addr+32],ram_MEM[addr+31],ram_MEM[addr+30],ram_MEM[addr+29],ram_MEM[addr+28],ram_MEM[addr+27],ram_MEM[addr+26],ram_MEM[addr+25],ram_MEM[addr+24],ram_MEM[addr+23],ram_MEM[addr+22],ram_MEM[addr+21],ram_MEM[addr+20],ram_MEM[addr+19],ram_MEM[addr+18],ram_MEM[addr+17],ram_MEM[addr+16],ram_MEM[addr+15],ram_MEM[addr+14],ram_MEM[addr+13],ram_MEM[addr+12],ram_MEM[addr+11],ram_MEM[addr+10],ram_MEM[addr+9],ram_MEM[addr+8],ram_MEM[addr+7],ram_MEM[addr+6],ram_MEM[addr+5],ram_MEM[addr+4],ram_MEM[addr+3],ram_MEM[addr+2],ram_MEM[addr+1],ram_MEM[addr]};
 
 	end
 end
@@ -4756,14 +4756,14 @@ end
 // write and read
 always @(posedge CLK) begin
 	if (pce) begin
-		if (WRE) begin		
+		if (WRE) begin
 			if (dwidth == 9)
 				{ram_MEM [addr+8],ram_MEM [addr+7], ram_MEM [addr+6], ram_MEM [addr+5], ram_MEM [addr+4], ram_MEM [addr+3], ram_MEM [addr+2], ram_MEM [addr+1], ram_MEM [addr]} <= DI[8:0];
 			else if(dwidth == 18) begin
 				if(AD[0] == 1'b1)
 					{ram_MEM [addr+8],ram_MEM [addr+7], ram_MEM [addr+6], ram_MEM [addr+5], ram_MEM [addr+4], ram_MEM [addr+3], ram_MEM [addr+2], ram_MEM [addr+1], ram_MEM [addr]} <= DI[8:0];
 				if(AD[1] == 1'b1)
-					{ram_MEM [addr+17],ram_MEM [addr+16], ram_MEM [addr+15], ram_MEM [addr+14], ram_MEM [addr+13], ram_MEM [addr+12], ram_MEM [addr+11], ram_MEM [addr+10], ram_MEM [addr+9]} <= DI[17:9];					
+					{ram_MEM [addr+17],ram_MEM [addr+16], ram_MEM [addr+15], ram_MEM [addr+14], ram_MEM [addr+13], ram_MEM [addr+12], ram_MEM [addr+11], ram_MEM [addr+10], ram_MEM [addr+9]} <= DI[17:9];
 			end
 			else if(dwidth == 36) begin
 				if(AD[0] == 1'b1)
@@ -4800,19 +4800,19 @@ always @(posedge CLK or posedge RESET) begin
 				if (WRITE_MODE == 2'b01) begin
 					bp_reg_async[BIT_WIDTH-1:0] <= mem_t[BIT_WIDTH-1:0];
                     if(dwidth == 9) begin
-					    bp_reg_async[BIT_WIDTH-1:0] <= DI[BIT_WIDTH-1:0];                       
+					    bp_reg_async[BIT_WIDTH-1:0] <= DI[BIT_WIDTH-1:0];
                     end else if(dwidth==18) begin
 						if(AD[0] == 1'b1)
 							bp_reg_async[8:0] <= DI[8:0];
 						if(AD[1] == 1'b1)
-                            bp_reg_async[17:9] <= DI[17:9];                        
+                            bp_reg_async[17:9] <= DI[17:9];
 				    end else if(dwidth==36) begin
 						if(AD[0] == 1'b1)
                             bp_reg_async[8:0]  <= DI[8:0];
 						if(AD[1] == 1'b1)
                             bp_reg_async[17:9] <= DI[17:9];
 						if(AD[2] == 1'b1)
-                            bp_reg_async[26:18] <= DI[26:18];	
+                            bp_reg_async[26:18] <= DI[26:18];
 						if(AD[3] == 1'b1)
                             bp_reg_async[35:27] <= DI[35:27];
 			        end
@@ -4820,8 +4820,8 @@ always @(posedge CLK or posedge RESET) begin
 				end
 				if (WRITE_MODE == 2'b10) begin
 					bp_reg_async[BIT_WIDTH-1:0] <= mem_t[BIT_WIDTH-1:0];
-				end				
-	
+				end
+
 			end else begin // WRE==0, read
 				bp_reg_async[BIT_WIDTH-1:0] <= mem_t[BIT_WIDTH-1:0];
 			end
@@ -4838,19 +4838,19 @@ always @(posedge CLK) begin
 				if (WRITE_MODE == 2'b01) begin
 					bp_reg_sync[BIT_WIDTH-1:0] <= mem_t[BIT_WIDTH-1:0];
                     if(dwidth == 9) begin
-					    bp_reg_sync[BIT_WIDTH-1:0] <= DI[BIT_WIDTH-1:0];                       
+					    bp_reg_sync[BIT_WIDTH-1:0] <= DI[BIT_WIDTH-1:0];
                     end else if(dwidth==18) begin
 						if(AD[0] == 1'b1)
 							bp_reg_sync[8:0] <= DI[8:0];
 						if(AD[1] == 1'b1)
-                            bp_reg_sync[17:9] <= DI[17:9];                        
+                            bp_reg_sync[17:9] <= DI[17:9];
 				    end else if(dwidth==36) begin
 						if(AD[0] == 1'b1)
                             bp_reg_sync[8:0]  <= DI[8:0];
 						if(AD[1] == 1'b1)
                             bp_reg_sync[17:9] <= DI[17:9];
 						if(AD[2] == 1'b1)
-                            bp_reg_sync[26:18] <= DI[26:18];	
+                            bp_reg_sync[26:18] <= DI[26:18];
 						if(AD[3] == 1'b1)
                             bp_reg_sync[35:27] <= DI[35:27];
 			        end
@@ -4858,8 +4858,8 @@ always @(posedge CLK) begin
 				end
 				if (WRITE_MODE == 2'b10) begin
 					bp_reg_sync[BIT_WIDTH-1:0] <= mem_t[BIT_WIDTH-1:0];
-				end				
-	
+				end
+
 			end else begin // WRE==0, read
 				bp_reg_sync[BIT_WIDTH-1:0] <= mem_t[BIT_WIDTH-1:0];
 			end
@@ -5025,7 +5025,7 @@ end
 
 assign DO = (READ_MODE == 1'b0)? bp_reg: pl_reg;
 
-assign pcea = CEA && bs_en;   
+assign pcea = CEA && bs_en;
 assign pceb = CEB && bs_en;
 always @ (BLKSEL)
 begin
@@ -5033,7 +5033,7 @@ begin
 		bs_en = 1;
 	end else begin
 		bs_en = 0;
-	end  	
+	end
 end
 
 always@(ADA,ADB,bit_width_a0,bit_width_a1,WREA,WREB,mc)begin
@@ -5169,7 +5169,7 @@ parameter BIT_WIDTH_0 = 36; // 9, 18, 36
 parameter BIT_WIDTH_1 = 36; // 9, 18, 36
 parameter BLK_SEL = 3'b000;
 parameter RESET_MODE = "SYNC"; //SYNC,ASYNC
-parameter INIT_RAM_00 = 288'h000000000000000000000000000000000000000000000000000000000000000000000000; 
+parameter INIT_RAM_00 = 288'h000000000000000000000000000000000000000000000000000000000000000000000000;
 parameter INIT_RAM_01 = 288'h000000000000000000000000000000000000000000000000000000000000000000000000;
 parameter INIT_RAM_02 = 288'h000000000000000000000000000000000000000000000000000000000000000000000000;
 parameter INIT_RAM_03 = 288'h000000000000000000000000000000000000000000000000000000000000000000000000;
@@ -5288,7 +5288,7 @@ end
 
 assign DO = (READ_MODE == 1'b0)? bp_reg: pl_reg;
 
-assign pcea = CEA && bs_en;   
+assign pcea = CEA && bs_en;
 assign pceb = CEB && bs_en;
 always @ (BLKSEL)
 begin
@@ -5296,7 +5296,7 @@ begin
 		bs_en = 1;
 	end else begin
 		bs_en = 0;
-	end  	
+	end
 end
 
 always@(ADA,ADB,bit_width_a0,bit_width_a1,WREA,WREB,mc)begin
@@ -5327,7 +5327,7 @@ always@(ADA,ADB,bit_width_a0,bit_width_a1,WREA,WREB,mc)begin
 	end
 end
 
-always @(posedge CLKA) begin		
+always @(posedge CLKA) begin
 	if (pcea) begin
 		if (WREA) begin
 			if(bit_width_d0 == 9) begin
@@ -5351,7 +5351,7 @@ always @(posedge CLKA) begin
 			mc <= ~mc;
 		end
 	end
-end	
+end
 
 always @ (bp_reg_async or bp_reg_sync or pl_reg_async or pl_reg_sync) begin
     if(RESET_MODE == "ASYNC") begin
@@ -5535,7 +5535,7 @@ end
 assign DOA = (READ_MODE0 == 1'b0)? bpa_reg : pla_reg;
 assign DOB = (READ_MODE1 == 1'b0)? bpb_reg : plb_reg;
 
-assign pcea = CEA && bs_en;   
+assign pcea = CEA && bs_en;
 assign pceb = CEB && bs_en;
 always @ (BLKSEL)
 begin
@@ -5543,7 +5543,7 @@ begin
 		bs_en = 1;
 	end else begin
 		bs_en = 0;
-	end  	
+	end
 end
 
 always@(ADA,ADB,bit_width_a0,bit_width_a1,WREA,WREB,mc)begin
@@ -5622,9 +5622,9 @@ always @(posedge CLKA) begin
 					{ram_MEM[addr_a+15],ram_MEM[addr_a+14],ram_MEM[addr_a+13],ram_MEM[addr_a+12],ram_MEM[addr_a+11],ram_MEM[addr_a+10],ram_MEM[addr_a+9],ram_MEM[addr_a+8]} <= DIA[15:8];
 			end
 			mc <= ~mc;
-		end 
+		end
 	end
-end	
+end
 
 always @(posedge CLKA or posedge RESETA) begin
 	if (RESETA) begin
@@ -5651,14 +5651,14 @@ always @(posedge CLKA or posedge RESETA) begin
 				if (WRITE_MODE0 == 2'b10) begin
 					bpa_reg_async[BIT_WIDTH_0-1:0] <= mem_a[BIT_WIDTH_0-1:0];
 				end
-				
-			end 
+
+			end
 			else begin // WREA==0, read
 				bpa_reg_async[BIT_WIDTH_0-1:0] <= mem_a[BIT_WIDTH_0-1:0];
 			end
 		end
 	end
-end	
+end
 
 always @(posedge CLKA) begin
 	if (RESETA) begin
@@ -5685,8 +5685,8 @@ always @(posedge CLKA) begin
 				if (WRITE_MODE0 == 2'b10) begin
 					bpa_reg_sync[BIT_WIDTH_0-1:0] <= mem_a[BIT_WIDTH_0-1:0];
 				end
-				
-			end 
+
+			end
 			else begin // WREA==0, read
 				bpa_reg_sync[BIT_WIDTH_0-1:0] <= mem_a[BIT_WIDTH_0-1:0];
 			end
@@ -5712,7 +5712,7 @@ always @(posedge CLKB) begin
 					{ram_MEM[addr_b+15],ram_MEM[addr_b+14],ram_MEM[addr_b+13],ram_MEM[addr_b+12],ram_MEM[addr_b+11],ram_MEM[addr_b+10],ram_MEM[addr_b+9],ram_MEM[addr_b+8]} <= DIB[15:8];
 			end
 			mc <= ~mc;
-		end 
+		end
     end
 end
 
@@ -5747,7 +5747,7 @@ always @(posedge CLKB or posedge RESETB) begin
 			end
 		end
 	end
-end	
+end
 
 always @(posedge CLKB) begin
 	if (RESETB) begin
@@ -5794,7 +5794,7 @@ parameter BIT_WIDTH_0 = 18; // 9, 18
 parameter BIT_WIDTH_1 = 18; // 9, 18
 parameter BLK_SEL = 3'b000;
 parameter RESET_MODE = "SYNC"; //SYNC,ASYNC
-parameter INIT_RAM_00 = 288'h000000000000000000000000000000000000000000000000000000000000000000000000; 
+parameter INIT_RAM_00 = 288'h000000000000000000000000000000000000000000000000000000000000000000000000;
 parameter INIT_RAM_01 = 288'h000000000000000000000000000000000000000000000000000000000000000000000000;
 parameter INIT_RAM_02 = 288'h000000000000000000000000000000000000000000000000000000000000000000000000;
 parameter INIT_RAM_03 = 288'h000000000000000000000000000000000000000000000000000000000000000000000000;
@@ -5937,7 +5937,7 @@ always@(ADA, ADB, bit_width_a0, bit_width_a1,WREA, WREB,mc)begin
 		addr_a[14:0] = ADA[13:4]*bit_width_d0;
 		mem_a[17:0]={ram_MEM[addr_a+17],ram_MEM[addr_a+16],ram_MEM[addr_a+15],ram_MEM[addr_a+14],ram_MEM[addr_a+13],ram_MEM[addr_a+12],ram_MEM[addr_a+11],ram_MEM[addr_a+10],ram_MEM[addr_a+9],ram_MEM[addr_a+8],ram_MEM[addr_a+7],ram_MEM[addr_a+6],ram_MEM[addr_a+5],ram_MEM[addr_a+4],ram_MEM[addr_a+3],ram_MEM[addr_a+2],ram_MEM[addr_a+1],ram_MEM[addr_a]};
 	end
-	
+
 	if(bit_width_a1==11)begin
 		addr_b[14:0] = ADB[13:3]*bit_width_d1;
 		mem_b[8:0]={ram_MEM[addr_b+8],ram_MEM[addr_b+7],ram_MEM[addr_b+6],ram_MEM[addr_b+5],ram_MEM[addr_b+4],ram_MEM[addr_b+3],ram_MEM[addr_b+2],ram_MEM[addr_b+1],ram_MEM[addr_b]};
@@ -6017,7 +6017,7 @@ always @(posedge CLKA) begin
 	if (RESETA) begin
 		pla_reg_sync <= 0;
 		bpa_reg_sync <= 0;
-	end else begin	
+	end else begin
 		if(OCEA) begin
 			pla_reg_sync <= bpa_reg;
 		end
@@ -6231,22 +6231,22 @@ end
 
 initial begin
 	case(dwidth)
-		1: begin 
-			awidth = 14;			
+		1: begin
+			awidth = 14;
 		   end
-		2: begin 
-			awidth = 13;			
+		2: begin
+			awidth = 13;
 		   end
-		4: begin 
-			awidth = 12;			
+		4: begin
+			awidth = 12;
 		   end
-		8: begin 
-			awidth = 11; 			
+		8: begin
+			awidth = 11;
 		   end
-		16: begin 
+		16: begin
 			awidth = 10;
 		   end
-		32: begin 
+		32: begin
 			awidth = 9;
 		   end
 		default: begin
@@ -6317,7 +6317,7 @@ always @(posedge CLK or posedge RESET) begin
 			bp_reg_async[BIT_WIDTH-1:0] <= mem_t[BIT_WIDTH-1:0];
 		end
 	end
-end	
+end
 
 always @(posedge CLK) begin
 	if (RESET) begin
@@ -6331,7 +6331,7 @@ always @(posedge CLK) begin
 			bp_reg_sync[BIT_WIDTH-1:0] <= mem_t[BIT_WIDTH-1:0];
 		end
 	end
-end	
+end
 
 endmodule // ROM: 16k Block ROM
 
@@ -6341,7 +6341,7 @@ parameter READ_MODE = 1'b0; // 1'b0: bypass mode; 1'b1: pipeline mode
 parameter BIT_WIDTH = 36; // 9, 18, 36
 parameter BLK_SEL = 3'b000;
 parameter RESET_MODE = "SYNC"; //SYNC,ASYNC
-parameter INIT_RAM_00 = 288'h000000000000000000000000000000000000000000000000000000000000000000000000; 
+parameter INIT_RAM_00 = 288'h000000000000000000000000000000000000000000000000000000000000000000000000;
 parameter INIT_RAM_01 = 288'h000000000000000000000000000000000000000000000000000000000000000000000000;
 parameter INIT_RAM_02 = 288'h000000000000000000000000000000000000000000000000000000000000000000000000;
 parameter INIT_RAM_03 = 288'h000000000000000000000000000000000000000000000000000000000000000000000000;
@@ -6435,11 +6435,11 @@ end
 
 initial begin
 	case(dwidth)
-		9: begin awidth = 11; 
+		9: begin awidth = 11;
 		   end
-		18: begin awidth = 10; 
+		18: begin awidth = 10;
 			end
-		36: begin awidth = 9; 
+		36: begin awidth = 9;
 		    end
 		default: begin
 		//	$display ("%d: Unsupported data width\n", dwidth);
@@ -6448,7 +6448,7 @@ initial begin
 	endcase
 end
 
-always@(AD,awidth,WRE)begin	
+always@(AD,awidth,WRE)begin
 	if(awidth==11)begin
 		addr[14:0] = AD[13:3]*dwidth;
 		mem_t[8:0] = {ram_MEM[addr+8],ram_MEM[addr+7],ram_MEM[addr+6],ram_MEM[addr+5],ram_MEM[addr+4],ram_MEM[addr+3],ram_MEM[addr+2],ram_MEM[addr+1],ram_MEM[addr]};
@@ -6512,7 +6512,7 @@ always @(posedge CLK) begin
 			bp_reg_sync[BIT_WIDTH-1:0] <= mem_t[BIT_WIDTH-1:0];
 		end
 	end
-end	
+end
 
 endmodule // ROMX9: 18k Block ROM
 
@@ -6650,7 +6650,7 @@ end
 
 assign DO = (READ_MODE == 1'b0)? bp_reg: pl_reg;
 
-assign pcea = CEA && bs_en;   
+assign pcea = CEA && bs_en;
 assign pceb = CEB && bs_en;
 always @ (BLKSEL)
 begin
@@ -6658,7 +6658,7 @@ begin
 		bs_en = 1;
 	end else begin
 		bs_en = 0;
-	end  	
+	end
 end
 
 always@(ADA,ADB,bit_width_a0,bit_width_a1,mc)begin
@@ -6793,7 +6793,7 @@ parameter BIT_WIDTH_0 = 36; // 9, 18, 36
 parameter BIT_WIDTH_1 = 36; // 9, 18, 36
 parameter BLK_SEL = 3'b000;
 parameter RESET_MODE = "SYNC"; //SYNC,ASYNC
-parameter INIT_RAM_00 = 288'h000000000000000000000000000000000000000000000000000000000000000000000000; 
+parameter INIT_RAM_00 = 288'h000000000000000000000000000000000000000000000000000000000000000000000000;
 parameter INIT_RAM_01 = 288'h000000000000000000000000000000000000000000000000000000000000000000000000;
 parameter INIT_RAM_02 = 288'h000000000000000000000000000000000000000000000000000000000000000000000000;
 parameter INIT_RAM_03 = 288'h000000000000000000000000000000000000000000000000000000000000000000000000;
@@ -6911,7 +6911,7 @@ end
 
 assign DO = (READ_MODE == 1'b0)? bp_reg: pl_reg;
 
-assign pcea = CEA && bs_en;   
+assign pcea = CEA && bs_en;
 assign pceb = CEB && bs_en;
 always @ (BLKSEL)
 begin
@@ -6919,7 +6919,7 @@ begin
 		bs_en = 1;
 	end else begin
 		bs_en = 0;
-	end  	
+	end
 end
 
 always@(ADA,ADB,bit_width_a0,bit_width_a1,mc)begin
@@ -6950,7 +6950,7 @@ always@(ADA,ADB,bit_width_a0,bit_width_a1,mc)begin
 	end
 end
 
-always @(posedge CLKA) begin		
+always @(posedge CLKA) begin
 	if (pcea) begin
 		if(bit_width_d0 == 9) begin
 			{ram_MEM [addr_a+8],ram_MEM [addr_a+7], ram_MEM [addr_a+6], ram_MEM [addr_a+5], ram_MEM [addr_a+4], ram_MEM [addr_a+3], ram_MEM [addr_a+2], ram_MEM [addr_a+1], ram_MEM [addr_a]} <= DI[8:0];
@@ -6972,7 +6972,7 @@ always @(posedge CLKA) begin
 		end
 		mc <= ~mc;
 	end
-end	
+end
 
 always @ (bp_reg_async or bp_reg_sync or pl_reg_async or pl_reg_sync) begin
     if(RESET_MODE == "ASYNC") begin
@@ -7114,22 +7114,22 @@ end
 
 initial begin
 	case(dwidth)
-		1: begin 
-			awidth = 14;			
+		1: begin
+			awidth = 14;
 		   end
-		2: begin 
-			awidth = 13;			
+		2: begin
+			awidth = 13;
 		   end
-		4: begin 
-			awidth = 12;			
+		4: begin
+			awidth = 12;
 		   end
-		8: begin 
-			awidth = 11; 			
+		8: begin
+			awidth = 11;
 		   end
-		16: begin 
+		16: begin
 			awidth = 10;
 		   end
-		32: begin 
+		32: begin
 			awidth = 9;
 		   end
 		default: begin
@@ -7200,7 +7200,7 @@ always @(posedge CLK or posedge RESET) begin
 			bp_reg_async[BIT_WIDTH-1:0] <= mem_t[BIT_WIDTH-1:0];
 		end
 	end
-end	
+end
 
 always @(posedge CLK) begin
 	if (RESET) begin
@@ -7214,7 +7214,7 @@ always @(posedge CLK) begin
 			bp_reg_sync[BIT_WIDTH-1:0] <= mem_t[BIT_WIDTH-1:0];
 		end
 	end
-end	
+end
 
 endmodule // rROM: revision 16k Block ROM
 
@@ -7225,7 +7225,7 @@ parameter READ_MODE = 1'b0; // 1'b0: bypass mode; 1'b1: pipeline mode
 parameter BIT_WIDTH = 36; // 9, 18, 36
 parameter BLK_SEL = 3'b000;
 parameter RESET_MODE = "SYNC"; //SYNC,ASYNC
-parameter INIT_RAM_00 = 288'h000000000000000000000000000000000000000000000000000000000000000000000000; 
+parameter INIT_RAM_00 = 288'h000000000000000000000000000000000000000000000000000000000000000000000000;
 parameter INIT_RAM_01 = 288'h000000000000000000000000000000000000000000000000000000000000000000000000;
 parameter INIT_RAM_02 = 288'h000000000000000000000000000000000000000000000000000000000000000000000000;
 parameter INIT_RAM_03 = 288'h000000000000000000000000000000000000000000000000000000000000000000000000;
@@ -7318,11 +7318,11 @@ end
 
 initial begin
 	case(dwidth)
-		9: begin awidth = 11; 
+		9: begin awidth = 11;
 		   end
-		18: begin awidth = 10; 
+		18: begin awidth = 10;
 			end
-		36: begin awidth = 9; 
+		36: begin awidth = 9;
 		    end
 		default: begin
 		//	$display ("%d: Unsupported data width\n", dwidth);
@@ -7331,7 +7331,7 @@ initial begin
 	endcase
 end
 
-always@(AD,awidth)begin	
+always@(AD,awidth)begin
 	if(awidth==11)begin
 		addr[14:0] = AD[13:3]*dwidth;
 		mem_t[8:0] = {ram_MEM[addr+8],ram_MEM[addr+7],ram_MEM[addr+6],ram_MEM[addr+5],ram_MEM[addr+4],ram_MEM[addr+3],ram_MEM[addr+2],ram_MEM[addr+1],ram_MEM[addr]};
@@ -7395,7 +7395,7 @@ always @(posedge CLK) begin
 			bp_reg_sync[BIT_WIDTH-1:0] <= mem_t[BIT_WIDTH-1:0];
 		end
 	end
-end	
+end
 
 endmodule // rROMX9: revision 18k Block ROM
 
@@ -7494,22 +7494,22 @@ end
 
 initial begin
 	case(dwidth)
-		1: begin 
-			awidth = 14;			
+		1: begin
+			awidth = 14;
 		   end
-		2: begin 
-			awidth = 13;			
+		2: begin
+			awidth = 13;
 		   end
-		4: begin 
-			awidth = 12;			
+		4: begin
+			awidth = 12;
 		   end
-		8: begin 
-			awidth = 11; 			
+		8: begin
+			awidth = 11;
 		   end
-		16: begin 
+		16: begin
 			awidth = 10;
 		   end
-		32: begin 
+		32: begin
 			awidth = 9;
 		   end
 		default: begin
@@ -7571,7 +7571,7 @@ always @(posedge CLK or posedge RESET) begin
 			bp_reg_async[BIT_WIDTH-1:0] <= mem_t[BIT_WIDTH-1:0];
 		end
 	end
-end	
+end
 
 always @(posedge CLK) begin
 	if (RESET) begin
@@ -7595,7 +7595,7 @@ module pROMX9 (DO, AD, CLK, CE, OCE, RESET);
 parameter READ_MODE = 1'b0; // 1'b0: bypass mode; 1'b1: pipeline mode
 parameter BIT_WIDTH = 36; // 9, 18, 36
 parameter RESET_MODE = "SYNC"; //SYNC,ASYNC
-parameter INIT_RAM_00 = 288'h000000000000000000000000000000000000000000000000000000000000000000000000; 
+parameter INIT_RAM_00 = 288'h000000000000000000000000000000000000000000000000000000000000000000000000;
 parameter INIT_RAM_01 = 288'h000000000000000000000000000000000000000000000000000000000000000000000000;
 parameter INIT_RAM_02 = 288'h000000000000000000000000000000000000000000000000000000000000000000000000;
 parameter INIT_RAM_03 = 288'h000000000000000000000000000000000000000000000000000000000000000000000000;
@@ -7685,11 +7685,11 @@ end
 
 initial begin
 	case(dwidth)
-		9: begin awidth = 11; 
+		9: begin awidth = 11;
 		   end
-		18: begin awidth = 10; 
+		18: begin awidth = 10;
 			end
-		36: begin awidth = 9; 
+		36: begin awidth = 9;
 		    end
 		default: begin
 		//	$display ("%d: Unsupported data width\n", dwidth);
@@ -7698,7 +7698,7 @@ initial begin
 	endcase
 end
 
-always@(AD,awidth)begin	
+always@(AD,awidth)begin
 	if(awidth==11)begin
 		addr[14:0] = AD[13:3]*dwidth;
 		mem_t[8:0] = {ram_MEM[addr+8],ram_MEM[addr+7],ram_MEM[addr+6],ram_MEM[addr+5],ram_MEM[addr+4],ram_MEM[addr+3],ram_MEM[addr+2],ram_MEM[addr+1],ram_MEM[addr]};
@@ -7753,7 +7753,7 @@ always @(posedge CLK) begin
 			bp_reg_sync[BIT_WIDTH-1:0] <= mem_t[BIT_WIDTH-1:0];
 		end
 	end
-end	
+end
 
 endmodule //pROMX9
 
@@ -7892,7 +7892,7 @@ end
 
 assign DO = (READ_MODE == 1'b0)? bp_reg: pl_reg;
 
-assign pcea = CEA && bs_ena;   
+assign pcea = CEA && bs_ena;
 assign pceb = CEB && bs_enb;
 
 always @ (BLKSELA, BLKSELB)
@@ -8043,7 +8043,7 @@ parameter BIT_WIDTH_1 = 36; // 9, 18, 36
 parameter BLK_SEL_0 = 3'b000;
 parameter BLK_SEL_1 = 3'b000;
 parameter RESET_MODE = "SYNC"; //SYNC,ASYNC
-parameter INIT_RAM_00 = 288'h000000000000000000000000000000000000000000000000000000000000000000000000; 
+parameter INIT_RAM_00 = 288'h000000000000000000000000000000000000000000000000000000000000000000000000;
 parameter INIT_RAM_01 = 288'h000000000000000000000000000000000000000000000000000000000000000000000000;
 parameter INIT_RAM_02 = 288'h000000000000000000000000000000000000000000000000000000000000000000000000;
 parameter INIT_RAM_03 = 288'h000000000000000000000000000000000000000000000000000000000000000000000000;
@@ -8161,7 +8161,7 @@ end
 
 assign DO = (READ_MODE == 1'b0)? bp_reg: pl_reg;
 
-assign pcea = CEA && bs_ena;   
+assign pcea = CEA && bs_ena;
 assign pceb = CEB && bs_enb;
 always @ (BLKSELA, BLKSELB)
 begin
@@ -8206,7 +8206,7 @@ always@(ADA,ADB,bit_width_a0,bit_width_a1,mc)begin
 	end
 end
 
-always @(posedge CLKA) begin		
+always @(posedge CLKA) begin
 	if (pcea) begin
 		if(bit_width_d0 == 9) begin
 			{ram_MEM [addr_a+8],ram_MEM [addr_a+7], ram_MEM [addr_a+6], ram_MEM [addr_a+5], ram_MEM [addr_a+4], ram_MEM [addr_a+3], ram_MEM [addr_a+2], ram_MEM [addr_a+1], ram_MEM [addr_a]} <= DI[8:0];
@@ -8228,7 +8228,7 @@ always @(posedge CLKA) begin
 		end
 		mc <= ~mc;
 	end
-end	
+end
 
 always @ (bp_reg_async or bp_reg_sync or pl_reg_async or pl_reg_sync) begin
     if(RESET_MODE == "ASYNC") begin
@@ -8413,7 +8413,7 @@ end
 assign DOA = (READ_MODE0 == 1'b0)? bpa_reg : pla_reg;
 assign DOB = (READ_MODE1 == 1'b0)? bpb_reg : plb_reg;
 
-assign pcea = CEA && bs_ena;   
+assign pcea = CEA && bs_ena;
 assign pceb = CEB && bs_enb;
 always @ (BLKSELA, BLKSELB)
 begin
@@ -8507,9 +8507,9 @@ always @(posedge CLKA) begin
 					{ram_MEM[addr_a+15],ram_MEM[addr_a+14],ram_MEM[addr_a+13],ram_MEM[addr_a+12],ram_MEM[addr_a+11],ram_MEM[addr_a+10],ram_MEM[addr_a+9],ram_MEM[addr_a+8]} <= DIA[15:8];
 			end
 			mc <= ~mc;
-		end 
+		end
 	end
-end	
+end
 
 always @(posedge CLKA or posedge RESETA) begin
 	if (RESETA) begin
@@ -8536,14 +8536,14 @@ always @(posedge CLKA or posedge RESETA) begin
 				if (WRITE_MODE0 == 2'b10) begin
 					bpa_reg_async[BIT_WIDTH_0-1:0] <= mem_a[BIT_WIDTH_0-1:0];
 				end
-				
-			end 
+
+			end
 			else begin // WREA==0, read
 				bpa_reg_async[BIT_WIDTH_0-1:0] <= mem_a[BIT_WIDTH_0-1:0];
 			end
 		end
 	end
-end	
+end
 
 always @(posedge CLKA) begin
 	if (RESETA) begin
@@ -8570,8 +8570,8 @@ always @(posedge CLKA) begin
 				if (WRITE_MODE0 == 2'b10) begin
 					bpa_reg_sync[BIT_WIDTH_0-1:0] <= mem_a[BIT_WIDTH_0-1:0];
 				end
-				
-			end 
+
+			end
 			else begin // WREA==0, read
 				bpa_reg_sync[BIT_WIDTH_0-1:0] <= mem_a[BIT_WIDTH_0-1:0];
 			end
@@ -8597,7 +8597,7 @@ always @(posedge CLKB) begin
 					{ram_MEM[addr_b+15],ram_MEM[addr_b+14],ram_MEM[addr_b+13],ram_MEM[addr_b+12],ram_MEM[addr_b+11],ram_MEM[addr_b+10],ram_MEM[addr_b+9],ram_MEM[addr_b+8]} <= DIB[15:8];
 			end
 			mc <= ~mc;
-		end 
+		end
     end
 end
 
@@ -8632,7 +8632,7 @@ always @(posedge CLKB or posedge RESETB) begin
 			end
 		end
 	end
-end	
+end
 
 always @(posedge CLKB) begin
 	if (RESETB) begin
@@ -8680,7 +8680,7 @@ parameter BIT_WIDTH_1 = 18; // 9, 18
 parameter BLK_SEL_0 = 3'b000;
 parameter BLK_SEL_1 = 3'b000;
 parameter RESET_MODE = "SYNC"; //SYNC,ASYNC
-parameter INIT_RAM_00 = 288'h000000000000000000000000000000000000000000000000000000000000000000000000; 
+parameter INIT_RAM_00 = 288'h000000000000000000000000000000000000000000000000000000000000000000000000;
 parameter INIT_RAM_01 = 288'h000000000000000000000000000000000000000000000000000000000000000000000000;
 parameter INIT_RAM_02 = 288'h000000000000000000000000000000000000000000000000000000000000000000000000;
 parameter INIT_RAM_03 = 288'h000000000000000000000000000000000000000000000000000000000000000000000000;
@@ -8829,7 +8829,7 @@ always@(ADA, ADB, bit_width_a0, bit_width_a1,WREA, WREB,mc)begin
 		addr_a[14:0] = ADA[13:4]*bit_width_d0;
 		mem_a[17:0]={ram_MEM[addr_a+17],ram_MEM[addr_a+16],ram_MEM[addr_a+15],ram_MEM[addr_a+14],ram_MEM[addr_a+13],ram_MEM[addr_a+12],ram_MEM[addr_a+11],ram_MEM[addr_a+10],ram_MEM[addr_a+9],ram_MEM[addr_a+8],ram_MEM[addr_a+7],ram_MEM[addr_a+6],ram_MEM[addr_a+5],ram_MEM[addr_a+4],ram_MEM[addr_a+3],ram_MEM[addr_a+2],ram_MEM[addr_a+1],ram_MEM[addr_a]};
 	end
-	
+
 	if(bit_width_a1==11)begin
 		addr_b[14:0] = ADB[13:3]*bit_width_d1;
 		mem_b[8:0]={ram_MEM[addr_b+8],ram_MEM[addr_b+7],ram_MEM[addr_b+6],ram_MEM[addr_b+5],ram_MEM[addr_b+4],ram_MEM[addr_b+3],ram_MEM[addr_b+2],ram_MEM[addr_b+1],ram_MEM[addr_b]};
@@ -8909,7 +8909,7 @@ always @(posedge CLKA) begin
 	if (RESETA) begin
 		pla_reg_sync <= 0;
 		bpa_reg_sync <= 0;
-	end else begin	
+	end else begin
 		if(OCEA) begin
 			pla_reg_sync <= bpa_reg;
 		end
@@ -9062,7 +9062,7 @@ parameter SOREG = 1'b0;
         end
     end
 
-    always @(SI or A or ASEL)   
+    always @(SI or A or ASEL)
     begin
         if (ASEL == 1'b1) begin
             ina0 = SI;
@@ -9071,7 +9071,7 @@ parameter SOREG = 1'b0;
         end
     end
 
-    always @(B or SBI)         
+    always @(B or SBI)
     begin
         if (BSEL_MODE == 1'b1) begin
             inb0 = SBI;
@@ -9084,8 +9084,8 @@ parameter SOREG = 1'b0;
     always @(posedge CLK or posedge RESET or negedge grstn)
     begin
         if (!grstn) begin
-            ina0_reg_async <= 0; 
-            ina1_reg_async <= 0; 
+            ina0_reg_async <= 0;
+            ina1_reg_async <= 0;
         end else if (RESET == 1'b1) begin
             ina0_reg_async <= 0;
             ina1_reg_async <= 0;
@@ -9099,8 +9099,8 @@ parameter SOREG = 1'b0;
     always @(posedge CLK or negedge grstn)
     begin
         if (!grstn) begin
-            ina0_reg_sync <= 0; 
-            ina1_reg_sync <= 0; 
+            ina0_reg_sync <= 0;
+            ina1_reg_sync <= 0;
         end else if (RESET == 1'b1) begin
             ina0_reg_sync <= 0;
             ina1_reg_sync <= 0;
@@ -9114,7 +9114,7 @@ parameter SOREG = 1'b0;
     always @(posedge CLK or posedge RESET or negedge grstn)
     begin
         if (!grstn) begin
-            inb_reg_async <= 0; 
+            inb_reg_async <= 0;
         end else if (RESET == 1'b1) begin
             inb_reg_async <= 0;
         end
@@ -9126,7 +9126,7 @@ parameter SOREG = 1'b0;
     always @(posedge CLK or negedge grstn)
     begin
         if (!grstn) begin
-            inb_reg_sync <= 0; 
+            inb_reg_sync <= 0;
         end else if (RESET == 1'b1) begin
             inb_reg_sync <= 0;
         end
@@ -9168,7 +9168,7 @@ parameter SOREG = 1'b0;
     end
 
     assign SBO = inb;
-   
+
     assign DOUT = (ADD_SUB == 1'b1) ? (ina1 - inb) : (ina1 + inb);
 
 endmodule
@@ -9185,7 +9185,7 @@ output [8:0] SO,SBO;
 output [8:0] DOUT;
 
 parameter AREG = 1'b0; // 1'b0: bypass mode; 1'b1: registered mode
-parameter BREG = 1'b0; 
+parameter BREG = 1'b0;
 parameter ADD_SUB = 1'b0; //1'b0:add; 1'b1:sub
 parameter PADD_RESET_MODE = "SYNC"; // SYNC, ASYNC
 parameter BSEL_MODE = 1'b1; // 1'b1: shift, 1'b0: parallel input B.
@@ -9201,7 +9201,7 @@ parameter SOREG = 1'b0;
             ina0_reg <= ina0_reg_async;
             ina1_reg <= ina1_reg_async;
             inb_reg <= inb_reg_async;
-        end 
+        end
         else if (PADD_RESET_MODE == "SYNC") begin
             ina0_reg <= ina0_reg_sync;
             ina1_reg <= ina1_reg_sync;
@@ -9209,7 +9209,7 @@ parameter SOREG = 1'b0;
         end
     end
 
-    always @(SI or A or ASEL)   
+    always @(SI or A or ASEL)
     begin
         if (ASEL == 1'b1) begin
             ina0 = SI;
@@ -9218,7 +9218,7 @@ parameter SOREG = 1'b0;
         end
     end
 
-    always @(B or SBI)         
+    always @(B or SBI)
     begin
         if (BSEL_MODE == 1'b1) begin
             inb0 = SBI;
@@ -9231,8 +9231,8 @@ parameter SOREG = 1'b0;
     always @(posedge CLK or posedge RESET or negedge grstn)
     begin
         if (!grstn) begin
-            ina0_reg_async <= 0; 
-            ina1_reg_async <= 0; 
+            ina0_reg_async <= 0;
+            ina1_reg_async <= 0;
         end else if (RESET == 1'b1) begin
             ina0_reg_async <= 0;
             ina1_reg_async <= 0;
@@ -9257,11 +9257,11 @@ parameter SOREG = 1'b0;
             ina1_reg_sync <= ina1;
         end
     end
-    
+
     always @(posedge CLK or posedge RESET or negedge grstn)
     begin
         if (!grstn) begin
-            inb_reg_async <= 0; 
+            inb_reg_async <= 0;
         end else if (RESET == 1'b1) begin
             inb_reg_async <= 0;
         end
@@ -9352,7 +9352,7 @@ parameter MULT_RESET_MODE = "SYNC"; // SYNC, ASYNC
 
     reg [17:0] out0,out1,out,out0_async,out0_sync,out_async,out_sync,d_out;
     wire [17:0] mult_out;
-    
+
     initial begin
         d_out = 0;
     end
@@ -9369,7 +9369,7 @@ parameter MULT_RESET_MODE = "SYNC"; // SYNC, ASYNC
             bsign_reg0 <= bsign_reg0_async;
             out0 <= out0_async;
             out <= out_async;
-        end 
+        end
         else if (MULT_RESET_MODE == "SYNC")
         begin
             ina_reg <= ina_reg_sync;
@@ -9399,7 +9399,7 @@ parameter MULT_RESET_MODE = "SYNC"; // SYNC, ASYNC
             b_in = SIB;
         end
     end
-           
+
     // input reg
     always @(posedge CLK or posedge RESET or negedge grstn)
     begin
@@ -9422,7 +9422,7 @@ parameter MULT_RESET_MODE = "SYNC"; // SYNC, ASYNC
     begin
         if (!grstn) begin
             ina_reg_sync <= 0;
-            ina1_reg_sync <= 0; 
+            ina1_reg_sync <= 0;
         end else if (RESET == 1'b1)
         begin
             ina_reg_sync <= 0;
@@ -9433,12 +9433,12 @@ parameter MULT_RESET_MODE = "SYNC"; // SYNC, ASYNC
             ina_reg_sync <= a_in;
             ina1_reg_sync <= ina;
         end
-    end   
+    end
 
     always @(posedge CLK or posedge RESET or negedge grstn)
     begin
         if (!grstn) begin
-            inb_reg_async <= 0; 
+            inb_reg_async <= 0;
         end else if (RESET == 1'b1)
         begin
             inb_reg_async <= 0;
@@ -9452,7 +9452,7 @@ parameter MULT_RESET_MODE = "SYNC"; // SYNC, ASYNC
     always @(posedge CLK or negedge grstn)
     begin
         if (!grstn) begin
-            inb_reg_sync <= 0; 
+            inb_reg_sync <= 0;
         end else if (RESET == 1'b1)
         begin
             inb_reg_sync <= 0;
@@ -9497,7 +9497,7 @@ parameter MULT_RESET_MODE = "SYNC"; // SYNC, ASYNC
     end
 
     assign SOB = inb;
-    
+
     // mult operation: asign,bsign->Sign bit
     always @(ina or asign_0)
     begin
@@ -9527,11 +9527,11 @@ parameter MULT_RESET_MODE = "SYNC"; // SYNC, ASYNC
 
     assign mult_out = (!a || !b)? 0 : a * b ;
 
-    // sign reg 
+    // sign reg
     always @(posedge CLK or posedge RESET or negedge grstn)
     begin
         if (!grstn) begin
-            asign_reg0_async <= 0;  
+            asign_reg0_async <= 0;
         end else if (RESET == 1'b1)
         begin
             asign_reg0_async <= 0;
@@ -9573,7 +9573,7 @@ parameter MULT_RESET_MODE = "SYNC"; // SYNC, ASYNC
     always @(posedge CLK or negedge grstn)
     begin
         if (!grstn) begin
-            bsign_reg0_sync <= 0;  
+            bsign_reg0_sync <= 0;
         end else if (RESET == 1'b1)
         begin
             bsign_reg0_sync <= 0;
@@ -9583,7 +9583,7 @@ parameter MULT_RESET_MODE = "SYNC"; // SYNC, ASYNC
             bsign_reg0_sync <= BSIGN;
         end
     end
-    
+
     always @(ASIGN or asign_reg0)
     begin
         if (ASIGN_REG == 1'b0) begin
@@ -9641,7 +9641,7 @@ parameter MULT_RESET_MODE = "SYNC"; // SYNC, ASYNC
             out1 = out0;
         end
     end
-    
+
     // output reg
     always @(posedge CLK or posedge RESET or negedge grstn)
     begin
@@ -9714,7 +9714,7 @@ parameter MULT_RESET_MODE = "SYNC"; // SYNC, ASYNC
     begin
         m_out = 0;
     end
-    
+
     // RESET mode
     always @(ina_reg_sync or ina_reg_async or ina1_reg_sync or ina1_reg_async or inb_reg_sync or inb_reg_async or asign_reg0_async or asign_reg0_sync or bsign_reg0_async or bsign_reg0_sync or out0_async or out0_sync or out_async or out_sync)
     begin
@@ -9727,7 +9727,7 @@ parameter MULT_RESET_MODE = "SYNC"; // SYNC, ASYNC
             bsign_reg0 <= bsign_reg0_async;
             out0 <= out0_async;
             out <= out_async;
-        end 
+        end
         else if (MULT_RESET_MODE == "SYNC")
         begin
             ina_reg <= ina_reg_sync;
@@ -9763,7 +9763,7 @@ parameter MULT_RESET_MODE = "SYNC"; // SYNC, ASYNC
     begin
         if (!grstn) begin
             ina_reg_async <= 0;
-            ina1_reg_async <= 0; 
+            ina1_reg_async <= 0;
         end else if (RESET == 1'b1)
         begin
             ina_reg_async <= 0;
@@ -9780,7 +9780,7 @@ parameter MULT_RESET_MODE = "SYNC"; // SYNC, ASYNC
     begin
         if (!grstn) begin
             ina_reg_sync <= 0;
-            ina1_reg_sync <= 0;   
+            ina1_reg_sync <= 0;
         end else if (RESET == 1'b1)
         begin
             ina_reg_sync <= 0;
@@ -9789,14 +9789,14 @@ parameter MULT_RESET_MODE = "SYNC"; // SYNC, ASYNC
         else if (CE == 1'b1)
         begin
             ina_reg_sync <= a_in;
-            ina1_reg_sync <= ina;          
+            ina1_reg_sync <= ina;
         end
-    end    
+    end
 
     always @(posedge CLK or posedge RESET or negedge grstn)
     begin
         if (!grstn) begin
-            inb_reg_async <= 0; 
+            inb_reg_async <= 0;
         end else if (RESET == 1'b1)
         begin
             inb_reg_async <= 0;
@@ -9810,7 +9810,7 @@ parameter MULT_RESET_MODE = "SYNC"; // SYNC, ASYNC
     always @(posedge CLK or negedge grstn)
     begin
         if (!grstn) begin
-            inb_reg_sync <= 0; 
+            inb_reg_sync <= 0;
         end else if (RESET == 1'b1)
         begin
             inb_reg_sync <= 0;
@@ -9887,7 +9887,7 @@ parameter MULT_RESET_MODE = "SYNC"; // SYNC, ASYNC
 
     assign mult_out = (!a || !b)? 0 : a * b ;
 
-    // sign reg 
+    // sign reg
     always @(posedge CLK or posedge RESET or negedge grstn)
     begin
         if (!grstn) begin
@@ -9905,7 +9905,7 @@ parameter MULT_RESET_MODE = "SYNC"; // SYNC, ASYNC
     always @(posedge CLK or negedge grstn)
     begin
         if (!grstn) begin
-            asign_reg0_sync <= 0;  
+            asign_reg0_sync <= 0;
         end else if (RESET == 1'b1)
         begin
             asign_reg0_sync <= 0;
@@ -9933,7 +9933,7 @@ parameter MULT_RESET_MODE = "SYNC"; // SYNC, ASYNC
     always @(posedge CLK or negedge grstn)
     begin
         if (!grstn) begin
-            bsign_reg0_sync <= 0;  
+            bsign_reg0_sync <= 0;
         end else if (RESET == 1'b1)
         begin
             bsign_reg0_sync <= 0;
@@ -9943,7 +9943,7 @@ parameter MULT_RESET_MODE = "SYNC"; // SYNC, ASYNC
             bsign_reg0_sync <= BSIGN;
         end
     end
-    
+
     always @(ASIGN or asign_reg0)
     begin
         if (ASIGN_REG == 1'b0) begin
@@ -9951,7 +9951,7 @@ parameter MULT_RESET_MODE = "SYNC"; // SYNC, ASYNC
         end else begin
             asign_0 = asign_reg0;
         end
-    end 
+    end
 
     always @(BSIGN or bsign_reg0)
     begin
@@ -10001,7 +10001,7 @@ parameter MULT_RESET_MODE = "SYNC"; // SYNC, ASYNC
             out1 = out0;
         end
     end
-    
+
     // output reg
     always @(posedge CLK or posedge RESET or negedge grstn)
     begin
@@ -10075,7 +10075,7 @@ parameter MULT_RESET_MODE = "SYNC"; // SYNC, ASYNC
     begin
        m_out = 0;
     end
-    
+
     // RESET mode
     always @(ina_reg_sync or ina_reg_async or inb_reg_sync or inb_reg_async or asign_reg0_async or asign_reg0_sync or bsign_reg0_async or bsign_reg0_sync or out_pipe_reg_async or out_pipe_reg_sync or out0_reg_async or out0_reg_sync or out1_reg_async or out1_reg_sync)
     begin
@@ -10088,7 +10088,7 @@ parameter MULT_RESET_MODE = "SYNC"; // SYNC, ASYNC
             out_pipe_reg <= out_pipe_reg_async;
             out0_reg <= out0_reg_async;
             out1_reg <= out1_reg_async;
-        end 
+        end
         else if (MULT_RESET_MODE == "SYNC")
         begin
             ina_reg <= ina_reg_sync;
@@ -10105,7 +10105,7 @@ parameter MULT_RESET_MODE = "SYNC"; // SYNC, ASYNC
     always @(posedge CLK or posedge RESET or negedge grstn)
     begin
         if (!grstn) begin
-            ina_reg_async <= 0; 
+            ina_reg_async <= 0;
         end else if (RESET == 1'b1)
         begin
             ina_reg_async <= 0;
@@ -10119,7 +10119,7 @@ parameter MULT_RESET_MODE = "SYNC"; // SYNC, ASYNC
     always @(posedge CLK or negedge grstn)
     begin
         if (!grstn) begin
-            ina_reg_sync <= 0; 
+            ina_reg_sync <= 0;
         end else if (RESET == 1'b1)
         begin
             ina_reg_sync <= 0;
@@ -10128,12 +10128,12 @@ parameter MULT_RESET_MODE = "SYNC"; // SYNC, ASYNC
         begin
             ina_reg_sync <= A;
         end
-    end    
+    end
 
     always @(posedge CLK or posedge RESET or negedge grstn)
     begin
         if (!grstn) begin
-            inb_reg_async <= 0; 
+            inb_reg_async <= 0;
         end else if (RESET == 1'b1)
         begin
             inb_reg_async <= 0;
@@ -10147,7 +10147,7 @@ parameter MULT_RESET_MODE = "SYNC"; // SYNC, ASYNC
     always @(posedge CLK or negedge grstn)
     begin
         if (!grstn) begin
-            inb_reg_sync <= 0; 
+            inb_reg_sync <= 0;
         end else if (RESET == 1'b1)
         begin
             inb_reg_sync <= 0;
@@ -10163,7 +10163,7 @@ parameter MULT_RESET_MODE = "SYNC"; // SYNC, ASYNC
         if (AREG == 1'b0)
         begin
             ina = A;
-        end else 
+        end else
         begin
             ina = ina_reg;
         end
@@ -10179,7 +10179,7 @@ parameter MULT_RESET_MODE = "SYNC"; // SYNC, ASYNC
             inb = inb_reg;
         end
     end
-    
+
     // mult operation: asign,bsign->Sign bit
     always @(ina or asign_0)
     begin
@@ -10206,14 +10206,14 @@ parameter MULT_RESET_MODE = "SYNC"; // SYNC, ASYNC
             b[71:36] = 0;
         end
     end
-    
+
     assign mult_out = (!a || !b)? 0 : a * b ;
 
-    // sign reg 
+    // sign reg
     always @(posedge CLK or posedge RESET or negedge grstn)
     begin
         if (!grstn) begin
-            asign_reg0_async <= 0;  
+            asign_reg0_async <= 0;
         end else if (RESET == 1'b1)
         begin
             asign_reg0_async <= 0;
@@ -10227,7 +10227,7 @@ parameter MULT_RESET_MODE = "SYNC"; // SYNC, ASYNC
     always @(posedge CLK or negedge grstn)
     begin
         if (!grstn) begin
-            asign_reg0_sync <= 0;  
+            asign_reg0_sync <= 0;
         end else if (RESET == 1'b1)
         begin
             asign_reg0_sync <= 0;
@@ -10255,7 +10255,7 @@ parameter MULT_RESET_MODE = "SYNC"; // SYNC, ASYNC
     always @(posedge CLK or negedge grstn)
     begin
         if (!grstn) begin
-            bsign_reg0_sync <= 0;  
+            bsign_reg0_sync <= 0;
         end else if (RESET == 1'b1)
         begin
             bsign_reg0_sync <= 0;
@@ -10265,13 +10265,13 @@ parameter MULT_RESET_MODE = "SYNC"; // SYNC, ASYNC
             bsign_reg0_sync <= BSIGN;
         end
     end
-    
+
     always @(ASIGN or asign_reg0)
     begin
         if (ASIGN_REG == 1'b0)
         begin
             asign_0 = ASIGN;
-        end else 
+        end else
         begin
             asign_0 = asign_reg0;
         end
@@ -10327,17 +10327,17 @@ parameter MULT_RESET_MODE = "SYNC"; // SYNC, ASYNC
             out_pipe = out_pipe_reg;
         end
     end
-    
+
     // output reg
     always @(posedge CLK or posedge RESET or negedge grstn)
     begin
-        if (!grstn) 
+        if (!grstn)
         begin
             out0_reg_async <= 0;
-        end else if (RESET == 1'b1) 
+        end else if (RESET == 1'b1)
         begin
             out0_reg_async <= 0;
-        end else if (CE == 1'b1) 
+        end else if (CE == 1'b1)
         begin
             out0_reg_async <= out_pipe;
         end
@@ -10345,13 +10345,13 @@ parameter MULT_RESET_MODE = "SYNC"; // SYNC, ASYNC
 
     always @(posedge CLK or negedge grstn)
     begin
-        if (!grstn) 
+        if (!grstn)
         begin
             out0_reg_sync <= 0;
-        end else if (RESET == 1'b1) 
+        end else if (RESET == 1'b1)
         begin
             out0_reg_sync <= 0;
-        end else if (CE == 1'b1) 
+        end else if (CE == 1'b1)
         begin
             out0_reg_sync <= out_pipe;
         end
@@ -10359,10 +10359,10 @@ parameter MULT_RESET_MODE = "SYNC"; // SYNC, ASYNC
 
     always @(out_pipe or out0_reg)
     begin
-        if (OUT0_REG == 1'b0) 
+        if (OUT0_REG == 1'b0)
         begin
             m_out0 = out_pipe;
-        end else 
+        end else
         begin
             m_out0 = out0_reg;
         end
@@ -10467,7 +10467,7 @@ parameter C_ADD_SUB = 1'b0; //1'b0: add; 1'b1: sub.
         alu_sel0_reg = 1'b0;
         alu_sel1_reg = 1'b0;
     end
-    
+
     // RESET mode
     always @(ina_reg_sync or ina_reg_async or inb_reg_sync or inb_reg_async or inc_reg_sync or inc_reg_async or asign_reg0_async or asign_reg0_sync or bsign_reg0_async or bsign_reg0_sync or absign_reg_async or absign_reg_sync or out0_async or out0_sync or out_async or out_sync)
     begin
@@ -10481,7 +10481,7 @@ parameter C_ADD_SUB = 1'b0; //1'b0: add; 1'b1: sub.
             absign_reg <= absign_reg_async;
             out0 <= out0_async;
             out_reg <= out_async;
-        end 
+        end
         else if (MULT_RESET_MODE == "SYNC")
         begin
             ina_reg <= ina_reg_sync;
@@ -10569,7 +10569,7 @@ parameter C_ADD_SUB = 1'b0; //1'b0: add; 1'b1: sub.
     always @(posedge CLK or negedge grstn)
     begin
         if (!grstn) begin
-            inc_reg_sync <= 0; 
+            inc_reg_sync <= 0;
         end else if (RESET == 1'b1)
         begin
             inc_reg_sync <= 0;
@@ -10612,7 +10612,7 @@ parameter C_ADD_SUB = 1'b0; //1'b0: add; 1'b1: sub.
             inc = inc_reg;
         end
     end
-    
+
     // mult operation: asign,bsign->Sign bit
     always @(ina or asign_0)
     begin
@@ -10626,7 +10626,7 @@ parameter C_ADD_SUB = 1'b0; //1'b0: add; 1'b1: sub.
             a[53:18] = 0;
         end
     end
-    
+
     always @(inb or bsign_0)
     begin
         if (bsign_0 == 1'b1)
@@ -10639,7 +10639,7 @@ parameter C_ADD_SUB = 1'b0; //1'b0: add; 1'b1: sub.
             b[53:36] = 0;
         end
     end
-    
+
     assign mult_out = (!a || !b)? 0 : a * b;
 
     // sign reg
@@ -10688,7 +10688,7 @@ parameter C_ADD_SUB = 1'b0; //1'b0: add; 1'b1: sub.
     always @(posedge CLK or negedge grstn)
     begin
         if (!grstn) begin
-            bsign_reg0_sync <= 0;  
+            bsign_reg0_sync <= 0;
         end else if (RESET == 1'b1)
         begin
             bsign_reg0_sync <= 0;
@@ -10698,17 +10698,17 @@ parameter C_ADD_SUB = 1'b0; //1'b0: add; 1'b1: sub.
             bsign_reg0_sync <= BSIGN;
         end
     end
-    
+
     always @(ASIGN or asign_reg0)
     begin
         if (ASIGN_REG == 1'b0)
         begin
             asign_0 = ASIGN;
-        end else 
+        end else
         begin
             asign_0 = asign_reg0;
         end
-    end 
+    end
 
     always @(BSIGN or bsign_reg0)
     begin
@@ -10741,17 +10741,17 @@ parameter C_ADD_SUB = 1'b0; //1'b0: add; 1'b1: sub.
             alu_sel1_reg <= alu_sel0;
         end
     end
-    
+
     always @(posedge CLK or negedge grstn)
     begin
         if (!grstn) begin
-            accload0_reg <= 0; 
+            accload0_reg <= 0;
         end else if (CE == 1'b1)
         begin
             accload0_reg <= ACCLOAD;
         end
     end
- 
+
     always @(ACCLOAD or accload0_reg or alu_sel or alu_sel0_reg)
     begin
         if (ACCLOAD_REG0 == 1'b0)
@@ -10768,26 +10768,26 @@ parameter C_ADD_SUB = 1'b0; //1'b0: add; 1'b1: sub.
     always @(posedge CLK or negedge grstn)
     begin
         if (!grstn) begin
-            accload1_reg <= 0; 
+            accload1_reg <= 0;
         end else if (CE == 1'b1)
         begin
             accload1_reg <= accload_0;
         end
     end
- 
+
     always @(accload_0 or accload1_reg or alu_sel0 or alu_sel1_reg)
     begin
         if (ACCLOAD_REG1 == 1'b0)
         begin
             accload_1 <= accload_0;
             alu_sel1 <= alu_sel0;
-        end else 
+        end else
         begin
             accload_1 <= accload1_reg;
             alu_sel1 <= alu_sel1_reg;
         end
     end
- 
+
     //pipeline reg
     always @(posedge CLK or posedge RESET or negedge grstn)
     begin
@@ -10835,11 +10835,11 @@ parameter C_ADD_SUB = 1'b0; //1'b0: add; 1'b1: sub.
             absign = absign_reg;
         end
     end
-    
+
     assign inc_ext = (alu_sel1) ? {1'b0, inc[53:0]} : 0;
     assign out_ext = (alu_sel1) ? {(out1[53] & absign),out1[53:0]} : 0;
     assign acc_load = (accload_1) ? m_out : 0;
-    
+
     always @ (inc_ext or CASI or out_ext or acc_load)
     begin
         if(MULTALU36X18_MODE == 0) begin   //36x18 +/- C
@@ -11005,9 +11005,9 @@ parameter MULT_RESET_MODE = "SYNC";// SYNC,ASYNC
         end
     end
 
-    always @ (A0 or SIA or ASEL) 
+    always @ (A0 or SIA or ASEL)
     begin
-        if(ASEL[0] == 1'b0) 
+        if(ASEL[0] == 1'b0)
         begin
             mina0 = A0;
         end else begin
@@ -11019,7 +11019,7 @@ parameter MULT_RESET_MODE = "SYNC";// SYNC,ASYNC
     always @(posedge CLK or posedge RESET or negedge grstn)
     begin
         if (!grstn) begin
-            ina0_reg_async <= 0; 
+            ina0_reg_async <= 0;
         end else if (RESET == 1'b1)
         begin
             ina0_reg_async <= 0;
@@ -11033,7 +11033,7 @@ parameter MULT_RESET_MODE = "SYNC";// SYNC,ASYNC
     always @(posedge CLK or negedge grstn)
     begin
         if (!grstn) begin
-            ina0_reg_sync <= 0; 
+            ina0_reg_sync <= 0;
         end else if (RESET == 1'b1)
         begin
             ina0_reg_sync <= 0;
@@ -11046,7 +11046,7 @@ parameter MULT_RESET_MODE = "SYNC";// SYNC,ASYNC
 
     always @ (ina0, A1, ASEL)
     begin
-        if(ASEL[1] == 1'b0) 
+        if(ASEL[1] == 1'b0)
         begin
             mina1 = A1;
         end else begin
@@ -11074,17 +11074,17 @@ parameter MULT_RESET_MODE = "SYNC";// SYNC,ASYNC
     always @(posedge CLK or negedge grstn)
     begin
         if (!grstn) begin
-            ina1_reg_sync <= 0; 
-            ina2_reg_sync <= 0; 
+            ina1_reg_sync <= 0;
+            ina2_reg_sync <= 0;
         end else if (RESET == 1'b1)
         begin
             ina1_reg_sync <= 0;
-            ina2_reg_sync <= 0; 
+            ina2_reg_sync <= 0;
         end
         else if (CE == 1'b1)
         begin
             ina1_reg_sync <= mina1;
-            ina2_reg_sync <= ina1; 
+            ina2_reg_sync <= ina1;
         end
     end
 
@@ -11123,9 +11123,9 @@ parameter MULT_RESET_MODE = "SYNC";// SYNC,ASYNC
 
     assign SOA = ina2;
 
-    always @(B0 or SIB or BSEL) 
+    always @(B0 or SIB or BSEL)
     begin
-        if(BSEL[0] == 1'b0) 
+        if(BSEL[0] == 1'b0)
         begin
             minb0 = B0;
         end else begin
@@ -11136,7 +11136,7 @@ parameter MULT_RESET_MODE = "SYNC";// SYNC,ASYNC
     always @(posedge CLK or posedge RESET or negedge grstn)
     begin
         if (!grstn) begin
-            inb0_reg_async <= 0; 
+            inb0_reg_async <= 0;
         end else if (RESET == 1'b1)
         begin
             inb0_reg_async <= 0;
@@ -11150,7 +11150,7 @@ parameter MULT_RESET_MODE = "SYNC";// SYNC,ASYNC
     always @(posedge CLK or negedge grstn)
     begin
         if (!grstn) begin
-            inb0_reg_sync <= 0; 
+            inb0_reg_sync <= 0;
         end else if (RESET == 1'b1)
         begin
             inb0_reg_sync <= 0;
@@ -11202,7 +11202,7 @@ parameter MULT_RESET_MODE = "SYNC";// SYNC,ASYNC
     always @(posedge CLK or posedge RESET or negedge grstn)
     begin
         if (!grstn) begin
-            inc_reg_async <= 0; 
+            inc_reg_async <= 0;
         end else if (RESET == 1'b1)
         begin
             inc_reg_async <= 0;
@@ -11216,7 +11216,7 @@ parameter MULT_RESET_MODE = "SYNC";// SYNC,ASYNC
     always @(posedge CLK or negedge grstn)
     begin
         if (!grstn) begin
-            inc_reg_sync <= 0; 
+            inc_reg_sync <= 0;
         end else if (RESET == 1'b1)
         begin
             inc_reg_sync <= 0;
@@ -11226,13 +11226,13 @@ parameter MULT_RESET_MODE = "SYNC";// SYNC,ASYNC
             inc_reg_sync <= C;
         end
     end
-    
+
     always @(minb0 or inb0_reg)
     begin
         if (B0REG == 1'b0)
         begin
             inb0 = minb0;
-        end else 
+        end else
         begin
             inb0 = inb0_reg;
         end
@@ -11264,7 +11264,7 @@ parameter MULT_RESET_MODE = "SYNC";// SYNC,ASYNC
     always @(posedge CLK or posedge RESET or negedge grstn)
     begin
         if (!grstn) begin
-            asign0_0_reg_async <= 0;  
+            asign0_0_reg_async <= 0;
         end else if (RESET == 1'b1)
         begin
             asign0_0_reg_async <= 0;
@@ -11278,7 +11278,7 @@ parameter MULT_RESET_MODE = "SYNC";// SYNC,ASYNC
     always @(posedge CLK or negedge grstn)
     begin
         if (!grstn) begin
-            asign0_0_reg_sync <= 0;  
+            asign0_0_reg_sync <= 0;
         end else if (RESET == 1'b1)
         begin
             asign0_0_reg_sync <= 0;
@@ -11292,7 +11292,7 @@ parameter MULT_RESET_MODE = "SYNC";// SYNC,ASYNC
     always @(posedge CLK or posedge RESET or negedge grstn)
     begin
         if (!grstn) begin
-            asign1_0_reg_async <= 0;  
+            asign1_0_reg_async <= 0;
         end else if (RESET == 1'b1)
         begin
             asign1_0_reg_async <= 0;
@@ -11306,7 +11306,7 @@ parameter MULT_RESET_MODE = "SYNC";// SYNC,ASYNC
     always @(posedge CLK or negedge grstn)
     begin
         if (!grstn) begin
-            asign1_0_reg_sync <= 0;  
+            asign1_0_reg_sync <= 0;
         end else if (RESET == 1'b1)
         begin
             asign1_0_reg_sync <= 0;
@@ -11333,7 +11333,7 @@ parameter MULT_RESET_MODE = "SYNC";// SYNC,ASYNC
         if (ASIGN1_REG == 1'b0)
         begin
             asign1_0 = ASIGN[1];
-        end else 
+        end else
         begin
             asign1_0 = asign1_0_reg;
         end
@@ -11343,7 +11343,7 @@ parameter MULT_RESET_MODE = "SYNC";// SYNC,ASYNC
     always @(posedge CLK or posedge RESET or negedge grstn)
     begin
         if (!grstn) begin
-            bsign0_0_reg_async <= 0;  
+            bsign0_0_reg_async <= 0;
         end else if (RESET == 1'b1)
         begin
             bsign0_0_reg_async <= 0;
@@ -11357,7 +11357,7 @@ parameter MULT_RESET_MODE = "SYNC";// SYNC,ASYNC
     always @(posedge CLK or negedge grstn)
     begin
         if (!grstn) begin
-            bsign0_0_reg_sync <= 0;  
+            bsign0_0_reg_sync <= 0;
         end else if (RESET == 1'b1)
         begin
             bsign0_0_reg_sync <= 0;
@@ -11371,7 +11371,7 @@ parameter MULT_RESET_MODE = "SYNC";// SYNC,ASYNC
     always @(posedge CLK or posedge RESET or negedge grstn)
     begin
         if (!grstn) begin
-            bsign1_0_reg_async <= 0;  
+            bsign1_0_reg_async <= 0;
         end else if (RESET == 1'b1)
         begin
             bsign1_0_reg_async <= 0;
@@ -11385,7 +11385,7 @@ parameter MULT_RESET_MODE = "SYNC";// SYNC,ASYNC
     always @(posedge CLK or negedge grstn)
     begin
         if (!grstn) begin
-            bsign1_0_reg_sync <= 0;  
+            bsign1_0_reg_sync <= 0;
         end else if (RESET == 1'b1)
         begin
             bsign1_0_reg_sync <= 0;
@@ -11443,13 +11443,13 @@ parameter MULT_RESET_MODE = "SYNC";// SYNC,ASYNC
     always @(posedge CLK or negedge grstn)
     begin
         if (!grstn) begin
-            accload0_reg <= 0; 
+            accload0_reg <= 0;
         end else if (CE == 1'b1)
         begin
             accload0_reg <= ACCLOAD;
         end
     end
- 
+
     always @(ACCLOAD or accload0_reg or alu_sel or alu_sel0_reg)
     begin
         if (ACCLOAD_REG0 == 1'b0)
@@ -11466,20 +11466,20 @@ parameter MULT_RESET_MODE = "SYNC";// SYNC,ASYNC
     always @(posedge CLK or negedge grstn)
     begin
         if (!grstn) begin
-            accload1_reg <= 0; 
+            accload1_reg <= 0;
         end else if (CE == 1'b1)
         begin
             accload1_reg <= accload_0;
         end
     end
- 
+
     always @(accload_0 or accload1_reg or alu_sel0 or alu_sel1_reg)
     begin
         if (ACCLOAD_REG1 == 1'b0)
         begin
             accload_1 <= accload_0;
             alu_sel1 <= alu_sel0;
-        end else 
+        end else
         begin
             accload_1 <= accload1_reg;
             alu_sel1 <= alu_sel1_reg;
@@ -11518,7 +11518,7 @@ parameter MULT_RESET_MODE = "SYNC";// SYNC,ASYNC
         begin
             b0[17:0] = inb0[17:0];
             b0[35:18] = {inb0[17],inb0[17],inb0[17],inb0[17],inb0[17],inb0[17],inb0[17],inb0[17],inb0[17],inb0[17],inb0[17],inb0[17],inb0[17],inb0[17],inb0[17],inb0[17],inb0[17],inb0[17]};
-        end else 
+        end else
         begin
             b0[17:0] = inb0[17:0];
             b0[35:18] = 0;
@@ -11531,7 +11531,7 @@ parameter MULT_RESET_MODE = "SYNC";// SYNC,ASYNC
         begin
             b1[17:0] = inb1[17:0];
             b1[35:18] = {inb1[17],inb1[17],inb1[17],inb1[17],inb1[17],inb1[17],inb1[17],inb1[17],inb1[17],inb1[17],inb1[17],inb1[17],inb1[17],inb1[17],inb1[17],inb1[17],inb1[17],inb1[17]};
-        end else 
+        end else
         begin
             b1[17:0] = inb1[17:0];
             b1[35:18] = 0;
@@ -11640,13 +11640,13 @@ parameter MULT_RESET_MODE = "SYNC";// SYNC,ASYNC
 
     always @(out0 or absign_0 or alu_sel1)
     begin
-        if(alu_sel1) 
+        if(alu_sel1)
         begin
             if (absign_0 == 1'b1)
             begin
                 out0_0[35:0] = out0[35:0];
                 out0_0[54:36] = {out0[35], out0[35], out0[35], out0[35], out0[35], out0[35], out0[35], out0[35], out0[35], out0[35], out0[35], out0[35], out0[35], out0[35], out0[35], out0[35], out0[35], out0[35], out0[35]};
-            end else 
+            end else
             begin
                 out0_0[35:0] = out0[35:0];
                 out0_0[54:36] = 19'b0;
@@ -11658,7 +11658,7 @@ parameter MULT_RESET_MODE = "SYNC";// SYNC,ASYNC
 
     always @(out1 or absign_1 or alu_sel1)
     begin
-        if(alu_sel1) 
+        if(alu_sel1)
         begin
             if (absign_1 == 1'b1)
             begin
@@ -11671,12 +11671,12 @@ parameter MULT_RESET_MODE = "SYNC";// SYNC,ASYNC
             end
         end else begin
             out1_0[54:0] = 55'b0;
-        end            
+        end
     end
 
     assign inc_ext = (alu_sel1) ? {1'b0, inc[53:0]} : 0;
     assign acc_load = (accload_1) ? m_out : 0;
-    
+
     always @ (inc_ext or CASI or out0_0 or out1_0 or acc_load)
     begin
         if(MULTADDALU18X18_MODE == 0) begin   //18x18 +/- 18x18 +/- C
@@ -11791,7 +11791,7 @@ parameter MULTALU18X18_MODE = 0; //0:ACC/0 +/- 18x18 +/- C; 1:ACC/0 +/- 18x18 + 
     reg [54:0] acc_out,dout;
     wire grstn = GSR.GSRO;
 
-    initial 
+    initial
     begin
         acc_reg = 55'b0;
         alu_sel = 1'b1;
@@ -11870,7 +11870,7 @@ parameter MULTALU18X18_MODE = 0; //0:ACC/0 +/- 18x18 +/- C; 1:ACC/0 +/- 18x18 + 
     always @(posedge CLK or posedge RESET or negedge grstn)
     begin
         if (!grstn) begin
-            inb0_reg_async <= 0; 
+            inb0_reg_async <= 0;
         end else if (RESET == 1'b1)
         begin
             inb0_reg_async <= 0;
@@ -11884,7 +11884,7 @@ parameter MULTALU18X18_MODE = 0; //0:ACC/0 +/- 18x18 +/- C; 1:ACC/0 +/- 18x18 + 
     always @(posedge CLK or negedge grstn)
     begin
         if (!grstn) begin
-            inb0_reg_sync <= 0; 
+            inb0_reg_sync <= 0;
         end else if (RESET == 1'b1)
         begin
             inb0_reg_sync <= 0;
@@ -11900,7 +11900,7 @@ parameter MULTALU18X18_MODE = 0; //0:ACC/0 +/- 18x18 +/- C; 1:ACC/0 +/- 18x18 + 
         if (BREG == 1'b0)
         begin
             inb1 = B;
-        end else 
+        end else
         begin
             inb1 = inb0_reg;
         end
@@ -11923,7 +11923,7 @@ parameter MULTALU18X18_MODE = 0; //0:ACC/0 +/- 18x18 +/- C; 1:ACC/0 +/- 18x18 + 
     always @(posedge CLK or negedge grstn)
     begin
         if (!grstn) begin
-            inc_reg_sync <= 0; 
+            inc_reg_sync <= 0;
         end else if (RESET == 1'b1)
         begin
             inc_reg_sync <= 0;
@@ -11961,7 +11961,7 @@ parameter MULTALU18X18_MODE = 0; //0:ACC/0 +/- 18x18 +/- C; 1:ACC/0 +/- 18x18 + 
     always @(posedge CLK or negedge grstn)
     begin
         if (!grstn) begin
-            asign0_reg_sync <= 0;  
+            asign0_reg_sync <= 0;
         end else if (RESET == 1'b1)
         begin
             asign0_reg_sync <= 0;
@@ -12000,7 +12000,7 @@ parameter MULTALU18X18_MODE = 0; //0:ACC/0 +/- 18x18 +/- C; 1:ACC/0 +/- 18x18 + 
     always @(posedge CLK or negedge grstn)
     begin
         if (!grstn) begin
-            bsign0_reg_sync <= 0;  
+            bsign0_reg_sync <= 0;
         end else if (RESET == 1'b1)
         begin
             bsign0_reg_sync <= 0;
@@ -12027,7 +12027,7 @@ parameter MULTALU18X18_MODE = 0; //0:ACC/0 +/- 18x18 +/- C; 1:ACC/0 +/- 18x18 + 
     always @(posedge CLK or posedge RESET or negedge grstn)
     begin
         if (!grstn) begin
-            dsign_reg_async <= 0;  
+            dsign_reg_async <= 0;
         end else if (RESET == 1'b1)
         begin
             dsign_reg_async <= 0;
@@ -12041,7 +12041,7 @@ parameter MULTALU18X18_MODE = 0; //0:ACC/0 +/- 18x18 +/- C; 1:ACC/0 +/- 18x18 + 
     always @(posedge CLK or negedge grstn)
     begin
         if (!grstn) begin
-            dsign_reg_sync <= 0;  
+            dsign_reg_sync <= 0;
         end else if (RESET == 1'b1)
         begin
             dsign_reg_sync <= 0;
@@ -12080,7 +12080,7 @@ parameter MULTALU18X18_MODE = 0; //0:ACC/0 +/- 18x18 +/- C; 1:ACC/0 +/- 18x18 + 
     always @(posedge CLK or negedge grstn)
     begin
         if (!grstn) begin
-            ind_reg_sync <= 0; 
+            ind_reg_sync <= 0;
         end else if (RESET == 1'b1)
         begin
             ind_reg_sync <= 0;
@@ -12125,13 +12125,13 @@ parameter MULTALU18X18_MODE = 0; //0:ACC/0 +/- 18x18 +/- C; 1:ACC/0 +/- 18x18 + 
     always @(posedge CLK or negedge grstn)
     begin
         if (!grstn) begin
-            accload0_reg <= 0; 
+            accload0_reg <= 0;
         end else if (CE == 1'b1)
         begin
             accload0_reg <= ACCLOAD;
         end
     end
- 
+
     always @(ACCLOAD or accload0_reg or alu_sel or alu_sel0_reg)
     begin
         if (ACCLOAD_REG0 == 1'b0)
@@ -12154,20 +12154,20 @@ parameter MULTALU18X18_MODE = 0; //0:ACC/0 +/- 18x18 +/- C; 1:ACC/0 +/- 18x18 + 
             accload1_reg <= accload_0;
         end
     end
- 
+
     always @(accload_0 or accload1_reg or alu_sel0 or alu_sel1_reg)
     begin
         if (ACCLOAD_REG1 == 1'b0)
         begin
             accload_1 <= accload_0;
             alu_sel1 <= alu_sel0;
-        end else 
+        end else
         begin
             accload_1 <= accload1_reg;
             alu_sel1 <= alu_sel1_reg;
         end
     end
- 
+
     always @(ina1 or asign_0)
     begin
         if (asign_0 == 1'b1)
@@ -12200,11 +12200,11 @@ parameter MULTALU18X18_MODE = 0; //0:ACC/0 +/- 18x18 +/- C; 1:ACC/0 +/- 18x18 + 
     begin
         if (!grstn) begin
             out0_async <= 0;
-            absign_reg_async <= 0;  
+            absign_reg_async <= 0;
         end else if (RESET == 1'b1)
         begin
             out0_async <= 0;
-            absign_reg_async <= 0;  
+            absign_reg_async <= 0;
         end
         else if (CE == 1'b1)
         begin
@@ -12217,19 +12217,19 @@ parameter MULTALU18X18_MODE = 0; //0:ACC/0 +/- 18x18 +/- C; 1:ACC/0 +/- 18x18 + 
     begin
         if (!grstn) begin
             out0_sync <= 0;
-            absign_reg_sync <= 0;  
+            absign_reg_sync <= 0;
         end else if (RESET == 1'b1)
         begin
             out0_sync <= 0;
-            absign_reg_sync <= 0;  
+            absign_reg_sync <= 0;
         end
         else if (CE == 1'b1)
         begin
             out0_sync <= mult_out;
-            absign_reg_sync <= absign_0;  
+            absign_reg_sync <= absign_0;
         end
     end
-    
+
     always @(mult_out or out0 or absign_0 or absign_reg)
     begin
         if (PIPE_REG == 1'b0)
@@ -12264,7 +12264,7 @@ parameter MULTALU18X18_MODE = 0; //0:ACC/0 +/- 18x18 +/- C; 1:ACC/0 +/- 18x18 + 
     assign acc_load = (accload_1) ? dout : 0;
     assign ind_ext = (alu_sel1) ? {dsign_0 & ind_0[53], ind_0[53:0]} : 0;
     assign inc_ext = (alu_sel1) ? {1'b0,inc[53:0]} : 0;
-    
+
     always @(acc_load or CASI or ppout1_ext or ind_ext or inc_ext)
     begin
         if(MULTALU18X18_MODE == 0)           //ACC/0 +/- 18x18 +/- C
@@ -12284,23 +12284,23 @@ parameter MULTALU18X18_MODE = 0; //0:ACC/0 +/- 18x18 +/- C; 1:ACC/0 +/- 18x18 + 
             end
         end else if(MULTALU18X18_MODE == 1)  //ACC/0 +/- 18x18 + CASI
         begin
-            if(B_ADD_SUB == 1'b0) 
+            if(B_ADD_SUB == 1'b0)
             begin
                 acc_out = acc_load + ppout1_ext + CASI;
             end else
             begin
-                acc_out = acc_load - ppout1_ext + CASI;                
-            end        
+                acc_out = acc_load - ppout1_ext + CASI;
+            end
         end else if(MULTALU18X18_MODE == 2)  //18x18 +/- D + CASI
         begin
-            if(B_ADD_SUB == 1'b0) 
+            if(B_ADD_SUB == 1'b0)
             begin
                 acc_out = ppout1_ext + ind_ext + CASI;
             end else
             begin
-                acc_out = ppout1_ext - ind_ext + CASI;                
+                acc_out = ppout1_ext - ind_ext + CASI;
             end
-        end 
+        end
     end
 
     always @(posedge CLK or posedge RESET or negedge grstn)
@@ -12392,7 +12392,7 @@ parameter ALU_RESET_MODE = "SYNC";//SYNC, ASYNC
             asign0_reg0 <= asign0_reg0_async;
             bsign0_reg0 <= bsign0_reg0_async;
             dout_reg <= dout_reg_async;
-        end 
+        end
         else if (ALU_RESET_MODE == "SYNC")
         begin
             ina0_reg <= ina0_reg_sync;
@@ -12406,7 +12406,7 @@ parameter ALU_RESET_MODE = "SYNC";//SYNC, ASYNC
     always @(posedge CLK or posedge RESET or negedge grstn)
     begin
         if (!grstn) begin
-            ina0_reg_async <= 0; 
+            ina0_reg_async <= 0;
         end else if (RESET == 1'b1)
         begin
             ina0_reg_async <= 0;
@@ -12560,7 +12560,7 @@ parameter ALU_RESET_MODE = "SYNC";//SYNC, ASYNC
     always @(posedge CLK or negedge grstn)
     begin
         if (!grstn) begin
-            accload0_reg <= 0; 
+            accload0_reg <= 0;
         end else if (CE == 1'b1)
         begin
             accload0_reg <= ACCLOAD;
@@ -12576,7 +12576,7 @@ parameter ALU_RESET_MODE = "SYNC";//SYNC, ASYNC
             alu_sel0_reg <= alu_sel;
         end
     end
- 
+
     always @(ACCLOAD or accload0_reg or alu_sel or alu_sel0_reg)
     begin
         if (ACCLOAD_REG == 1'b0)
@@ -12620,7 +12620,7 @@ parameter ALU_RESET_MODE = "SYNC";//SYNC, ASYNC
     end
 
     assign acc_load = (accload_0) ? m_out : 0;
-    
+
     always @(acc_load or CASI or ina0_ext or inb0_ext)
     begin
         if(ALUD_MODE == 0)           //ACC/0 +/- B +/- A
@@ -12646,7 +12646,7 @@ parameter ALU_RESET_MODE = "SYNC";//SYNC, ASYNC
             end else
             begin
                 dout = acc_load - inb0_ext + CASI;
-            end        
+            end
         end else if(ALUD_MODE == 2)  //A +/- B + CASI
         begin
             if(B_ADD_SUB == 1'b0)
@@ -12771,10 +12771,10 @@ initial  begin
     half_clk = 2*FREQ_DIV;
 end
 
-always   
+always
        begin
             #half_clk;
-            oscr = 1'b1;	   
+            oscr = 1'b1;
             #half_clk;
             oscr = 1'b0;
        end
@@ -12854,7 +12854,7 @@ reg div3_reg;
 reg clkfb_init,div3_init,pre_div3_in;
 
 
-initial begin 
+initial begin
 IDIV_reg = 1;
 FBDIV_reg = 1;
 clkin_cycle[0] = 0;
@@ -12913,7 +12913,7 @@ always @(posedge CLKIN or negedge resetn) begin
 	        clkin_cycle[3] <= clkin_cycle[2];
             clkin_cycle[4] <= clkin_cycle[3];
         end
-    
+
         if (clkin_cycle[0] > 0) begin
             if(((clkin_cycle[0] - clkin_period1 < 0.01) && (clkin_cycle[0] - clkin_period1 > -0.01)) &&(!div_dyn_change)) begin
                 clk_effect <= 1'b1;
@@ -13076,7 +13076,7 @@ always @(CLKIN or oclk_effect or clkout or resetn) begin
 end
 
 assign CLKOUT = clk_out;
-assign LOCK = lock_reg;  
+assign LOCK = lock_reg;
 
 //clkout_p
 // DYN_DA_EN == "false".
@@ -13179,15 +13179,15 @@ always @(posedge clkfb) begin
 end
 
 always @(clkoutp) begin
-    clk_ps_reg0 <= #(ps_dly+f_dly) clkoutp;    
+    clk_ps_reg0 <= #(ps_dly+f_dly) clkoutp;
 end
-      
+
 always @(CLKIN or oclk_effect or clk_ps_reg0 or resetn) begin
     if (resetn == 1'b0) begin
         clk_ps_reg <= 1'b0;
     end else if(CLKOUTP_BYPASS == "true") begin
         clk_ps_reg <= CLKIN;
-    end 
+    end
     //else if (oclk_effect == 1'b1) begin
     else begin
         clk_ps_reg <= clk_ps_reg0;
@@ -13210,12 +13210,12 @@ always @(posedge clk_div_src or posedge RESET_S) begin
 			cnt_div <= 0;
         end
 	end
-end    
-    
+end
+
 assign CLKOUTD = (CLKOUTD_BYPASS == "true") ? CLKIN : clkout_div_reg;
 
 // div3
-assign div3_in=(CLKOUTD3_SRC=="CLKOUTP")?clk_ps_reg:clk_out; 
+assign div3_in=(CLKOUTD3_SRC=="CLKOUTP")?clk_ps_reg:clk_out;
 
 always @ (div3_in) begin
     pre_div3_in <= div3_in;
@@ -13379,7 +13379,7 @@ step_reg = 8'b00000000;
 lock_reg = 1'b0;
 end
 
-    assign reset_sig = RESET | (~grstn);    
+    assign reset_sig = RESET | (~grstn);
 
     always @(posedge CLKIN or posedge reset_sig) begin
         if(reset_sig) begin
@@ -13391,14 +13391,14 @@ end
             clkin_period_pre<=clkin_period;
         end
 
-        if(clkin_period > 0) begin    
+        if(clkin_period > 0) begin
             if((clkin_period-clkin_period_pre <0.001) &&(clkin_period-clkin_period_pre>-0.001)) begin
                 clk_effect = 1;
             end else begin
                 clk_effect = 0;
             end
         end
-           
+
     end
 
     always @ (negedge CLKIN or posedge reset_sig) begin
@@ -13428,17 +13428,17 @@ end
             if(DIV_SEL == 1'b0) begin
                 if(cnt >= 33600) begin
                     lock_reg <= 1'b1;
-                end else begin                
+                end else begin
                     lock_reg <= 1'b0;
-                end               
+                end
             end
 
             if(DIV_SEL == 1'b1) begin
                 if(cnt >= 2100) begin
                     lock_reg <= 1'b1;
-                end else begin                
+                end else begin
                     lock_reg <= 1'b0;
-                end               
+                end
             end
         end
     end
@@ -13479,7 +13479,7 @@ endmodule
 
 
 // CLKDIV
-module CLKDIV(CLKOUT, CALIB, HCLKIN, RESETN); 
+module CLKDIV(CLKOUT, CALIB, HCLKIN, RESETN);
 
 input HCLKIN;
 input RESETN;
@@ -13516,7 +13516,7 @@ initial begin
         select3p5 = 1'b0;
     end else if (DIV_MODE == "3.5") begin
         select3p5 = 1'b1;
-        select245 = 1'b0;        
+        select245 = 1'b0;
     end
 
     if (DIV_MODE == "5")
@@ -13666,7 +13666,7 @@ input [2:0] RCLKSEL;
 input [7:0] DLLSTEP;
 input [7:0] WSTEP;
 input RLOADN, RMOVE, RDIR, WLOADN, WMOVE, WDIR, HOLD;
-output DQSR90, DQSW0, DQSW270; 
+output DQSR90, DQSW0, DQSW270;
 output [2:0] RPOINT, WPOINT;
 output RVALID,RBURST, RFLAG, WFLAG;
 
@@ -13734,7 +13734,7 @@ begin
 end
 
 // dqs write
-always @ (negedge FCLK or posedge reset)  
+always @ (negedge FCLK or posedge reset)
 begin
     if (reset == 1'b1) begin
         hold_0 <= 1'b0;
@@ -13764,7 +13764,7 @@ assign hold_en = hold_2 | hold_cnt1 | hold_cnt0;
 assign fclk_hold = ~hold_en & FCLK;
 assign fclk_in = (DQS_MODE == "X1") ? PCLK : fclk_hold;
 
-always @(wstep_reg) 
+always @(wstep_reg)
 begin
     if ((wstep_reg == 8'b11111111 && WDIR == 1'b0) || (wstep_reg == 8'b00000000 && WDIR == 1'b1)) begin
         WFLAG <= 1'b1;
@@ -13792,7 +13792,7 @@ always @(DLLSTEP or WSTEP) begin
     end
 end
 
-always @(wstep_init or WLOADN or WMOVE or WDIR) 
+always @(wstep_init or WLOADN or WMOVE or WDIR)
 begin
     if (WLOADN == 1'b0) begin
         wstep_reg <= wstep_init;
@@ -13802,7 +13802,7 @@ begin
                 if (WDIR == 1'b0) begin  // plus(+)
                     if (WFLAG == 1'b0 || (wstep_reg <= 8'b00000000)) begin
                         wstep_reg <= wstep_reg + 1;
-                    end 
+                    end
                 end else if (WDIR == 1'b1) begin  // minus (-)
                     if (WFLAG == 1'b0 || (wstep_reg == 8'b11111111)) begin
                         wstep_reg <= wstep_reg - 1;
@@ -13817,7 +13817,7 @@ end
 assign dqsw0_dly_in[0] = fclk_in;
 assign dqsw270_dly_in[0] =  fclk_in;
 assign dqsr90_dly_in[0] = dqs_r_clean;
-generate 
+generate
    genvar i;
     for(i=1;i<256;i=i+1) begin: gen_delay
       assign #0.025 dqsw0_dly_in[i] = dqsw0_dly_in[i-1];
@@ -13854,7 +13854,7 @@ end
 
 // dqs read
 
-always @ (posedge FCLK or posedge reset) 
+always @ (posedge FCLK or posedge reset)
 begin
     if (reset == 1'b1)begin
         rstn_0 <= 1'b0;
@@ -13862,14 +13862,14 @@ begin
         rstn_0 <= 1'b1;
    end
 end
-                                                                                             
+
 always @ (posedge FCLK or negedge rstn_0)
 begin
     if (rstn_0 == 1'b0) begin
         d_cnt0_0 <= 1'b0;
         d_cnt0_1 <= 1'b0;
     end else begin
-        d_cnt0_0 <= ~d_cnt0_0; 
+        d_cnt0_0 <= ~d_cnt0_0;
         d_cnt0_1 <= (d_cnt0_0 ^ d_cnt0_1);
     end
 end
@@ -13878,8 +13878,8 @@ always @(d_cnt0_0,d_cnt0_1) begin
     if(DQS_MODE == "X2_DDR2" || DQS_MODE == "X2_DDR3" || DQS_MODE == "X2_DDR3_EXT") begin
         update0_set <= ~d_cnt0_0;
     end else if(DQS_MODE == "X4") begin
-        update0_set <= ~d_cnt0_1 & d_cnt0_0; 
-    end    
+        update0_set <= ~d_cnt0_1 & d_cnt0_0;
+    end
 end
 
 always @ (posedge FCLK or negedge rstn_0)
@@ -13902,7 +13902,7 @@ begin
     end else begin
         rstn_1 <= 1'b1;
     end
-end                                                                                                
+end
 
 always @ (posedge clk_rd or negedge rstn_1)
 begin
@@ -13918,13 +13918,13 @@ end
 always @(d_cnt1_0,d_cnt1_1) begin
     if(DQS_MODE == "X2_DDR2" || DQS_MODE == "X2_DDR3" || DQS_MODE == "X2_DDR3_EXT") begin
         if(HWL == "false") begin
-            update1_set <= d_cnt1_0;            
-        end else begin        
+            update1_set <= d_cnt1_0;
+        end else begin
             update1_set <= ~d_cnt1_0;
         end
     end else if(DQS_MODE == "X4") begin
         if(HWL == "false") begin
-            update1_set <= (~d_cnt1_1) & (~d_cnt1_0);        
+            update1_set <= (~d_cnt1_1) & (~d_cnt1_0);
         end else begin
             update1_set <= ~d_cnt1_1 & d_cnt1_0;
         end
@@ -13972,7 +13972,7 @@ begin
     end else begin
         if (update0 == 1'b1) begin
             rd_d1 <= rd_d0;
-            rd_d1_ext <= rd_d_ext;            
+            rd_d1_ext <= rd_d_ext;
         end  else if (update0 == 1'b0) begin
             rd_d1 <= rd_d1;
             rd_d1_ext <= rd_d1_ext;
@@ -14033,7 +14033,7 @@ always @(rd_dq_x1,rd_dq_x2,rd_dq_x4,rd_dq_x2_ext) begin
 end
 
 assign #0.2 rd_dq_del = rd_dq;
-   
+
 always @ (posedge clk_rd or posedge reset)
 begin
     if (reset == 1'b1) begin
@@ -14106,7 +14106,7 @@ begin
 end
 assign cnt_det1 = ((~cnt0_det1) & cnt0_det1_reg) &(~dqs_en);
 
-always @ (negedge dqs_r_clean or negedge rstn_det) 
+always @ (negedge dqs_r_clean or negedge rstn_det)
 begin
     if (rstn_det == 1'b0) begin
         cnt0_det0 <= 1'b0;
@@ -14117,7 +14117,7 @@ begin
     end
 end
 assign cnt_det0_0 = ~((~cnt0_det0) & cnt0_det0_reg);
-                              
+
 always @ (negedge DQSR90 or negedge rstn_det)
 begin
     if (rstn_det == 1'b0)  begin
@@ -14131,11 +14131,11 @@ begin
     end
 end
 
-assign cnt_det0_1 =  ~(cnt1_det0 & (~cnt1_det0_reg));                                
+assign cnt_det0_1 =  ~(cnt1_det0 & (~cnt1_det0_reg));
 assign cnt_det0 = ~(cnt_det0_0 | cnt_det0_1);
 assign RBURST = cnt_det0 & cnt_det1;
 
-always @(rstep_reg) 
+always @(rstep_reg)
 begin
     if ((rstep_reg == 8'b11111111 && RDIR == 1'b0) || (rstep_reg == 8'b00000000 && RDIR == 1'b1)) begin
         RFLAG <= 1'b1;
@@ -14159,7 +14159,7 @@ begin
                 if (RDIR == 1'b0) begin  // plus(+)
                     if (RFLAG == 1'b0 || (rstep_reg <= 8'b00000000)) begin
                         rstep_reg <= rstep_reg + 1;
-                    end 
+                    end
                 end else if (RDIR == 1'b1) begin  // minus (-)
                     if (RFLAG == 1'b0 || (rstep_reg == 8'b11111111)) begin
                         rstep_reg <= rstep_reg - 1;
@@ -14294,8 +14294,8 @@ begin
         cnt1_up <= (cnt0_up ^ cnt1_up);
    end
 end
- 
-assign update_rd = (DQS_MODE == "X4") ? (~cnt1_up & cnt0_up) : (~cnt0_up); 
+
+assign update_rd = (DQS_MODE == "X4") ? (~cnt1_up & cnt0_up) : (~cnt0_up);
 
 always @ (posedge fclk_fifo or negedge resetn_up)
 begin
@@ -14370,7 +14370,7 @@ begin
         if (update_a == 1'b1) begin
             rd_q <= (shift_1 & (shift_q || sign_q || x1_mode_sel));
         end else begin
-            rd_q_1 <= rd_q;      
+            rd_q_1 <= rd_q;
         end
     end
 end
@@ -14425,7 +14425,7 @@ real dly_adj;
 realtime del, step_dly;
 realtime clkin_edge,clkin_period,clkin_period_pre;
 reg CLKOUT;
-wire grstn = GSR.GSRO; 
+wire grstn = GSR.GSRO;
 
 initial
 begin
@@ -14452,14 +14452,14 @@ end
             clkin_period<=$realtime-clkin_edge;
             clkin_period_pre<=clkin_period;
 
-        if(clkin_period > 0)     
+        if(clkin_period > 0)
             //if((clkin_period_pre-clkin_period<0.001) &&(clkin_period_pre-clkin_period>-0.001))
             if(clkin_period_pre == clkin_period)
                 clk_effect = 1;
             else
                 clk_effect = 0;
-    end 
-    
+    end
+
     always @(step_reg,DIR) begin
         if ((step_reg == 8'b11111111 && DIR == 1'b0) || (step_reg == 8'b00000000 && DIR == 1'b1))
             flag <= 1'b1;
@@ -14479,14 +14479,14 @@ end
     always @(DLLSTEP, LOADN, MOVE, CLKIN, clk_effect) begin
         if (clk_effect == 1'b1) begin
            if (LOADN == 1'b0) begin
-               step_reg <= dllstep_adj; 
+               step_reg <= dllstep_adj;
            end else begin
                if (MOVE === 1'b0 && premove === 1'b1) begin
                    if (LOADN == 1'b1) begin
                        if (DIR == 1'b0) begin  // plus(+)
                            if (flag == 1'b0 || (step_reg == 8'b00000000)) begin
                                step_reg <= step_reg + 1;
-                           end 
+                           end
                        end else if (DIR == 1'b1) begin  // minus (-)
                            if (flag == 1'b0 || (step_reg == 8'b11111111)) begin
                                step_reg <= step_reg - 1;
@@ -14509,7 +14509,7 @@ end
     always @(CLKIN) begin
         CLKOUT <= #(step_dly) CLKIN;
     end
-    
+
 endmodule
 
 
@@ -14763,7 +14763,7 @@ always @(dcsout or selforce_out or SELFORCE) begin
     else
         clkout <= selforce_out;
 end
-        
+
 assign CLKOUT = clkout;
 
 endmodule
@@ -14886,7 +14886,7 @@ assign #(0.025*delay_data) delay_out = DI;
 assign DO = (delay_data == 0) ? DI : delay_out;
 
 /*assign #0.025 delay_in[0] =  DI;
-generate 
+generate
     genvar i;
     for(i=1;i<128;i=i+1) begin: gen_delay
       assign #0.025 delay_in[i] = delay_in[i-1];
@@ -14901,12 +14901,12 @@ endmodule
 module rPLL (CLKOUT, CLKOUTP, CLKOUTD, CLKOUTD3, LOCK, CLKIN, CLKFB, FBDSEL, IDSEL, ODSEL, DUTYDA, PSDA, FDLY, RESET, RESET_P);
 input CLKIN;
 input CLKFB;
-input RESET; 
-input RESET_P; 
-input [5:0] FBDSEL; 
+input RESET;
+input RESET_P;
+input [5:0] FBDSEL;
 input [5:0] IDSEL;
 input [5:0] ODSEL;
-input [3:0] PSDA,FDLY; 
+input [3:0] PSDA,FDLY;
 input [3:0] DUTYDA;
 
 output CLKOUT;
@@ -15027,7 +15027,7 @@ always @(posedge CLKIN or negedge resetn) begin
 	        clkin_cycle[3] <= clkin_cycle[2];
             clkin_cycle[4] <= clkin_cycle[3];
         end
-    
+
         if (clkin_cycle[0] > 0) begin
             if(((clkin_cycle[0] - clkin_period1 < 0.01) && (clkin_cycle[0] - clkin_period1 > -0.01)) &&(!div_dyn_change)) begin
                 clk_effect <= 1'b1;
@@ -15190,7 +15190,7 @@ always @(CLKIN or oclk_effect or clkout or resetn) begin
 end
 
 assign CLKOUT = clk_out;
-assign LOCK = lock_reg;  
+assign LOCK = lock_reg;
 
 //clkout_p
 // DYN_DA_EN == "false".
@@ -15304,15 +15304,15 @@ always @(posedge clkfb) begin
 end
 
 always @(clkoutp) begin
-    clk_ps_reg0 <= #(ps_dly+f_dly) clkoutp;    
+    clk_ps_reg0 <= #(ps_dly+f_dly) clkoutp;
 end
-      
+
 always @(CLKIN or oclk_effect or clk_ps_reg0 or resetn) begin
     if (resetn == 1'b0) begin
         clk_ps_reg <= 1'b0;
     end else if(CLKOUTP_BYPASS == "true") begin
         clk_ps_reg <= CLKIN;
-    end 
+    end
     //else if (oclk_effect == 1'b1) begin
     else begin
         clk_ps_reg <= clk_ps_reg0;
@@ -15335,12 +15335,12 @@ always @(posedge clk_div_src or negedge resetn) begin
 			cnt_div <= 0;
         end
 	end
-end    
-    
+end
+
 assign CLKOUTD = (CLKOUTD_BYPASS == "true") ? CLKIN : clkout_div_reg;
 
 // div3
-assign div3_in=(CLKOUTD3_SRC=="CLKOUTP")?clk_ps_reg:clk_out; 
+assign div3_in=(CLKOUTD3_SRC=="CLKOUTP")?clk_ps_reg:clk_out;
 
 always @ (div3_in) begin
     pre_div3_in <= div3_in;
@@ -15377,7 +15377,7 @@ input RTEN;
 output O;
 
 buf IB (O, I);
-        
+
 endmodule
 
 //IOBUF with ODT
@@ -15390,8 +15390,8 @@ inout IO;
 
 buf OB (O, IO);
 bufif0 IB (IO,I,OEN);
-    
-endmodule 
+
+endmodule
 
 //ELVDS_IBUF with ODT
 module ELVDS_IBUF_R (O, I, IB, RTEN);
@@ -15452,7 +15452,7 @@ always
             #half_clk;
             oscr = 1'b0;
        end
-      
+
 endmodule
 
 //OTP,One-Time-Programming
@@ -15470,7 +15470,7 @@ input LOADN_SPIAD;//Select dynamic address signal SPIAD at low level
 endmodule
 
 // CLKDIVG
-module CLKDIVG(CLKOUT, CALIB, CLKIN, RESETN); 
+module CLKDIVG(CLKOUT, CALIB, CLKIN, RESETN);
 
 input CLKIN;
 input RESETN;
@@ -15510,7 +15510,7 @@ initial begin
     begin
         select5 = 1'b1;
     end else begin
-        select5 = 1'b0;        
+        select5 = 1'b0;
     end
 
 end
@@ -15717,7 +15717,7 @@ parameter PSD_FINE = 0;//0~7
 parameter DTMS_ENB = "FALSE";//"FALSE":fixed 50% duty cycle for case odivb=2~128; "TRUE":set PSB_COARSE & PSB_FINE as duty edge when DYN_DPA_EN="TRUE" for case odivb=2~128
 parameter DTMS_ENC = "FALSE";//"FALSE":fixed 50% duty cycle for case odivc=2~128; "TRUE":set PSC_COARSE & PSC_FINE as duty edge when DYN_DPA_EN="TRUE" for case odivc=2~128
 parameter DTMS_END = "FALSE";//"FALSE":fixed 50% duty cycle for case odivd=2~128; "TRUE":set PSD_COARSE & PSD_FINE as duty edge when DYN_DPA_EN="TRUE" for case odivd=2~128
- 
+
 parameter RESET_I_EN = "FALSE";//"TRUE","FALSE". Enable RESET_I through the dedicated signal from ciu.
 parameter RESET_S_EN =  "FALSE";//"TRUE","FALSE". Enable RESET_S through the dedicated signal from ciu.
 
@@ -15848,7 +15848,7 @@ always @(posedge CLKIN or negedge resetn) begin
 	        clkin_cycle[3] <= clkin_cycle[2];
             clkin_cycle[4] <= clkin_cycle[3];
         end
-    
+
         if (clkin_cycle[0] > 0) begin
             if(((clkin_cycle[0] - clkin_period1 < 0.01) && (clkin_cycle[0] - clkin_period1 > -0.01)) &&(!div_dyn_change)) begin
                 clk_effect <= 1'b1;
@@ -15917,7 +15917,7 @@ begin
         clkoutb_period = (clkin_period * ODIVB_SEL_reg);
     end
 end
-    
+
 always @(*)
 begin
     if (CLKC_IN_SEL == 2'b00 || CLKC_IN_SEL == 2'b01) begin
@@ -16065,7 +16065,7 @@ end
 //dynamic phase shift
 always @(*)
 begin
-    
+
     if(PSSEL == 2'b01)
     begin
         pssel_b_flag <= 1'b1;
@@ -16107,7 +16107,7 @@ begin
         coarse_dyn_d <= 1;
     end else
     begin
-        
+
         if (PSSEL == 2'b01)
         begin
             if(pssel_b_flag == 1'b1)
@@ -16153,7 +16153,7 @@ begin
                     fine_dyn_b <= fine_dyn_b - 1;
                 end
             end
-        end     
+        end
         end else if (PSSEL == 2'b10)
         begin
             if(pssel_c_flag == 1'b1)
@@ -16228,7 +16228,7 @@ begin
                     fine_dyn_d <= fine_dyn_d + 1;
                 end else
                 begin
-                    if(ODIVD_SEL_reg == 1) 
+                    if(ODIVD_SEL_reg == 1)
                     begin
                         coarse_dyn_d <= 1;
                     end else begin
@@ -16260,8 +16260,8 @@ begin
     if(CLKA_IN_SEL == 2'b11)
     begin
         clkouta_duty = (clkouta_period * h_level_a / ODIVA_SEL_reg);
-    end else 
-    begin    
+    end else
+    begin
         clkouta_duty = clkouta_half;
     end
 end
@@ -16339,7 +16339,7 @@ begin
     if(resetn == 1'b0)
     begin
         ckena <= 1'b0;
-    end else 
+    end else
     begin
         ckena <= enclk_a;
     end
@@ -16350,7 +16350,7 @@ begin
     if(rst == 1'b1)
     begin
         ckenb <= 1'b0;
-    end else 
+    end else
     begin
         ckenb <= enclk_b;
     end
@@ -16361,7 +16361,7 @@ begin
     if(rst == 1'b1)
     begin
         ckenc <= 1'b0;
-    end else 
+    end else
     begin
         ckenc <= enclk_c;
     end
@@ -16396,9 +16396,9 @@ end
 always @(coarse_b or fine_b or ODIVB_SEL_reg or clkoutb_period) begin
     if(coarse_b == ODIVB_SEL_reg)
     begin
-        real_phaseb = (unit_phase * fine_b/8);            
+        real_phaseb = (unit_phase * fine_b/8);
     end else begin
-        real_phaseb = (coarse_b + (unit_phase * fine_b/8));    
+        real_phaseb = (coarse_b + (unit_phase * fine_b/8));
     end
     phase_valueb = clkoutb_period * (real_phaseb/ODIVB_SEL_reg);
 end
@@ -16412,7 +16412,7 @@ begin
     clkoutb_duty_odd = (clkoutb_period * h_level_b / ODIVB_SEL_reg);
 end
 
-always @(clkoutb_half or real_dutyb or real_phaseb or ODIVB_SEL_reg or clkoutb_period or clkoutb_duty_odd) 
+always @(clkoutb_half or real_dutyb or real_phaseb or ODIVB_SEL_reg or clkoutb_period or clkoutb_duty_odd)
 begin
     if(PSB_COARSE == ODIVB_SEL)
     begin
@@ -16514,7 +16514,7 @@ begin
     clkoutc_duty_odd = (clkoutc_period * h_level_c / ODIVC_SEL_reg);
 end
 
-always @(clkoutc_half or real_dutyc or real_phasec or ODIVC_SEL_reg or clkoutc_period or clkoutc_duty_odd) 
+always @(clkoutc_half or real_dutyc or real_phasec or ODIVC_SEL_reg or clkoutc_period or clkoutc_duty_odd)
 begin
     if(PSC_COARSE == ODIVC_SEL)
     begin
@@ -16540,7 +16540,7 @@ begin
                 clkoutc_duty = (clkoutc_period * (real_dutyc - real_phasec))/ODIVC_SEL_reg;
             end else if(real_dutyc < real_phasec)
             begin
-                clkoutc_duty = (clkoutc_period *(ODIVC_SEL_reg + (real_dutyc - real_phasec)))/ODIVC_SEL_reg; 
+                clkoutc_duty = (clkoutc_period *(ODIVC_SEL_reg + (real_dutyc - real_phasec)))/ODIVC_SEL_reg;
             end
         end
 
@@ -16591,7 +16591,7 @@ end
 
 always @(coarse_d or fine_d or ODIVD_SEL_reg or clkoutd_period) begin
     if(coarse_d == ODIVD_SEL_reg)begin
-        real_phased = (unit_phase * fine_d/8);    
+        real_phased = (unit_phase * fine_d/8);
     end else begin
         real_phased = (coarse_d + (unit_phase * fine_d/8));
     end
@@ -16613,9 +16613,9 @@ begin
     if(PSD_COARSE == ODIVD_SEL)begin
         real_dutyd = (unit_duty * PSD_FINE/8);
     end else begin
-        real_dutyd = (PSD_COARSE + (unit_duty * PSD_FINE/8));        
+        real_dutyd = (PSD_COARSE + (unit_duty * PSD_FINE/8));
     end
-    
+
     if(CLKC_IN_SEL == 2'b10 || CLKC_IN_SEL == 2'b11)
     begin
         clkoutd_duty = clkoutd_duty_odd;
@@ -16665,7 +16665,3 @@ end
 assign CLKOUTD = (ckend == 1'b1) ? clkd_out : 1'b0;
 
 endmodule
-
-
-
-

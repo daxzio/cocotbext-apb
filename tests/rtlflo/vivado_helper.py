@@ -4,7 +4,6 @@ from fpga import Project
 
 
 class vivado_helper:
-
     def __init__(self):
         self.cwd = os.getcwd()
         self.build_dir = f"{self.cwd}/build"

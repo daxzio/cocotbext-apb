@@ -1,8 +1,8 @@
-module dut 
+module dut
 #(
         integer G_REGWIDTH = 32
       , integer G_ADDR_WIDTH = 32
-) 
+)
 (
         input wire clk,
         input wire rst,
@@ -41,4 +41,3 @@ assign s_apb_pslverr  = m_apb_pslverr;
 
 
 endmodule
-

@@ -1,9 +1,9 @@
-module dut 
+module dut
 #(
       integer REGWIDTH = 32
       , integer N_REGS = 32
       , integer G_ADDR_WIDTH = $clog2(N_REGS)+$clog2(REGWIDTH/8)
-) 
+)
 (
         input wire clk,
         input wire rst,
@@ -27,4 +27,3 @@ module dut
     );
 
 endmodule
-

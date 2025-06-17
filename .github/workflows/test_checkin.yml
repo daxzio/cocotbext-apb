@@ -1,7 +1,7 @@
 name: Test Cocotbext APB
 
-on: 
-  push: 
+on:
+  push:
   pull_request:
   schedule:
     - cron: '0 1 * * 0'
@@ -9,8 +9,8 @@ jobs:
   run_lint:
     strategy:
       fail-fast: false # So that one fail doesn't stop remaining tests
-    runs-on: ubuntu-latest      
-    
+    runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
       - name: Install dependencies
@@ -25,7 +25,7 @@ jobs:
         continue-on-error: true
         run: |
           mypy cocotbext
- 
+
   build_icarus_linux:
     uses: ./.github/workflows/setup_icarus.yml
 #   build_verilator_linux:
@@ -47,7 +47,7 @@ jobs:
     env:
       CI_TARGET: ${{ matrix.target }}
       TERM: xterm-256color # for tput in the script file
-    
+
     steps:
       - uses: actions/checkout@v4
       - name: Report Environment
@@ -79,7 +79,7 @@ jobs:
           python -m pip install --upgrade git+https://github.com/cocotb/cocotb-bus.git
       - name: Run Tests
         run: |
-          unset PYTHONHOME 
+          unset PYTHONHOME
           make SIM=${CI_TARGET}
 
   build_code_main:
@@ -98,7 +98,7 @@ jobs:
     env:
       CI_TARGET: ${{ matrix.target }}
       TERM: xterm-256color # for tput in the script file
-    
+
     steps:
       - uses: actions/checkout@v4
       - name: Report Environment
@@ -130,9 +130,9 @@ jobs:
           python -m pip install --upgrade git+https://github.com/cocotb/cocotb-bus.git
       - name: Run Tests
         run: |
-          unset PYTHONHOME 
+          unset PYTHONHOME
           make SIM=${CI_TARGET}
-    
+
 #   pypy_release:
 #     needs: [build_code_linux]
 #     uses: ./.github/workflows/pypy_release.yml
@@ -152,7 +152,7 @@ jobs:
           password: ${{ secrets.PYPI_API_TOKEN }}
           attestations: false
 
-#         env: 
+#         env:
 #           PYPY_SECRET : ${{ secrets.PYPI_API_TOKEN }}
 #         if: " env.PYPY_SECRET != '' }}"
 #           with:

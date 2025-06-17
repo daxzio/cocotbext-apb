@@ -98,7 +98,6 @@ class collectTestsDirs:
 
 
 class tb_runner:
-
     def __init__(self):
         self.project = parseProject()
         self.ui = VUnit.from_argv()

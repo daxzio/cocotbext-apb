@@ -58,7 +58,7 @@ def main() -> int:
     parser = _get_parser()
     args = parser.parse_args()
     rc = 0
-    
+
     result = ET.Element("testsuites", name=args.output_testsuites_name)
 
     input_pattern = re.compile(args.input_filename)

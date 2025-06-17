@@ -111,7 +111,7 @@ VERILOG_DESIGN?=\
     ${SIM_VERILOG_SOURCES} \
     ${XILINX_SIM_SOURCES} \
     ${EXT_VERILOG_SOURCES} \
-    ${INT_VERILOG_SOURCES} 
+    ${INT_VERILOG_SOURCES}
 
 VERILOG_SOURCES+=\
     ${VERILOG_DESIGN} \
@@ -140,4 +140,3 @@ endif
 
 clean::
 	rm -rf __pycache__/ .simvision/ .Xil/ results.xml *.trn *.dsn vivado* *.vcd *.out irun* simvision* xrun* .bpad/ waves.shm/ *.err INCA_libs/ *.fst* ncvlog.log
-

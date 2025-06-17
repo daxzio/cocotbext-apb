@@ -9,9 +9,8 @@ from parseProject import parseProject
 
 
 class vivado_runner:
-
     def __init__(self):
-        #cwd = os.getcwd().split(os.sep)[-1]
+        # cwd = os.getcwd().split(os.sep)[-1]
         self.project = parseProject()
         self.project.parseSetup()
         # self.name = f"{self.project.synth_top}_{cwd}"

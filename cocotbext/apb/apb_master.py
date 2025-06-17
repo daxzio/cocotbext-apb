@@ -179,9 +179,15 @@ class ApbMaster(ApbBase):
                 self.sync.clear()
                 await self.sync.wait()
 
-            write, addr, data, strb, prot, error_expected, tx_id = (
-                self.queue_tx.popleft()
-            )
+            (
+                write,
+                addr,
+                data,
+                strb,
+                prot,
+                error_expected,
+                tx_id,
+            ) = self.queue_tx.popleft()
 
             if addr < 0 or addr >= 2**self.address_width:
                 raise ValueError("Address out of range")

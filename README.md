@@ -8,7 +8,7 @@ GitHub repository: https://github.com/daxzio/cocotbext-apb
 
 ## Introduction
 
-APB simulation models for [cocotb](https://github.com/cocotb/cocotb). 
+APB simulation models for [cocotb](https://github.com/cocotb/cocotb).
 
 The APB protocol is cover in these documents [APB Protocol Specification](https://github.com/daxzio/cocotbext-apb/blob/main/assets/IHI0024D_amba_apb_protocol_spec.pdf) and [APB Architecture Specification](https://github.com/daxzio/cocotbext-apb/blob/main/assets/IHI0024E_amba_apb_architecture_spec.pdf)
 
@@ -41,7 +41,7 @@ See the `tests` directory for complete testbenches using these modules.
 
 ### APB Bus
 
-The `APBBus` is used to map to a APB interface on the `dut`.  Class methods `from_entity` and `from_prefix` are provided to facilitate signal default name matching. 
+The `APBBus` is used to map to a APB interface on the `dut`.  Class methods `from_entity` and `from_prefix` are provided to facilitate signal default name matching.
 
 #### Required:
 * _psel_
@@ -58,7 +58,7 @@ The `APBBus` is used to map to a APB interface on the `dut`.  Class methods `fro
 
 ### APB Master
 
-The `ApbMaster` class implement a APB driver and is capable of generating read and write operations against APB slaves.  
+The `ApbMaster` class implement a APB driver and is capable of generating read and write operations against APB slaves.
 
 To use these modules, import the one you need and connect it to the DUT:
 
@@ -92,7 +92,7 @@ Once the module is instantiated, read and write operations can be initiated in a
 * `write_nowait(addr, data, strb=-1, prot=ApbProt.NONSECURE, error_expected=False)`:write _data_ (bytes), to _addr_, submit to queue. If an slverr is experienced a critical warning will be issued by default, but will reduced this to an info warning if `error_expected=True`
 * `read(addr, data=-1, prot=ApbProt.NONSECURE, error_expected=False)`: read bytes, at _addr_, id _data_supplied check for match, wait for result. If an slverr is experienced a critical warning will be issued by default, but will reduced this to an info warning if `error_expected=True`
 * `read_nowait(addr, data, prot=ApbProt.NONSECURE, error_expected=False)`: read bytes, at _addr_, id _data_supplied check for match, submit to queue. If an slverr is experienced a critical warning will be issued by default, but will reduced this to an info warning if `error_expected=True`
- 
+
 ### APB slave
 
 The `ApbSlave` classe implement an APB slaves and is capable of completing read and write operations from upstream APB masters.  This modules can either be used to perform memory reads and writes on a `MemoryInterface` on behalf of the DUT, or they can be extended to implement customized functionality.
@@ -194,6 +194,3 @@ Multi-port memories can be constructed by passing the `mem` object of the first 
 * `hexdump(address, length, prefix='')`: print hex dump of _length_ bytes starting from _address_, prefix lines with optional _prefix_
 * `hexdump_line(address, length, prefix='')`: return hex dump (list of str) of _length_ bytes starting from _address_, prefix lines with optional _prefix_
 * `hexdump_str(address, length, prefix='')`: return hex dump (str) of _length_ bytes starting from _address_, prefix lines with optional _prefix_
-
-
-

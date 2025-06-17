@@ -1,4 +1,4 @@
-# vivado -mode batch -source ../../../../rtlflo/migrate.tcl 
+# vivado -mode batch -source ../../../../rtlflo/migrate.tcl
 
 set version [version -short]
 set year [lindex [split $version "."] 0]
