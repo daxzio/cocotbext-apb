@@ -72,7 +72,7 @@ class ApbSlave(ApbBase):
                         )
                     if not 2 == len(addrs):
                         raise Exception(f"Address range needs to be 2 value , {addrs}")
-                    if addrs[0] <= address < addrs[1]:
+                    if addrs[0] <= address <= addrs[1]:
                         raise exception
                 else:
                     raise Exception(f"Unknown addr type , {addrs}")
