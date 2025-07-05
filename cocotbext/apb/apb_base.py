@@ -47,8 +47,8 @@ class ApbBase:
         self.address_width = len(self.bus.paddr)
         self.wwidth = len(self.bus.pwdata)
         self.rwidth = len(self.bus.prdata)
-        self.rbytes = int(self.rwidth / 4)
-        self.wbytes = int(self.wwidth / 4)
+        self.rbytes = int(self.rwidth / 8)
+        self.wbytes = int(self.wwidth / 8)
         self.byte_size = 8
         self.byte_lanes = self.wwidth // self.byte_size
         self.rdata_mask = 2**self.rwidth - 1
