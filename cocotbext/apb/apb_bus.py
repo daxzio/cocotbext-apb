@@ -47,11 +47,10 @@ class Apb4Bus(Apb3Bus):
         if signals is None:
             signals = self._signals
         if optional_signals is None:
-            optional_signals = self._optional_signals.extend(
-                ["pstrb", "pprot", "pslverr"]
-            )
+            optional_signals = self._optional_signals.copy()
+            optional_signals.extend(["pstrb", "pprot", "pslverr"])
         super().__init__(
-            entity, prefix, signals, optional_signals=self._optional_signals, **kwargs
+            entity, prefix, signals, optional_signals=optional_signals, **kwargs
         )
 
 
@@ -66,16 +65,15 @@ class Apb5Bus(Apb4Bus):
         if signals is None:
             signals = self._signals
         if optional_signals is None:
-            optional_signals = self._optional_signals.extend(
-                [
-                    "pwakeup",
-                    "pauser",
-                    "pwuser",
-                    "pruser",
-                    "pbuser",
-                    "pnse",
-                ]
-            )
+            optional_signals = self._optional_signals.copy()
+            optional_signals.extend([
+                "pwakeup",
+                "pauser",
+                "pwuser",
+                "pruser",
+                "pbuser",
+                "pnse",
+            ])
         super().__init__(
-            entity, prefix, signals, optional_signals=self._optional_signals, **kwargs
+            entity, prefix, signals, optional_signals=optional_signals, **kwargs
         )
