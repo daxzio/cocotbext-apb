@@ -237,9 +237,7 @@ class ApbMaster(ApbBase):
                         raise Exception(
                             f"Expected 0x{data_int:08x} doesn't match returned 0x{ret:08x}"
                         )
-                self.queue_rx.append(
-                    (ret.to_bytes(len(self.bus.prdata), "little"), tx_id)
-                )
+                self.queue_rx.append((ret.to_bytes(self.rbytes, "little"), tx_id))
 
             if self.penable_present:
                 self.bus.penable.value = 0
