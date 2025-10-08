@@ -4,3 +4,4 @@ pytest
 pyflakes
 ruff
 mypy
+pre-commit

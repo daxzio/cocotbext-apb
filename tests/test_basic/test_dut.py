@@ -166,7 +166,6 @@ async def test_dut_basic(dut):
     x = randint(0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF)
     await tb.intf.write(0x0000, x)
     await tb.intf.read(0x0000, x)
-    exit()
 
     x = []
     for i in range(tb.n_regs):

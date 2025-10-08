@@ -114,7 +114,7 @@ module top (
     logic [31:0] field_storage_regs_f_value [32] ;
     logic [31:0] field_combo_regs_f_next [32] ;
     logic field_combo_regs_f_load_next [32] ;
-    for(genvar i0=0; i0<32; i0++) begin
+    for(genvar i0=0; i0<32; i0=i0+1) begin
         // always_comb begin
         always @(*) begin
             logic [31:0] next_c;
