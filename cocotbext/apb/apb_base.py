@@ -41,7 +41,6 @@ class ApbBase:
         self.log.setLevel(logging.INFO)
         self.log.info(f"APB {self.name}")
         self.log.info(f"cocotbext-apb version {__version__}")
-        self.log.info(f"Copyright (c) 2024-{datetime.datetime.now().year} Daxzio")
         self.log.info("https://github.com/daxzio/cocotbext-apb")
 
         self.address_width = len(self.bus.paddr)
@@ -68,7 +67,7 @@ class ApbBase:
         self.log.info(f"  Byte size: {self.byte_size} bits")
         self.log.info(f"  Data width: {self.wwidth} bits ({self.byte_lanes} bytes)")
 
-        self.log.info("APB monitor signals:")
+        self.log.info("APB signals:")
         for sig in sorted(
             list(set().union(self.bus._signals, self.bus._optional_signals))
         ):
