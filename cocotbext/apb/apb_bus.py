@@ -66,14 +66,16 @@ class Apb5Bus(Apb4Bus):
             signals = self._signals
         if optional_signals is None:
             optional_signals = self._optional_signals.copy()
-            optional_signals.extend([
-                "pwakeup",
-                "pauser",
-                "pwuser",
-                "pruser",
-                "pbuser",
-                "pnse",
-            ])
+            optional_signals.extend(
+                [
+                    "pwakeup",
+                    "pauser",
+                    "pwuser",
+                    "pruser",
+                    "pbuser",
+                    "pnse",
+                ]
+            )
         super().__init__(
             entity, prefix, signals, optional_signals=optional_signals, **kwargs
         )
