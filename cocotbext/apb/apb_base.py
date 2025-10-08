@@ -41,6 +41,7 @@ class ApbBase:
         self.log.setLevel(logging.INFO)
         self.log.info(f"APB {self.name}")
         self.log.info(f"cocotbext-apb version {__version__}")
+        self.log.info(f"Copyright (c) 2024-{datetime.datetime.now().year} Daxzio")
         self.log.info("https://github.com/daxzio/cocotbext-apb")
 
         self.address_width = len(self.bus.paddr)
