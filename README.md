@@ -33,11 +33,11 @@ See the `tests` directory for complete testbenches using these modules.
 
 ### APB Write
 
-![APB Write](https://github.com/daxzio/cocotbext-apb/blob/main/assets/apb_write.png)
+![APB Write](https://github.com/daxzio/cocotbext-apb/raw/main/assets/apb_write.png)
 
 ### APB Read
 
-![APB Read](https://github.com/daxzio/cocotbext-apb/blob/main/assets/apb_read.png)
+![APB Read](https://github.com/daxzio/cocotbext-apb/raw/main/assets/apb_read.png)
 
 ### APB Bus
 
@@ -135,7 +135,7 @@ Both attributes are arrays, and each element can be a single address, or a two e
 
 If there is a read or a write with an address in this space, and the prot from the master does not match, it will report the type of error, as a warning, and assert `slverr`. The access will also be unsuccessful, the write will not occur and a read will result in all zeros being returned.
 
-![APB Write Error](https://github.com/daxzio/cocotbext-apb/blob/main/assets/apb_write_error.png)
+![APB Write Error](https://github.com/daxzio/cocotbext-apb/raw/main/assets/apb_write_error.png)
 
 ### APB RAM
 
