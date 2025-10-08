@@ -97,6 +97,28 @@ async def test_dut_basic(dut):
     await tb.intf.write(0x0000, 0x7765432121454568)
     await tb.intf.read(0x0000, 0x7765432121454568)
 
+    x = randint(0, 0xFFFFFFFFFFFFFFFF)
+    await tb.intf.write(0x0000, x, length=8)
+    await tb.intf.read(0x0000, x, length=8)
+    x = randint(0xFFFFFFFF, 0xFFFFFFFFFFFFFFFF)
+    await tb.intf.write(0x0000, x)
+    await tb.intf.read(0x0000, x)
+    x = randint(0x0, 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF)
+    await tb.intf.write(0x0000, x, length=16)
+    await tb.intf.read(0x0000, x, length=16)
+    x = randint(0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF)
+    await tb.intf.write(0x0000, x)
+    await tb.intf.read(0x0000, x)
+    x = randint(0x0, 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF)
+    await tb.intf.write(0x0000, x, length=32)
+    await tb.intf.read(0x0000, x, length=32)
+    x = randint(
+        0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF,
+        0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF,
+    )
+    await tb.intf.write(0x0000, x)
+    await tb.intf.read(0x0000, x)
+
     x = []
     for i in range(tb.n_regs):
         x.append(randint(0, (2**tb.regwidth) - 1))

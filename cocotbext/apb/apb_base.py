@@ -68,7 +68,7 @@ class ApbBase:
         self.log.info(f"  Byte size: {self.byte_size} bits")
         self.log.info(f"  Data width: {self.wwidth} bits ({self.byte_lanes} bytes)")
 
-        self.log.info("APB monitor signals:")
+        self.log.info("APB signals:")
         for sig in sorted(
             list(set().union(self.bus._signals, self.bus._optional_signals))
         ):

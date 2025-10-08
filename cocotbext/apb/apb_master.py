@@ -21,6 +21,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
 """
+import math
 
 from cocotb import start_soon
 from cocotb.triggers import RisingEdge
@@ -66,6 +67,20 @@ class ApbMaster(ApbBase):
         self._run_coroutine_obj: Any = None
         self._restart()
 
+    def calc_length(self, length, data):
+        if -1 == length:
+            length = self.wbytes
+        if not 0 == length % self.wbytes:
+            raise Exception(
+                f"Length needs to be a multiple of the byte width: {length}%{self.wbytes}"
+            )
+        if isinstance(data, int):
+            min_length = math.ceil(data.bit_length() / self.wwidth)
+        else:
+            min_length = math.ceil(len(data) / self.wwidth)
+        length = max(int(length / self.wbytes), min_length)
+        return length
+
     async def write(
         self,
         addr: int,
@@ -73,8 +88,9 @@ class ApbMaster(ApbBase):
         strb: int = -1,
         prot: ApbProt = ApbProt.NONSECURE,
         error_expected: bool = False,
+        length: int = -1,
     ) -> None:
-        self.write_nowait(addr, data, strb, prot, error_expected)
+        self.write_nowait(addr, data, strb, prot, error_expected, length)
         await self._idle.wait()
 
     def write_nowait(
@@ -84,18 +100,24 @@ class ApbMaster(ApbBase):
         strb: int = -1,
         prot: ApbProt = ApbProt.NONSECURE,
         error_expected: bool = False,
+        length: int = -1,
     ) -> None:
         """ """
-        self.tx_id += 1
-        if isinstance(data, int):
-            datab = data.to_bytes(self.wbytes, "little")
-        else:
-            datab = data
-        self.queue_tx.append(
-            (True, addr, datab, strb, prot, error_expected, self.tx_id)
-        )
-        self.sync.set()
+        self.loop = self.calc_length(length, data)
+
         self._idle.clear()
+        for i in range(self.loop):
+            addrb = addr + i * self.wbytes
+            if isinstance(data, int):
+                subdata = (data >> self.wwidth * i) & self.wdata_mask
+                datab = subdata.to_bytes(self.wbytes, "little")
+            else:
+                datab = data[i * self.wbytes : (i + 1) * self.wbytes]
+            self.tx_id += 1
+            self.queue_tx.append(
+                (True, addrb, datab, strb, prot, error_expected, self.tx_id)
+            )
+        self.sync.set()
 
     async def read(
         self,
@@ -103,6 +125,7 @@ class ApbMaster(ApbBase):
         data: Union[int, bytes] = bytes(),
         prot: ApbProt = ApbProt.NONSECURE,
         error_expected: bool = False,
+        length: int = -1,
     ) -> bytes:
         rx_id = self.read_nowait(addr, data, prot, error_expected)
         found = False
@@ -122,18 +145,21 @@ class ApbMaster(ApbBase):
         data: Union[int, bytes] = bytes(),
         prot: ApbProt = ApbProt.NONSECURE,
         error_expected: bool = False,
+        length: int = -1,
     ) -> int:
-        if isinstance(data, int):
-            if data > self.rdata_mask:
-                self.log.warning(
-                    f"Read data 0x{data:08x} exceeds width expected 0x{self.rdata_mask:08x}"
-                )
-            datab = data.to_bytes(self.rbytes, "little")
-        else:
-            datab = data
-        self.tx_id += 1
-        self.queue_tx.append((False, addr, datab, -1, prot, error_expected, self.tx_id))
+        self.loop = self.calc_length(length, data)
         self.sync.set()
+        for i in range(self.loop):
+            addrb = addr + i * self.rbytes
+            if isinstance(data, int):
+                subdata = (data >> self.rwidth * i) & self.rdata_mask
+                datab = subdata.to_bytes(self.rbytes, "little")
+            else:
+                datab = data
+            self.tx_id += 1
+            self.queue_tx.append(
+                (False, addrb, datab, -1, prot, error_expected, self.tx_id)
+            )
         self._idle.clear()
         return self.tx_id
 
