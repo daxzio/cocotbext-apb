@@ -60,6 +60,8 @@ The `APBBus` is used to map to a APB interface on the `dut`.  Class methods `fro
 
 The `ApbMaster` class implement a APB driver and is capable of generating read and write operations against APB slaves.
 
+The master automatically handles data wider than the bus width by splitting transactions into multiple sequential APB accesses at consecutive addresses. This allows seamless transfers of wide data values across narrower APB interfaces.
+
 To use these modules, import the one you need and connect it to the DUT:
 
     from cocotbext.apb import ApbMaster, ApbBus
@@ -88,10 +90,10 @@ Once the module is instantiated, read and write operations can be initiated in a
 * `enable_backpressure(seednum=None)`: Enable random delays on the interface
 * `disable_backpressure()`: Disable random delays on the interface
 * `wait()`: blocking wait until all outstanding operations complete
-* `write(addr, data, strb=-1, prot=ApbProt.NONSECURE, error_expected=False)`: write _data_ (bytes), to _addr_, wait for result.  If an slverr is experienced a critical warning will be issued by default, but will reduced this to an info warning if `error_expected=True`
-* `write_nowait(addr, data, strb=-1, prot=ApbProt.NONSECURE, error_expected=False)`:write _data_ (bytes), to _addr_, submit to queue. If an slverr is experienced a critical warning will be issued by default, but will reduced this to an info warning if `error_expected=True`
-* `read(addr, data=-1, prot=ApbProt.NONSECURE, error_expected=False)`: read bytes, at _addr_, id _data_supplied check for match, wait for result. If an slverr is experienced a critical warning will be issued by default, but will reduced this to an info warning if `error_expected=True`
-* `read_nowait(addr, data, prot=ApbProt.NONSECURE, error_expected=False)`: read bytes, at _addr_, id _data_supplied check for match, submit to queue. If an slverr is experienced a critical warning will be issued by default, but will reduced this to an info warning if `error_expected=True`
+* `write(addr, data, strb=-1, prot=ApbProt.NONSECURE, error_expected=False, length=-1)`: write _data_ (bytes or int), to _addr_, wait for result.  If an slverr is experienced a critical warning will be issued by default, but will reduced this to an info warning if `error_expected=True`. If _data_ is wider than the bus width, it will automatically be split into multiple sequential APB write accesses at consecutive addresses. The optional _length_ parameter can override the automatic length calculation, should be a multiple of the number of bytes in the wdata bus.
+* `write_nowait(addr, data, strb=-1, prot=ApbProt.NONSECURE, error_expected=False, length=-1)`: write _data_ (bytes or int), to _addr_, submit to queue. If an slverr is experienced a critical warning will be issued by default, but will reduced this to an info warning if `error_expected=True`. If _data_ is wider than the bus width, it will automatically be split into multiple sequential APB write accesses at consecutive addresses. The optional _length_ parameter can override the automatic length calculation, should be a multiple of the number of bytes in the wdata bus.
+* `read(addr, data=bytes(), prot=ApbProt.NONSECURE, error_expected=False, length=-1)`: read bytes, at _addr_, if _data_ supplied check for match, wait for result. If an slverr is experienced a critical warning will be issued by default, but will reduced this to an info warning if `error_expected=True`. If _data_ is wider than the bus width, it will automatically be split into multiple sequential APB read accesses at consecutive addresses. The optional _length_ parameter can override the automatic length calculation, should be a multiple of the number of bytes in the wdata bus.
+* `read_nowait(addr, data=bytes(), prot=ApbProt.NONSECURE, error_expected=False, length=-1)`: read bytes, at _addr_, if _data_ supplied check for match, submit to queue. If an slverr is experienced a critical warning will be issued by default, but will reduced this to an info warning if `error_expected=True`. If _data_ is wider than the bus width, it will automatically be split into multiple sequential APB read accesses at consecutive addresses. The optional _length_ parameter can override the automatic length calculation, should be a multiple of the number of bytes in the wdata bus.
 
 ### APB slave
 
