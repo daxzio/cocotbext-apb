@@ -1,6 +1,8 @@
 SIM?=icarus
 
-default:
+default: verilog vhdl
+
+verilog:
 	cd tests/test_basic ; make clean sim WAVES=0 && ../rtlflo/combine_results.py
 	cd tests/test_basic_64 ; make clean sim WAVES=0 && ../rtlflo/combine_results.py
 	cd tests/test_slave ; make clean sim WAVES=0 && ../rtlflo/combine_results.py
@@ -8,6 +10,9 @@ default:
 	cd tests/test_slave_noprot ; make clean sim WAVES=0 && ../rtlflo/combine_results.py
 	cd tests/test_slave_noslverr ; make clean sim WAVES=0 && ../rtlflo/combine_results.py
 	cd tests/test_slave_nostrb ; make clean sim WAVES=0 && ../rtlflo/combine_results.py
+
+vhdl:
+	# VHDL tests would go here if any are added
 
 lint:
 	pyflakes cocotbext

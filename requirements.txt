@@ -1,5 +1,5 @@
 cocotb
-cocotb-bus
+# cocotb-bus
 pytest
 pyflakes
 ruff
