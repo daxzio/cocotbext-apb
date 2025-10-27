@@ -246,14 +246,17 @@ class ApbMaster(ApbBase):
             while not self.bus.pready.value:
                 await RisingEdge(self.clock)
 
-            if self.pslverr_present and bool(self.bus.pslverr.value):
-                msg = "PSLVERR detected!"
-                if self.pprot_present:
-                    msg += f" PPROT - {ApbProt(self.bus.pprot.value).name}"
-                if error_expected:
-                    self.log.info(msg)
-                else:
+            if self.pslverr_present:
+                if not bool(self.bus.pslverr.value) == error_expected:
+                    if bool(self.bus.pslverr.value):
+                        msg = "PSLVERR detected not expected!"
+                    else:
+                        msg = "PSLVERR expected not detected!"
+                    if self.pprot_present:
+                        msg += f" PPROT - {ApbProt(self.bus.pprot.value).name}"
                     self.log.critical(msg)
+                    raise Exception(msg)
+
             if not write:
                 ret = resolve_x_int(self.bus.prdata)
                 self.log.info(f"Value read: 0x{ret:08x}")
