@@ -63,6 +63,8 @@ jobs:
       - name: Setup Verilator
         if: matrix.target == 'verilator'
         uses: veryl-lang/setup-verilator@v1
+      - name: Verilator version
+        if: matrix.target == 'verilator'
         run: verilator --version
       - name: Install dependency for ghdl
         if: matrix.target == 'ghdl'
