@@ -76,6 +76,7 @@ Once the module is instantiated, read and write operations can be initiated in a
 #### `ApbMaster`constructor parameters
 * _bus_: `ApbBus` object containing APB interface signals
 * _clock_: clock signal
+* _timeout_max_: Maximum clock cycles to wait for `pready` signal before timing out (optional, default `1000`). Set to `-1` to disable timeout.
 * _reset_: reset signal (optional)
 * _reset_active_level_: reset active level (optional, default `True`)
 

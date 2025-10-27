@@ -50,23 +50,18 @@ async def test_apb_pprot(dut):
 
     await tb.m.write(0x1000, 0x74568562, prot=ApbProt.PRIVILEGED)
     await tb.m.read(0x1000, 0x74568562, prot=ApbProt.PRIVILEGED)
-    await tb.m.read(0x1000, 0x00000000, prot=ApbProt.NONSECURE)
+    await tb.m.read(0x1000, 0x00000000, prot=ApbProt.NONSECURE, error_expected=True)
 
-    await tb.m.write(0x1000, 0x52346325, prot=ApbProt.NONSECURE)
+    await tb.m.write(0x1000, 0x52346325, prot=ApbProt.NONSECURE, error_expected=True)
     await tb.m.read(0x1000, 0x74568562, prot=ApbProt.PRIVILEGED)
 
-    #     try:
-    #         await tb.m.read(0x0110, 0x00000000, prot=ApbProt.NONSECURE)
-    #     except :
-    #         pass
     await tb.m.read(0x1000, 0x00000000, prot=ApbProt.NONSECURE, error_expected=True)
 
     await tb.m.write(0x2000, 0xA356B3E1, prot=ApbProt.INSTRUCTION)
     await tb.m.read(0x2000, 0xA356B3E1, prot=ApbProt.INSTRUCTION)
-    await tb.m.read(0x2000, 0x00000000, prot=ApbProt.NONSECURE)
     await tb.m.read(0x2000, 0x00000000, prot=ApbProt.NONSECURE, error_expected=True)
 
-    await tb.m.write(0x2000, 0x45325533, prot=ApbProt.NONSECURE)
+    await tb.m.write(0x2000, 0x45325533, prot=ApbProt.NONSECURE, error_expected=True)
     await tb.m.read(0x2000, 0xA356B3E1, prot=ApbProt.INSTRUCTION)
 
     await tb.m.write(0x2000, 0x45325533, prot=ApbProt.NONSECURE, error_expected=True)

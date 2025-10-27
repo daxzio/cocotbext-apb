@@ -39,8 +39,12 @@ from .utils import resolve_x_int
 
 
 class ApbMaster(ApbBase):
-    def __init__(self, bus, clock, **kwargs) -> None:
+    def __init__(self, bus, clock, timeout_max=1000, **kwargs) -> None:
         super().__init__(bus, clock, name="master", **kwargs)
+
+        self.timeout_max = timeout_max
+        self.exception_enabled = True
+        self.exception_occurred = False
 
         self.queue_tx: Deque[Tuple[bool, int, bytes, int, ApbProt, bool, int]] = deque()
         self.queue_rx: Deque[Tuple[bytes, int]] = deque()
@@ -243,8 +247,15 @@ class ApbMaster(ApbBase):
                 self.bus.penable.value = 1
                 await RisingEdge(self.clock)
 
+            timeout = 0
             while not self.bus.pready.value:
                 await RisingEdge(self.clock)
+                if self.timeout_max != -1:
+                    timeout += 1
+                    if timeout >= self.timeout_max:
+                        raise TimeoutError(
+                            f"APB transaction timeout: pready not asserted within {self.timeout_max} clock cycles (addr: 0x{addr:08x})"
+                        )
 
             if self.pslverr_present:
                 if not bool(self.bus.pslverr.value) == error_expected:
@@ -254,8 +265,12 @@ class ApbMaster(ApbBase):
                         msg = "PSLVERR expected not detected!"
                     if self.pprot_present:
                         msg += f" PPROT - {ApbProt(self.bus.pprot.value).name}"
-                    self.log.critical(msg)
-                    raise Exception(msg)
+                    self.exception_occurred = True
+                    if self.exception_enabled:
+                        self.log.critical(msg)
+                        raise Exception(msg)
+                    else:
+                        self.log.warning(msg)
 
             if not write:
                 ret = resolve_x_int(self.bus.prdata)

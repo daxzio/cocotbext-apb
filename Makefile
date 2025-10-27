@@ -10,6 +10,7 @@ verilog:
 	cd tests/test_slave_noprot ; make clean sim WAVES=0 && ../rtlflo/combine_results.py
 	cd tests/test_slave_noslverr ; make clean sim WAVES=0 && ../rtlflo/combine_results.py
 	cd tests/test_slave_nostrb ; make clean sim WAVES=0 && ../rtlflo/combine_results.py
+	cd tests/test_slverr ; make clean sim WAVES=0 && ../rtlflo/combine_results.py
 
 vhdl:
 	# VHDL tests would go here if any are added
@@ -30,6 +31,9 @@ dist:
 	rm -rf MANIFEST
 	rm -rf CHANGELOG.txt
 	python setup.py sdist
+
+pre-commit:
+	pre-commit run --all-files
 
 GIT_TAG?=0.0.1
 VERSION_FILE?=`find . -name version.py`
