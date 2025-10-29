@@ -1,16 +1,17 @@
 SIM?=icarus
 TOPLEVEL_LANG=verilog
 WORK_BASE?=..
-BASE?=etana
-# PROJ_HOME?=..
 
-TOPLEVEL = dut
-MODULE = test_${TOPLEVEL}
+TOPLEVEL = regblock
+MODULE = test_dut
 
 INT_VERILOG_SOURCES += \
-    ../rtl/top.sv \
+    ./regblock.sv \
 
 COCOTB_SOURCES = \
-    ./dut.sv
 
 include ${WORK_BASE}/rtlflo/cocotb_helper.mak
+
+CPUIF?=apb4-flat
+RDL_ARGS?=-P N_REGS=32 -P REGWIDTH=32
+include ../regblock.mak
