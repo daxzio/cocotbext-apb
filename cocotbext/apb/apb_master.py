@@ -53,6 +53,7 @@ class ApbMaster(ApbBase):
         self.queue_rx: Deque[Tuple[bytes, int]] = deque()
         self.tx_id = 0
         self.return_int = False
+        self.ret: Union[bytes, None] = None
 
         self.sync = Event()
 
@@ -158,7 +159,7 @@ class ApbMaster(ApbBase):
         error_expected: bool = False,
         device: int = 0,
         length: int = -1,
-    ) -> bytes:
+    ) -> Union[bytes, int]:
         rx_id = self.read_nowait(addr, data, prot, error_expected, device)
         found = False
         while not found:

@@ -91,10 +91,32 @@ Once the module is instantiated, read and write operations can be initiated in a
 * `enable_backpressure(seednum=None)`: Enable random delays on the interface
 * `disable_backpressure()`: Disable random delays on the interface
 * `wait()`: blocking wait until all outstanding operations complete
-* `write(addr, data, strb=-1, prot=ApbProt.NONSECURE, error_expected=False, length=-1)`: write _data_ (bytes or int), to _addr_, wait for result.  If an slverr is experienced a critical warning will be issued by default, but will reduced this to an info warning if `error_expected=True`. If _data_ is wider than the bus width, it will automatically be split into multiple sequential APB write accesses at consecutive addresses. The optional _length_ parameter can override the automatic length calculation, should be a multiple of the number of bytes in the wdata bus.
-* `write_nowait(addr, data, strb=-1, prot=ApbProt.NONSECURE, error_expected=False, length=-1)`: write _data_ (bytes or int), to _addr_, submit to queue. If an slverr is experienced a critical warning will be issued by default, but will reduced this to an info warning if `error_expected=True`. If _data_ is wider than the bus width, it will automatically be split into multiple sequential APB write accesses at consecutive addresses. The optional _length_ parameter can override the automatic length calculation, should be a multiple of the number of bytes in the wdata bus.
-* `read(addr, data=bytes(), prot=ApbProt.NONSECURE, error_expected=False, length=-1)`: read bytes, at _addr_, if _data_ supplied check for match, wait for result. If an slverr is experienced a critical warning will be issued by default, but will reduced this to an info warning if `error_expected=True`. If _data_ is wider than the bus width, it will automatically be split into multiple sequential APB read accesses at consecutive addresses. The optional _length_ parameter can override the automatic length calculation, should be a multiple of the number of bytes in the wdata bus.
-* `read_nowait(addr, data=bytes(), prot=ApbProt.NONSECURE, error_expected=False, length=-1)`: read bytes, at _addr_, if _data_ supplied check for match, submit to queue. If an slverr is experienced a critical warning will be issued by default, but will reduced this to an info warning if `error_expected=True`. If _data_ is wider than the bus width, it will automatically be split into multiple sequential APB read accesses at consecutive addresses. The optional _length_ parameter can override the automatic length calculation, should be a multiple of the number of bytes in the wdata bus.
+* `write(addr, data, strb=-1, prot=ApbProt.NONSECURE, error_expected=False, device=0, length=-1)`: write _data_ (bytes or int), to _addr_, wait for result.  If an slverr is experienced a critical warning will be issued by default, but will reduced this to an info warning if `error_expected=True`. If _data_ is wider than the bus width, it will automatically be split into multiple sequential APB write accesses at consecutive addresses. The optional _length_ parameter can override the automatic length calculation, should be a multiple of the number of bytes in the wdata bus. The optional _device_ parameter specifies the slave index to target.
+* `write_nowait(addr, data, strb=-1, prot=ApbProt.NONSECURE, error_expected=False, device=0, length=-1)`: write _data_ (bytes or int), to _addr_, submit to queue. If an slverr is experienced a critical warning will be issued by default, but will reduced this to an info warning if `error_expected=True`. If _data_ is wider than the bus width, it will automatically be split into multiple sequential APB write accesses at consecutive addresses. The optional _length_ parameter can override the automatic length calculation, should be a multiple of the number of bytes in the wdata bus. The optional _device_ parameter specifies the slave index to target.
+* `read(addr, data=bytes(), prot=ApbProt.NONSECURE, error_expected=False, device=0, length=-1)`: read bytes, at _addr_, if _data_ supplied check for match, wait for result. If an slverr is experienced a critical warning will be issued by default, but will reduced this to an info warning if `error_expected=True`. If _data_ is wider than the bus width, it will automatically be split into multiple sequential APB read accesses at consecutive addresses. The optional _length_ parameter can override the automatic length calculation, should be a multiple of the number of bytes in the wdata bus. The optional _device_ parameter specifies the slave index to target.
+* `read_nowait(addr, data=bytes(), prot=ApbProt.NONSECURE, error_expected=False, device=0, length=-1)`: read bytes, at _addr_, if _data_ supplied check for match, submit to queue. If an slverr is experienced a critical warning will be issued by default, but will reduced this to an info warning if `error_expected=True`. If _data_ is wider than the bus width, it will automatically be split into multiple sequential APB read accesses at consecutive addresses. The optional _length_ parameter can override the automatic length calculation, should be a multiple of the number of bytes in the wdata bus. The optional _device_ parameter specifies the slave index to target.
+
+### Multi-Device Support
+
+The `ApbMaster` supports multiple slave devices on the same bus instance. To use this feature:
+
+1.  **Signal Connection**:
+    *   `psel` must be a vector (e.g., `[1:0]` for 2 slaves).
+    *   `prdata` must be a concatenated vector of all slave read data outputs (e.g., `[63:0]` for 2 slaves with 32-bit data width).
+
+2.  **Access**:
+    *   Use the `device` parameter in `read`, `write`, `read_nowait`, and `write_nowait` methods to specify the target slave index (integer).
+    *   The `ApbMaster` will assert the corresponding bit in `psel` (`1 << device`) and slice the `prdata` appropriately.
+
+Example:
+
+```python
+# Write to slave 0
+await tb.intf.write(0x100, 0xDEADBEEF, device=0)
+
+# Read from slave 1
+val = await tb.intf.read(0x200, device=1)
+```
 
 ### APB slave
 

@@ -1,0 +1,14 @@
+addrmap top {
+    reg {
+        field {
+            sw=rw;
+            hw=r;
+            singlepulse;
+        } START[1] = 0;
+    } START;
+    reg {
+        field {
+            sw=r; hw=w;
+        } BUSY[1];
+    } BUSY;
+};
