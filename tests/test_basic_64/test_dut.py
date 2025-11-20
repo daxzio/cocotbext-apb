@@ -15,8 +15,9 @@ def returned_val(read_op):
 class testbench:
     def __init__(self, dut, reset_sense=1, period=10):
 
-        self.regwidth = int(dut.REGWIDTH)
-        self.n_regs = int(dut.N_REGS)
+        self.regwidth = len(dut.s_apb_pwdata)
+        self.n_regs = 2 ** (len(dut.s_apb_paddr) - 2)
+        self.n_regs = 32
         self.mask = (2**self.regwidth) - 1
         self.incr = int(self.regwidth / 8)
         self.cr = ClkReset(dut, period, reset_sense=reset_sense, resetname="rst")

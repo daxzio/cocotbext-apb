@@ -11,6 +11,8 @@ verilog:
 	cd tests/test_slave_noslverr ; make clean sim WAVES=0 && ../rtlflo/combine_results.py
 	cd tests/test_slave_nostrb ; make clean sim WAVES=0 && ../rtlflo/combine_results.py
 	cd tests/test_slverr ; make clean sim WAVES=0 && ../rtlflo/combine_results.py
+	cd tests/test_multi_device ; make clean sim WAVES=0 && ../rtlflo/combine_results.py
+	cd tests/test_poll ; make clean sim WAVES=0 && ../rtlflo/combine_results.py
 
 vhdl:
 	# VHDL tests would go here if any are added

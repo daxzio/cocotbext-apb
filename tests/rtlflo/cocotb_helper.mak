@@ -13,7 +13,14 @@ default: vivado_build
 SIM?=icarus
 else
 default: sim
+ifeq ($(SIM),icarus)
+sim: clean_sim_build
+.PHONY: clean_sim_build
+clean_sim_build:
+	rm -rf sim_build
 endif
+endif
+
 
 include $(shell cocotb-config --makefiles)/Makefile.sim
 include ${WORK_BASE}/rtlflo/xilinx_helper.mak
