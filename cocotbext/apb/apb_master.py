@@ -236,12 +236,12 @@ class ApbMaster(ApbBase):
         await self._idle.wait()
 
     async def _run(self):
-        await RisingEdge(self.clock)
         while True:
             while not self.queue_tx:
                 self._idle.set()
                 self.sync.clear()
                 await self.sync.wait()
+                await RisingEdge(self.clock)
 
             (
                 write,
@@ -331,6 +331,10 @@ class ApbMaster(ApbBase):
                 if not data == bytes():
                     data_int = int.from_bytes(data, byteorder="little")
                     if not data_int == ret_slice:
+                        self.bus.psel.value = 0
+                        await RisingEdge(self.clock)
+                        await RisingEdge(self.clock)
+                        await RisingEdge(self.clock)
                         raise Exception(
                             f"Expected 0x{data_int:08x} doesn't match returned 0x{ret_slice:08x}"
                         )
