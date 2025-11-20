@@ -237,11 +237,11 @@ class ApbMaster(ApbBase):
 
     async def _run(self):
         while True:
+            await RisingEdge(self.clock)
             while not self.queue_tx:
                 self._idle.set()
                 self.sync.clear()
                 await self.sync.wait()
-                await RisingEdge(self.clock)
 
             (
                 write,
