@@ -55,6 +55,7 @@ class ApbMaster(ApbBase):
         self.tx_id = 0
         self.return_int = False
         self.ret: Union[bytes, None] = None
+        self.intra_delay: int = 0
 
         self._idle = Event()
 
@@ -98,6 +99,8 @@ class ApbMaster(ApbBase):
     ) -> None:
         self.write_nowait(addr, data, strb, prot, error_expected, device, length)
         await self._idle.wait()
+        for i in range(self.intra_delay):
+            await RisingEdge(self.clock)
 
     def write_nowait(
         self,
@@ -161,6 +164,8 @@ class ApbMaster(ApbBase):
                     found = True
                     break
             await self._idle.wait()
+        for i in range(self.intra_delay):
+            await RisingEdge(self.clock)
         self.ret = ret
         if self.return_int:
             return int.from_bytes(ret, byteorder="little")
