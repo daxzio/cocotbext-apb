@@ -62,6 +62,9 @@ class ApbBase:
         if self.pstrb_present:
             assert self.byte_lanes == len(self.bus.pstrb)
         assert self.byte_lanes * self.byte_size == self.wwidth
+        self.multi_device = False
+        if len(self.bus.psel) > 1:
+            self.multi_device = True
 
         self.log.info(f"APB {self.name} configuration:")
         self.log.info(f"  Address width: {self.address_width} bits")

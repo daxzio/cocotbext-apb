@@ -21,11 +21,12 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
 """
+
 import math
 import logging
 
 from cocotb import start_soon
-from cocotb.triggers import RisingEdge
+from cocotb.triggers import RisingEdge, FallingEdge
 
 from collections import deque
 from cocotb.triggers import Event
@@ -55,10 +56,7 @@ class ApbMaster(ApbBase):
         self.return_int = False
         self.ret: Union[bytes, None] = None
 
-        self.sync = Event()
-
         self._idle = Event()
-        self._idle.set()
 
         if self.penable_present:
             self.bus.penable.value = 0
@@ -70,11 +68,6 @@ class ApbMaster(ApbBase):
             self.bus.pprot.value = 0
         self.bus.pwrite.value = 0
         self.bus.pwdata.value = 0
-        self.multi_device = False
-        if not 0 == len(self.bus.psel):
-            self.multi_device = True
-
-        #         self._init_reset(reset, reset_active_level)
 
         self._run_coroutine_obj: Any = None
         self._restart()
@@ -131,7 +124,6 @@ class ApbMaster(ApbBase):
             self.queue_tx.append(
                 (True, addrb, datab, strb, prot, error_expected, device, self.tx_id)
             )
-        self.sync.set()
 
     async def poll(
         self,
@@ -139,7 +131,7 @@ class ApbMaster(ApbBase):
         data: Union[int, bytes] = bytes(),
         device: int = 0,
     ) -> None:
-        self.log.info(f"Poll addr:  0x{addr:08x}")
+        self.log.info(f"Poll :  0x{addr:08x}")
         level_num = self.log.getEffectiveLevel()
         self.log.setLevel(logging.WARNING)
         if isinstance(data, int):
@@ -168,8 +160,7 @@ class ApbMaster(ApbBase):
                 if rx_id == tx_id:
                     found = True
                     break
-            await RisingEdge(self.clock)
-        await self._idle.wait()
+            await self._idle.wait()
         self.ret = ret
         if self.return_int:
             return int.from_bytes(ret, byteorder="little")
@@ -186,7 +177,7 @@ class ApbMaster(ApbBase):
         length: int = -1,
     ) -> int:
         self.loop = self.calc_length(length, data)
-        self.sync.set()
+        self._idle.clear()
         for i in range(self.loop):
             addrb = addr + i * self.rbytes
             if isinstance(data, int):
@@ -198,7 +189,6 @@ class ApbMaster(ApbBase):
             self.queue_tx.append(
                 (False, addrb, datab, -1, prot, error_expected, device, self.tx_id)
             )
-        self._idle.clear()
         return self.tx_id
 
     def _restart(self) -> None:
@@ -237,118 +227,112 @@ class ApbMaster(ApbBase):
 
     async def _run(self):
         while True:
-            await RisingEdge(self.clock)
-            while not self.queue_tx:
-                self._idle.set()
-                self.sync.clear()
-                await self.sync.wait()
+            if not self.queue_tx:
+                await RisingEdge(self.clock)
+            else:
+                (
+                    write,
+                    addr,
+                    data,
+                    strb,
+                    prot,
+                    error_expected,
+                    device,
+                    tx_id,
+                ) = self.queue_tx.popleft()
 
-            (
-                write,
-                addr,
-                data,
-                strb,
-                prot,
-                error_expected,
-                device,
-                tx_id,
-            ) = self.queue_tx.popleft()
+                if addr < 0 or addr >= 2**self.address_width:
+                    raise ValueError("Address out of range")
 
-            if addr < 0 or addr >= 2**self.address_width:
-                raise ValueError("Address out of range")
+                if device > len(self.bus.psel) - 1:
+                    raise ValueError(
+                        f"Trying to access a device, {device}, that is not available on the bus {len(self.bus.psel)-1}"
+                    )
 
-            if device > len(self.bus.psel) - 1:
-                raise ValueError(
-                    f"Trying to access a device, {device}, that is not available on the bus {len(self.bus.psel)-1}"
-                )
+                self.bus.psel.value = 1 << device
+                self.bus.paddr.value = addr
+                extra_text = ""
+                if self.pprot_present:
+                    self.bus.pprot.value = prot
+                    extra_text += f" prot: {prot}"
+                apb = ""
+                if self.multi_device:
+                    apb = f"({device}) "
+                if self.penable_present:
+                    self.bus.penable.value = 0
+                if write:
+                    data = int.from_bytes(data, byteorder="little")
+                    self.log.info(f"Write {apb}0x{addr:08x}: 0x{data:08x}{extra_text}")
+                    self.bus.pwdata.value = data & self.wdata_mask
+                    self.bus.pwrite.value = 1
+                    if self.pstrb_present:
+                        if -1 == strb:
+                            self.bus.pstrb.value = self.strb_mask
+                        else:
+                            self.bus.pstrb.value = strb
 
-            self.bus.psel.value = 1 << device
-            self.bus.paddr.value = addr
-            extra_text = ""
-            if self.pprot_present:
-                self.bus.pprot.value = prot
-                extra_text += f" prot: {prot}"
-            if self.multi_device:
-                extra_text += f" device: {device}"
-            if self.penable_present:
-                self.bus.penable.value = 0
-            if write:
-                data = int.from_bytes(data, byteorder="little")
-                self.log.info(
-                    f"Write addr: 0x{addr:08x} data: 0x{data:08x}{extra_text}"
-                )
-                self.bus.pwdata.value = data & self.wdata_mask
-                self.bus.pwrite.value = 1
+                await RisingEdge(self.clock)
+                if self.penable_present:
+                    self.bus.penable.value = 1
+                    await FallingEdge(self.clock)
+                timeout = 0
+                while not self.bus.pready.value:
+                    await FallingEdge(self.clock)
+                    if self.timeout_max != -1:
+                        timeout += 1
+                        if timeout >= self.timeout_max:
+                            self.log.info(f"Read  {apb}0x{addr:08x}:{extra_text}")
+                            raise TimeoutError(
+                                f"APB transaction timeout: pready not asserted within {self.timeout_max} clock cycles (addr: 0x{addr:08x})"
+                            )
+
+                if self.pslverr_present:
+                    if not bool(self.bus.pslverr.value) == error_expected:
+                        if bool(self.bus.pslverr.value):
+                            msg = "PSLVERR detected not expected!"
+                        else:
+                            msg = "PSLVERR expected not detected!"
+                        if self.pprot_present:
+                            msg += f" PPROT - {ApbProt(self.bus.pprot.value).name}"
+                        self.exception_occurred = True
+                        if self.exception_enabled:
+                            self.log.critical(msg)
+                            raise Exception(msg)
+                        else:
+                            self.log.warning(msg)
+
+                if not write:
+                    ret = resolve_x_int(self.bus.prdata)
+                    # Need something that can handle dynamic read widths per device,
+                    # Using the write width as a proxy for now, FIXME
+                    ret_slice = (ret >> (device * self.wwidth)) & self.wdata_mask
+                    self.log.info(
+                        f"Read  {apb}0x{addr:08x}: 0x{ret_slice:08x}{extra_text}"
+                    )
+                    if not data == bytes():
+                        data_int = int.from_bytes(data, byteorder="little")
+                        if not data_int == ret_slice:
+                            self.bus.psel.value = 0
+                            await RisingEdge(self.clock)
+                            await RisingEdge(self.clock)
+                            await RisingEdge(self.clock)
+                            raise Exception(
+                                f"Expected 0x{data_int:08x} doesn't match returned 0x{ret_slice:08x}"
+                            )
+                    self.queue_rx.append((ret.to_bytes(self.rbytes, "little"), tx_id))
+
+                if not self.queue_tx:
+                    self._idle.set()
+
+                await RisingEdge(self.clock)
+
+                if self.penable_present:
+                    self.bus.penable.value = 0
+                self.bus.psel.value = 0
+                self.bus.paddr.value = 0
+                if self.pprot_present:
+                    self.bus.pprot.value = 0
+                self.bus.pwrite.value = 0
+                self.bus.pwdata.value = 0
                 if self.pstrb_present:
-                    if -1 == strb:
-                        self.bus.pstrb.value = self.strb_mask
-                    else:
-                        self.bus.pstrb.value = strb
-            #             else:
-            #                 self.log.info(f"Read addr:  0x{addr:08x}{extra_text}")
-            await RisingEdge(self.clock)
-            if self.penable_present:
-                self.bus.penable.value = 1
-                await RisingEdge(self.clock)
-
-            timeout = 0
-            while not self.bus.pready.value:
-                await RisingEdge(self.clock)
-                if self.timeout_max != -1:
-                    timeout += 1
-                    if timeout >= self.timeout_max:
-                        self.log.info(f"Read addr:  0x{addr:08x}{extra_text}")
-                        raise TimeoutError(
-                            f"APB transaction timeout: pready not asserted within {self.timeout_max} clock cycles (addr: 0x{addr:08x})"
-                        )
-
-            if self.pslverr_present:
-                if not bool(self.bus.pslverr.value) == error_expected:
-                    if bool(self.bus.pslverr.value):
-                        msg = "PSLVERR detected not expected!"
-                    else:
-                        msg = "PSLVERR expected not detected!"
-                    if self.pprot_present:
-                        msg += f" PPROT - {ApbProt(self.bus.pprot.value).name}"
-                    self.exception_occurred = True
-                    if self.exception_enabled:
-                        self.log.critical(msg)
-                        raise Exception(msg)
-                    else:
-                        self.log.warning(msg)
-
-            extra_text = ""
-            if self.multi_device:
-                extra_text += f" device: {device}"
-            if not write:
-                ret = resolve_x_int(self.bus.prdata)
-                # Need something that can handle dynamic read widths per device,
-                # Using the write width as a proxy for now, FIXME
-                ret_slice = (ret >> (device * self.wwidth)) & self.wdata_mask
-                self.log.info(
-                    f"Read  addr: 0x{addr:08x} data: 0x{ret_slice:08x}{extra_text}"
-                )
-                if not data == bytes():
-                    data_int = int.from_bytes(data, byteorder="little")
-                    if not data_int == ret_slice:
-                        self.bus.psel.value = 0
-                        await RisingEdge(self.clock)
-                        await RisingEdge(self.clock)
-                        await RisingEdge(self.clock)
-                        raise Exception(
-                            f"Expected 0x{data_int:08x} doesn't match returned 0x{ret_slice:08x}"
-                        )
-                self.queue_rx.append((ret.to_bytes(self.rbytes, "little"), tx_id))
-
-            if self.penable_present:
-                self.bus.penable.value = 0
-            self.bus.psel.value = 0
-            self.bus.paddr.value = 0
-            if self.pprot_present:
-                self.bus.pprot.value = 0
-            self.bus.pwrite.value = 0
-            self.bus.pwdata.value = 0
-            if self.pstrb_present:
-                self.bus.pstrb.value = 0
-
-            self.sync.set()
+                    self.bus.pstrb.value = 0

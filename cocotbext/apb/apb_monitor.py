@@ -27,7 +27,8 @@ from typing import Any, Deque, Tuple
 from collections import deque
 
 from cocotb import start_soon
-from cocotb.triggers import RisingEdge
+from cocotb.triggers import RisingEdge, ReadOnly
+from cocotb.utils import get_sim_time
 
 from .constants import ApbProt
 from .utils import resolve_x_int
@@ -49,6 +50,8 @@ class ApbMonitor(ApbBase):
 
         self._run_coroutine_obj: Any = None
         self._resolve_coroutine_obj: Any = None
+        self._check_sync_coroutines: Any = []
+        # self.enable_check_sync()
         self._restart()
 
     def _restart(self) -> None:
@@ -58,6 +61,39 @@ class ApbMonitor(ApbBase):
             self._resolve_coroutine_obj.kill()
         self._run_coroutine_obj = start_soon(self._run())
         self._resolve_coroutine_obj = start_soon(self._resolve_signals())
+
+    def enable_check_sync(self) -> None:
+        """Enable check for synchronous signal changes"""
+        self.disable_check_sync()
+        self._last_clk_time = get_sim_time()
+        self._check_sync_coroutines.append(start_soon(self._check_sync_clock()))
+        for name in self.bus._signals:
+            if hasattr(self.bus, name):
+                self._check_sync_coroutines.append(
+                    start_soon(self._check_sync_signal(name, getattr(self.bus, name)))
+                )
+
+    def disable_check_sync(self) -> None:
+        """Disable check for synchronous signal changes"""
+        for coro in self._check_sync_coroutines:
+            coro.kill()
+        self._check_sync_coroutines.clear()
+
+    async def _check_sync_clock(self) -> None:
+        while True:
+            await RisingEdge(self.clock)
+            self._last_clk_time = get_sim_time()
+
+    async def _check_sync_signal(self, name: str, signal: Any) -> None:
+        while True:
+            await signal.value_change
+            if get_sim_time() != self._last_clk_time:
+                await ReadOnly()
+                if get_sim_time() != self._last_clk_time:
+                    self.log.error(
+                        f"Signal {name} changed at {get_sim_time()}, "
+                        f"which is not aligned with the last clock edge at {self._last_clk_time}"
+                    )
 
     async def _resolve_signals(self):
         while True:
@@ -75,8 +111,8 @@ class ApbMonitor(ApbBase):
             self.timeout = 0
 
             if not 0 == self.psel:
-                index = int(math.log2(self.psel))
-                if not self.psel == 2**index:
+                device = int(math.log2(self.psel))
+                if not self.psel == 2**device:
                     self.log.critical(f"incorrect formatted psel {self.psel}")
 
                 if self.paddr < 0 or self.paddr >= 2**self.address_width:
@@ -92,12 +128,15 @@ class ApbMonitor(ApbBase):
                 pstrb = self.strb_mask
                 if self.pstrb_present:
                     pstrb = self.pstrb
+                extra_text = ""
                 if self.pprot_present:
                     pprot = self.pprot
-                    pprot_text = f"prot: {pprot}"
+                    extra_text += f" prot: {pprot}"
                 else:
-                    pprot_text = ""
                     pprot = ApbProt.NONSECURE
+                apb = ""
+                if self.multi_device:
+                    apb = f"({device}) "
 
                 wdata = self.pwdata
                 await RisingEdge(self.clock)
@@ -112,19 +151,16 @@ class ApbMonitor(ApbBase):
                         raise Exception(
                             f"pready wait has exceed timout {self.timeout_max}"
                         )
-                apb = ""
-                if not 0 == len(self.bus.psel) - 1:
-                    apb = f"({index}) "
 
                 if pwrite:
                     data = wdata
                     self.log.debug(
-                        f"Write {apb}0x{paddr:08x}: 0x{data:08x} {pprot_text}"
+                        f"Write {apb}0x{paddr:08x}: 0x{data:08x}{extra_text}"
                     )
                 else:
-                    data = (self.prdata >> 32 * index) & self.rdata_mask
+                    data = (self.prdata >> 32 * device) & self.rdata_mask
                     self.log.debug(
-                        f"Read  {apb}0x{paddr:08x}: 0x{data:08x} {pprot_text}"
+                        f"Read  {apb}0x{paddr:08x}: 0x{data:08x}{extra_text}"
                     )
                 self.queue_txn.append((pwrite, paddr, data, pstrb, pprot, self.txn_id))
                 self.txn_id += 1

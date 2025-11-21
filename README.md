@@ -97,6 +97,30 @@ Once the module is instantiated, read and write operations can be initiated in a
 * `read_nowait(addr, data=bytes(), prot=ApbProt.NONSECURE, error_expected=False, device=0, length=-1)`: read bytes, at _addr_, if _data_ supplied check for match, submit to queue. If an slverr is experienced a critical warning will be issued by default, but will reduced this to an info warning if `error_expected=True`. If _data_ is wider than the bus width, it will automatically be split into multiple sequential APB read accesses at consecutive addresses. The optional _length_ parameter can override the automatic length calculation, should be a multiple of the number of bytes in the wdata bus. The optional _device_ parameter specifies the slave index to target.
 * `poll(addr, data=bytes(), device=0)`: poll address, at _addr_, until data at address matches _data_. The optional _device_ parameter specifies the slave index to target.
 
+
+Example:
+
+```python
+# Write to slave 0
+await tb.intf.write(0x100, 0xDEADBEEF, device=0)
+
+# Read from slave 1
+val = await tb.intf.read(0x200, device=1)
+
+### APB Monitor
+
+The `ApbMonitor` class tracks APB bus transactions and verifies signal synchronization.
+
+#### Usage
+
+    from cocotbext.apb import ApbMonitor
+    monitor = ApbMonitor(bus, dut.clk)
+
+#### Methods
+
+* `enable_check_sync()`: Enable checking that signal changes are aligned with the clock edge, default.
+* `disable_check_sync()`: Disable the synchronous signal check.
+
 ### Multi-Device Support
 
 The `ApbMaster` supports multiple slave devices on the same bus instance. To use this feature:
