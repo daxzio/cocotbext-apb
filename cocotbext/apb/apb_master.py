@@ -90,7 +90,7 @@ class ApbMaster(ApbBase):
 
     def calc_address(self, addr):
         self.addr = addr
-        if not self.addrmap is None and isinstance(addr, str):
+        if self.addrmap is not None and isinstance(addr, str):
             self.addr = self.addrmap[addr]
         return self.addr
 
