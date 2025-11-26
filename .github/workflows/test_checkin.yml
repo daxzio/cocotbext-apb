@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
@@ -42,7 +42,7 @@ jobs:
       CI_TARGET: ${{ matrix.target }}
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Report Environment
         run: |
           echo "Runing tests with env set to : ${CI_TARGET}"
@@ -104,7 +104,7 @@ jobs:
       CI_TARGET: ${{ matrix.target }}
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Report Environment
         run: |
           echo "Runing tests with env set to : ${CI_TARGET}"
@@ -162,7 +162,7 @@ jobs:
     permissions:
       id-token: write  # IMPORTANT: this permission is mandatory for trusted publishing
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Make PyPi dist release
         run: make dist
       - name: Publish Python distribution to PyPI
