@@ -131,6 +131,7 @@ await tb.intf.write(0x100, 0xDEADBEEF, device=0)
 
 # Read from slave 1
 val = await tb.intf.read(0x200, device=1)
+```
 
 ### APB Monitor
 
