@@ -9,11 +9,11 @@ module regblock (
         input wire s_apb_pwrite,
         input wire s_apb_penable,
         input wire [2:0] s_apb_pprot,
-        input wire [2:0] s_apb_paddr,
-        input wire [15:0] s_apb_pwdata,
-        input wire [1:0] s_apb_pstrb,
+        input wire [3:0] s_apb_paddr,
+        input wire [31:0] s_apb_pwdata,
+        input wire [3:0] s_apb_pstrb,
         output logic s_apb_pready,
-        output logic [15:0] s_apb_prdata,
+        output logic [31:0] s_apb_prdata,
         output logic s_apb_pslverr
 
 
@@ -24,15 +24,15 @@ module regblock (
     //--------------------------------------------------------------------------
     logic cpuif_req;
     logic cpuif_req_is_wr;
-    logic [2:0] cpuif_addr;
-    logic [15:0] cpuif_wr_data;
-    logic [15:0] cpuif_wr_biten;
+    logic [3:0] cpuif_addr;
+    logic [31:0] cpuif_wr_data;
+    logic [31:0] cpuif_wr_biten;
     logic cpuif_req_stall_wr;
     logic cpuif_req_stall_rd;
 
     logic cpuif_rd_ack;
     logic cpuif_rd_err;
-    logic [15:0] cpuif_rd_data;
+    logic [31:0] cpuif_rd_data;
 
     logic cpuif_wr_ack;
     logic cpuif_wr_err;
@@ -54,9 +54,9 @@ module regblock (
                     is_active <= '1;
                     cpuif_req <= '1;
                     cpuif_req_is_wr <= s_apb_pwrite;
-                    cpuif_addr <= {s_apb_paddr[2:1], 1'b0};
+                    cpuif_addr <= {s_apb_paddr[3:2], 2'b0};
                     cpuif_wr_data <= s_apb_pwdata;
-                    for(int i=0; i<2; i++) begin
+                    for(int i=0; i<4; i++) begin
                         cpuif_wr_biten[i*8 +: 8] <= {8{s_apb_pstrb[i]}};
                     end
                 end
@@ -93,18 +93,18 @@ module regblock (
     logic decoded_req;
     logic decoded_req_is_wr;
     /* verilator lint_off UNUSEDSIGNAL */
-    logic [15:0] decoded_wr_data;
-    logic [15:0] decoded_wr_biten;
+    logic [31:0] decoded_wr_data;
+    logic [31:0] decoded_wr_biten;
     /* verilator lint_on UNUSEDSIGNAL */
 
     always @(*) begin
         /* verilator lint_off UNUSEDSIGNAL */
         integer next_cpuif_addr;
         /* verilator lint_on UNUSEDSIGNAL */
-        decoded_reg_strb_status = cpuif_req_masked & (cpuif_addr == 3'h0);
-        decoded_reg_strb_busy = cpuif_req_masked & (cpuif_addr == 3'h2);
-        decoded_reg_strb_config = cpuif_req_masked & (cpuif_addr == 3'h4);
-        decoded_reg_strb_interrupt = cpuif_req_masked & (cpuif_addr == 3'h6);
+        decoded_reg_strb_status = cpuif_req_masked & (cpuif_addr == 4'h0);
+        decoded_reg_strb_busy = cpuif_req_masked & (cpuif_addr == 4'h4);
+        decoded_reg_strb_config = cpuif_req_masked & (cpuif_addr == 4'h8);
+        decoded_reg_strb_interrupt = cpuif_req_masked & (cpuif_addr == 4'hc);
     end
 
     // Pass down signals to next stage
@@ -233,23 +233,23 @@ module regblock (
 
     logic readback_err;
     logic readback_done;
-    logic [15:0] readback_data;
+    logic [31:0] readback_data;
 
     // Assign readback values to a flattened array
-    logic [15:0] readback_array[4];
+    logic [31:0] readback_array[4];
     assign readback_array[0][7:0] = (decoded_reg_strb_status && !decoded_req_is_wr) ? field_storage_status_value : '0;
-    assign readback_array[0][15:8] = '0;
+    assign readback_array[0][31:8] = '0;
     assign readback_array[1][7:0] = (decoded_reg_strb_busy && !decoded_req_is_wr) ? field_storage_busy_value : '0;
-    assign readback_array[1][15:8] = '0;
+    assign readback_array[1][31:8] = '0;
     assign readback_array[2][7:0] = (decoded_reg_strb_config && !decoded_req_is_wr) ? field_storage_config_value : '0;
-    assign readback_array[2][15:8] = '0;
+    assign readback_array[2][31:8] = '0;
     assign readback_array[3][7:0] = (decoded_reg_strb_interrupt && !decoded_req_is_wr) ? field_storage_interrupt_value : '0;
-    assign readback_array[3][15:8] = '0;
+    assign readback_array[3][31:8] = '0;
 
     // Reduce the array
     // always_comb begin
     always @(*) begin
-        logic [15:0] readback_data_var;
+        logic [31:0] readback_data_var;
         readback_done = decoded_req & ~decoded_req_is_wr;
         readback_err = '0;
         readback_data_var = '0;
