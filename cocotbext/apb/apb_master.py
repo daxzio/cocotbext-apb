@@ -56,6 +56,7 @@ class ApbMaster(ApbBase):
         self.return_int = False
         self.ret: Union[bytes, None] = None
         self.intra_delay: int = 0
+        self.addrmap = None
 
         self._idle = Event()
 
@@ -87,6 +88,12 @@ class ApbMaster(ApbBase):
         length = max(int(length / self.wbytes), min_length)
         return length
 
+    def calc_address(self, addr):
+        self.addr = addr
+        if not self.addrmap is None and isinstance(addr, str):
+            self.addr = self.addrmap[addr]
+        return self.addr
+
     async def write(
         self,
         addr: int,
@@ -113,11 +120,11 @@ class ApbMaster(ApbBase):
         length: int = -1,
     ) -> None:
         """ """
-        self.loop = self.calc_length(length, data)
-
         self._idle.clear()
+        self.addr = self.calc_address(addr)
+        self.loop = self.calc_length(length, data)
         for i in range(self.loop):
-            addrb = addr + i * self.wbytes
+            addrb = self.addr + i * self.wbytes
             if isinstance(data, int):
                 subdata = (data >> self.wwidth * i) & self.wdata_mask
                 datab = subdata.to_bytes(self.wbytes, "little")
@@ -181,10 +188,11 @@ class ApbMaster(ApbBase):
         device: int = 0,
         length: int = -1,
     ) -> int:
-        self.loop = self.calc_length(length, data)
         self._idle.clear()
+        self.addr = self.calc_address(addr)
+        self.loop = self.calc_length(length, data)
         for i in range(self.loop):
-            addrb = addr + i * self.rbytes
+            addrb = self.addr + i * self.rbytes
             if isinstance(data, int):
                 subdata = (data >> self.rwidth * i) & self.rdata_mask
                 datab = subdata.to_bytes(self.rbytes, "little")
