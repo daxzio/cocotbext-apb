@@ -1,0 +1,20 @@
+addrmap top #(
+    longint REGWIDTH = 32
+) {
+    reg {
+        regwidth = REGWIDTH;
+        field {sw=rw; hw=na;} STATUS[8] = 0x12;
+    } STATUS;
+    reg {
+        regwidth = REGWIDTH;
+        field {sw=rw; hw=na;} BUSY[8] = 0x34;
+    } BUSY;
+    reg {
+        regwidth = REGWIDTH;
+        field {sw=rw; hw=na;} CONFIG[8] = 0x56;
+    } CONFIG;
+    reg {
+        regwidth = REGWIDTH;
+        field {sw=rw; hw=na;} INTERRUPT[8] = 0x78;
+    } INTERRUPT;
+};
