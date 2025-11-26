@@ -1,5 +1,4 @@
-# from cocotb_bus.bus import Bus
-from .bus import Bus
+from cocotb_bus.bus import Bus
 
 # from apb.stream import define_stream
 # ApbBus, ApbTransaction, ApbSource, ApbSink, ApbMonitor = define_stream("Apb",
