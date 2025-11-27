@@ -158,7 +158,7 @@ class ApbMonitor(ApbBase):
                         f"Write {apb}0x{paddr:08x}: 0x{data:08x}{extra_text}"
                     )
                 else:
-                    data = (self.prdata >> 32 * device) & self.rdata_mask
+                    data = (self.prdata >> 32 * device) & self.rdata_mask[device]
                     self.log.debug(
                         f"Read  {apb}0x{paddr:08x}: 0x{data:08x}{extra_text}"
                     )

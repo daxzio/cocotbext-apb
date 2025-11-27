@@ -44,16 +44,24 @@ class ApbBase:
         self.log.info(f"Copyright (c) 2024-{datetime.datetime.now().year} Daxzio")
         self.log.info("https://github.com/daxzio/cocotbext-apb")
 
+        self.total_devices = len(self.bus.psel)
+        self.multi_device = False
+        if self.total_devices > 1:
+            self.multi_device = True
+        self.byte_size = 8
         self.address_width = len(self.bus.paddr)
         self.wwidth = len(self.bus.pwdata)
-        self.rwidth = len(self.bus.prdata)
-        self.rbytes = int(self.rwidth / 8)
         self.wbytes = int(self.wwidth / 8)
-        self.byte_size = 8
-        self.byte_lanes = self.wwidth // self.byte_size
-        self.rdata_mask = 2**self.rwidth - 1
         self.wdata_mask = 2**self.wwidth - 1
+        self.byte_lanes = self.wwidth // self.byte_size
         self.strb_mask = 2**self.byte_lanes - 1
+        self.rwidth = []
+        self.rbytes = []
+        self.rdata_mask = []
+        for i in range(self.total_devices):
+            self.rwidth.append(int(len(self.bus.prdata) / self.total_devices))
+            self.rbytes.append(int(self.rwidth[i] / 8))
+            self.rdata_mask.append(2 ** self.rwidth[i] - 1)
 
         self.penable_present = hasattr(self.bus, "penable")
         self.pstrb_present = hasattr(self.bus, "pstrb")
@@ -62,9 +70,6 @@ class ApbBase:
         if self.pstrb_present:
             assert self.byte_lanes == len(self.bus.pstrb)
         assert self.byte_lanes * self.byte_size == self.wwidth
-        self.multi_device = False
-        if len(self.bus.psel) > 1:
-            self.multi_device = True
 
         self.log.info(f"APB {self.name} configuration:")
         self.log.info(f"  Address width: {self.address_width} bits")

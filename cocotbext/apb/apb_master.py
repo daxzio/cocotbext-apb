@@ -145,7 +145,7 @@ class ApbMaster(ApbBase):
         level_num = self.log.getEffectiveLevel()
         self.log.setLevel(logging.WARNING)
         if isinstance(data, int):
-            datab = data.to_bytes(self.rbytes, "little")
+            datab = data.to_bytes(self.rbytes[device], "little")
         else:
             datab = data
         self.ret = None
@@ -192,10 +192,10 @@ class ApbMaster(ApbBase):
         self.addr = self.calc_address(addr)
         self.loop = self.calc_length(length, data)
         for i in range(self.loop):
-            addrb = self.addr + i * self.rbytes
+            addrb = self.addr + i * self.rbytes[device]
             if isinstance(data, int):
-                subdata = (data >> self.rwidth * i) & self.rdata_mask
-                datab = subdata.to_bytes(self.rbytes, "little")
+                subdata = (data >> self.rwidth[device] * i) & self.rdata_mask[device]
+                datab = subdata.to_bytes(self.rbytes[device], "little")
             else:
                 datab = data
             self.tx_id += 1
@@ -316,9 +316,9 @@ class ApbMaster(ApbBase):
 
                 if not write:
                     ret = resolve_x_int(self.bus.prdata)
-                    # Need something that can handle dynamic read widths per device,
-                    # Using the write width as a proxy for now, FIXME
-                    ret_slice = (ret >> (device * self.wwidth)) & self.wdata_mask
+                    ret_slice = (
+                        ret >> (device * self.rwidth[device])
+                    ) & self.rdata_mask[device]
                     self.log.info(
                         f"Read  {apb}0x{addr:08x}: 0x{ret_slice:08x}{extra_text}"
                     )
@@ -332,7 +332,9 @@ class ApbMaster(ApbBase):
                             raise Exception(
                                 f"Expected 0x{data_int:08x} doesn't match returned 0x{ret_slice:08x}"
                             )
-                    self.queue_rx.append((ret.to_bytes(self.rbytes, "little"), tx_id))
+                    self.queue_rx.append(
+                        (ret_slice.to_bytes(self.rbytes[device], "little"), tx_id)
+                    )
 
                 if not self.queue_tx:
                     self._idle.set()
