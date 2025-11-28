@@ -56,7 +56,7 @@ class ApbMaster(ApbBase):
         self.return_int = False
         self.ret: Union[bytes, None] = None
         self.intra_delay: int = 0
-        self.addrmap = None
+        self.addrmap = {}
 
         self._idle = Event()
 
@@ -88,11 +88,14 @@ class ApbMaster(ApbBase):
         length = max(int(length / self.wbytes), min_length)
         return length
 
-    def calc_address(self, addr):
+    def calc_address(self, addr, device: int = 0):
         self.addr = addr
-        if self.addrmap is not None and isinstance(addr, str):
-            self.addr = self.addrmap[addr]
+        if not 0 == len(self.addrmap) and isinstance(addr, str):
+            self.addr = self.addrmap[device][addr]
         return self.addr
+
+    def addaddrmap(self, addrmap, device: int = 0):
+        self.addrmap[device] = addrmap
 
     async def write(
         self,
