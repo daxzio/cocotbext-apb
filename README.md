@@ -90,6 +90,14 @@ The `ApbMaster` supports address mapping through the `addrmap` attribute, which 
 
 The `addrmap` attribute is a dictionary that maps register names (strings) to their corresponding addresses (integers). When a string is passed as the `addr` parameter to `read()`, `write()`, `read_nowait()`, `write_nowait()`, or `poll()` methods, the master will automatically look up the address in the `addrmap` dictionary.
 
+**Indexed Register Access:**
+
+For registers that are arrays or need indexed access, you can use either:
+1. String format with bracket notation: `"STATUS[0]"`, `"STATUS[1]"`, etc.
+2. The `index` parameter: `read("STATUS", data, index=0)`, `write("STATUS", data, index=1)`, etc.
+
+Both methods add an offset to the base register address equal to `index * wbytes` (where `wbytes` is the bus width in bytes). The `index` parameter is particularly useful when using a variable index in loops.
+
 Example:
 
 ```python
@@ -108,6 +116,15 @@ apb_driver.addrmap = {
 # Use string names instead of numeric addresses
 await apb_driver.write('STATUS', 0x12)
 await apb_driver.read('CONFIG')
+
+# Indexed access using string format
+await apb_driver.read('STATUS[0]', 0x12)
+await apb_driver.read('STATUS[1]', 0x34)
+
+# Indexed access using index parameter (useful with variables)
+for i in range(4):
+    await apb_driver.write('STATUS', data[i], index=i)
+    await apb_driver.read('STATUS', expected[i], index=i)
 ```
 
 #### Methods
@@ -116,10 +133,10 @@ await apb_driver.read('CONFIG')
 * `enable_backpressure(seednum=None)`: Enable random delays on the interface
 * `disable_backpressure()`: Disable random delays on the interface
 * `wait()`: blocking wait until all outstanding operations complete
-* `write(addr, data, strb=-1, prot=ApbProt.NONSECURE, error_expected=False, device=0, length=-1)`: write _data_ (bytes or int), to _addr_ (int or string when `addrmap` is configured), wait for result.  If an slverr is experienced a critical warning will be issued by default, but will reduced this to an info warning if `error_expected=True`. If _data_ is wider than the bus width, it will automatically be split into multiple sequential APB write accesses at consecutive addresses. The optional _length_ parameter can override the automatic length calculation, should be a multiple of the number of bytes in the wdata bus. The optional _device_ parameter specifies the slave index to target.
-* `write_nowait(addr, data, strb=-1, prot=ApbProt.NONSECURE, error_expected=False, device=0, length=-1)`: write _data_ (bytes or int), to _addr_ (int or string when `addrmap` is configured), submit to queue. If an slverr is experienced a critical warning will be issued by default, but will reduced this to an info warning if `error_expected=True`. If _data_ is wider than the bus width, it will automatically be split into multiple sequential APB write accesses at consecutive addresses. The optional _length_ parameter can override the automatic length calculation, should be a multiple of the number of bytes in the wdata bus. The optional _device_ parameter specifies the slave index to target.
-* `read(addr, data=bytes(), prot=ApbProt.NONSECURE, error_expected=False, device=0, length=-1)`: read bytes, at _addr_ (int or string when `addrmap` is configured), if _data_ supplied check for match, wait for result. If an slverr is experienced a critical warning will be issued by default, but will reduced this to an info warning if `error_expected=True`. If _data_ is wider than the bus width, it will automatically be split into multiple sequential APB read accesses at consecutive addresses. The optional _length_ parameter can override the automatic length calculation, should be a multiple of the number of bytes in the wdata bus. The optional _device_ parameter specifies the slave index to target.
-* `read_nowait(addr, data=bytes(), prot=ApbProt.NONSECURE, error_expected=False, device=0, length=-1)`: read bytes, at _addr_ (int or string when `addrmap` is configured), if _data_ supplied check for match, submit to queue. If an slverr is experienced a critical warning will be issued by default, but will reduced this to an info warning if `error_expected=True`. If _data_ is wider than the bus width, it will automatically be split into multiple sequential APB read accesses at consecutive addresses. The optional _length_ parameter can override the automatic length calculation, should be a multiple of the number of bytes in the wdata bus. The optional _device_ parameter specifies the slave index to target.
+* `write(addr, data, strb=-1, prot=ApbProt.NONSECURE, error_expected=False, device=0, length=-1, index=-1)`: write _data_ (bytes or int), to _addr_ (int or string when `addrmap` is configured), wait for result.  If an slverr is experienced a critical warning will be issued by default, but will reduced this to an info warning if `error_expected=True`. If _data_ is wider than the bus width, it will automatically be split into multiple sequential APB write accesses at consecutive addresses. The optional _length_ parameter can override the automatic length calculation, should be a multiple of the number of bytes in the wdata bus. The optional _device_ parameter specifies the slave index to target. The optional _index_ parameter adds an offset to the address equal to `index * wbytes`, useful for accessing indexed registers (alternative to using string format like `"STATUS[0]"`).
+* `write_nowait(addr, data, strb=-1, prot=ApbProt.NONSECURE, error_expected=False, device=0, length=-1, index=-1)`: write _data_ (bytes or int), to _addr_ (int or string when `addrmap` is configured), submit to queue. If an slverr is experienced a critical warning will be issued by default, but will reduced this to an info warning if `error_expected=True`. If _data_ is wider than the bus width, it will automatically be split into multiple sequential APB write accesses at consecutive addresses. The optional _length_ parameter can override the automatic length calculation, should be a multiple of the number of bytes in the wdata bus. The optional _device_ parameter specifies the slave index to target. The optional _index_ parameter adds an offset to the address equal to `index * wbytes`, useful for accessing indexed registers (alternative to using string format like `"STATUS[0]"`).
+* `read(addr, data=bytes(), prot=ApbProt.NONSECURE, error_expected=False, device=0, index=-1, length=-1)`: read bytes, at _addr_ (int or string when `addrmap` is configured), if _data_ supplied check for match, wait for result. If an slverr is experienced a critical warning will be issued by default, but will reduced this to an info warning if `error_expected=True`. If _data_ is wider than the bus width, it will automatically be split into multiple sequential APB read accesses at consecutive addresses. The optional _length_ parameter can override the automatic length calculation, should be a multiple of the number of bytes in the wdata bus. The optional _device_ parameter specifies the slave index to target. The optional _index_ parameter adds an offset to the address equal to `index * wbytes`, useful for accessing indexed registers (alternative to using string format like `"STATUS[0]"`).
+* `read_nowait(addr, data=bytes(), prot=ApbProt.NONSECURE, error_expected=False, device=0, index=-1, length=-1)`: read bytes, at _addr_ (int or string when `addrmap` is configured), if _data_ supplied check for match, submit to queue. If an slverr is experienced a critical warning will be issued by default, but will reduced this to an info warning if `error_expected=True`. If _data_ is wider than the bus width, it will automatically be split into multiple sequential APB read accesses at consecutive addresses. The optional _length_ parameter can override the automatic length calculation, should be a multiple of the number of bytes in the wdata bus. The optional _device_ parameter specifies the slave index to target. The optional _index_ parameter adds an offset to the address equal to `index * wbytes`, useful for accessing indexed registers (alternative to using string format like `"STATUS[0]"`).
 * `poll(addr, data=bytes(), device=0)`: poll address, at _addr_ (int or string when `addrmap` is configured), until data at address matches _data_. The optional _device_ parameter specifies the slave index to target.
 
 

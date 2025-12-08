@@ -22,8 +22,9 @@ THE SOFTWARE.
 
 """
 
-import math
+import re
 import logging
+import math
 
 from cocotb import start_soon
 from cocotb.triggers import RisingEdge, FallingEdge
@@ -34,6 +35,7 @@ from typing import Deque
 from typing import Tuple
 from typing import Any
 from typing import Union
+from typing import Dict
 
 from .apb_base import ApbBase
 from .constants import ApbProt
@@ -56,7 +58,7 @@ class ApbMaster(ApbBase):
         self.return_int = False
         self.ret: Union[bytes, None] = None
         self.intra_delay: int = 0
-        self.addrmap = {}
+        self.addrmap: Dict[int, Dict[str, int]] = {}
 
         self._idle = Event()
 
@@ -88,10 +90,16 @@ class ApbMaster(ApbBase):
         length = max(int(length / self.wbytes), min_length)
         return length
 
-    def calc_address(self, addr, device: int = 0):
+    def calc_address(self, addr, device: int = 0, index: int = -1):
         self.addr = addr
         if not 0 == len(self.addrmap) and isinstance(addr, str):
+            h = re.findall(r"\[(\d+)\]", addr)
+            addr = re.sub(r"\[.+", "", addr)
             self.addr = self.addrmap[device][addr]
+            for g in h:
+                self.addr += int(g) * self.wbytes
+        if index != -1:
+            self.addr += index * self.wbytes
         return self.addr
 
     def addaddrmap(self, addrmap, device: int = 0):
@@ -106,8 +114,9 @@ class ApbMaster(ApbBase):
         error_expected: bool = False,
         device: int = 0,
         length: int = -1,
+        index: int = -1,
     ) -> None:
-        self.write_nowait(addr, data, strb, prot, error_expected, device, length)
+        self.write_nowait(addr, data, strb, prot, error_expected, device, length, index)
         await self._idle.wait()
         for i in range(self.intra_delay):
             await RisingEdge(self.clock)
@@ -121,10 +130,11 @@ class ApbMaster(ApbBase):
         error_expected: bool = False,
         device: int = 0,
         length: int = -1,
+        index: int = -1,
     ) -> None:
         """ """
         self._idle.clear()
-        self.addr = self.calc_address(addr)
+        self.addr = self.calc_address(addr, device, index)
         self.loop = self.calc_length(length, data)
         for i in range(self.loop):
             addrb = self.addr + i * self.wbytes
@@ -163,9 +173,12 @@ class ApbMaster(ApbBase):
         prot: ApbProt = ApbProt.NONSECURE,
         error_expected: bool = False,
         device: int = 0,
+        index: int = -1,
         length: int = -1,
     ) -> Union[bytes, int]:
-        rx_id = self.read_nowait(addr, data, prot, error_expected, device)
+        rx_id = self.read_nowait(
+            addr, data, prot, error_expected, device, index, length
+        )
         found = False
         while not found:
             while self.queue_rx:
@@ -189,10 +202,11 @@ class ApbMaster(ApbBase):
         prot: ApbProt = ApbProt.NONSECURE,
         error_expected: bool = False,
         device: int = 0,
+        index: int = -1,
         length: int = -1,
     ) -> int:
         self._idle.clear()
-        self.addr = self.calc_address(addr)
+        self.addr = self.calc_address(addr, device, index)
         self.loop = self.calc_length(length, data)
         for i in range(self.loop):
             addrb = self.addr + i * self.rbytes[device]

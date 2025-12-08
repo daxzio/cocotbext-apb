@@ -31,7 +31,7 @@ class testbench:
 
 
 @test()
-async def test_dut_addrmap0(dut):
+async def addrmap0(dut):
     tb = testbench(dut, reset_sense=1)
     tb.intf.addrmap[0] = {
         "STATUS": 0x0000 + tb.incr * 0,
@@ -70,7 +70,7 @@ async def test_dut_addrmap0(dut):
 
 
 @test()
-async def test_dut_addrmap2(dut):
+async def addrmap2(dut):
     tb = testbench(dut, reset_sense=1)
     tb.intf.addaddrmap(
         {
@@ -108,3 +108,81 @@ async def test_dut_addrmap2(dut):
     await tb.intf.read("INTERRUPT", x[3])
 
     await tb.cr.end_test(200)
+
+
+@test()
+async def addrmap3(dut):
+    tb = testbench(dut, reset_sense=1)
+    tb.intf.addaddrmap(
+        {
+            "STATUS": 0x0000 + tb.incr * 0,
+            "BUSY": 0x0000 + tb.incr * 1,
+            "CONFIG": 0x0000 + tb.incr * 2,
+            "INTERRUPT": 0x0000 + tb.incr * 3,
+        }
+    )
+
+    await tb.intf.read("STATUS[0]", 0x12)
+    await tb.intf.read("STATUS[1]", 0x34)
+    await tb.intf.read("STATUS[2]", 0x56)
+    await tb.intf.read("STATUS[3]", 0x78)
+
+    x = []
+    for i in range(4):
+        x.append(randint(0, 0xFF))
+
+    await tb.intf.write("STATUS[0]", x[0])
+    await tb.intf.write("STATUS[1]", x[1])
+    await tb.intf.write("STATUS[2]", x[2])
+    await tb.intf.write("STATUS[3]", x[3])
+
+    await tb.intf.read("STATUS[0]", x[0])
+    await tb.intf.read("STATUS[1]", x[1])
+    await tb.intf.read("STATUS[2]", x[2])
+    await tb.intf.read("STATUS[3]", x[3])
+
+    await tb.intf.read("STATUS", x[0])
+    await tb.intf.read("BUSY", x[1])
+    await tb.intf.read("CONFIG", x[2])
+    await tb.intf.read("INTERRUPT", x[3])
+
+    await tb.cr.wait_clkn(200)
+
+
+@test()
+async def addrmap4(dut):
+    tb = testbench(dut, reset_sense=1)
+    tb.intf.addaddrmap(
+        {
+            "STATUS": 0x0000 + tb.incr * 0,
+            "BUSY": 0x0000 + tb.incr * 1,
+            "CONFIG": 0x0000 + tb.incr * 2,
+            "INTERRUPT": 0x0000 + tb.incr * 3,
+        }
+    )
+
+    await tb.intf.read("STATUS", 0x12, index=0)
+    await tb.intf.read("STATUS", 0x34, index=1)
+    await tb.intf.read("STATUS", 0x56, index=2)
+    await tb.intf.read("STATUS", 0x78, index=3)
+
+    x = []
+    for i in range(4):
+        x.append(randint(0, 0xFF))
+
+    await tb.intf.write("STATUS", x[0], index=0)
+    await tb.intf.write("STATUS", x[1], index=1)
+    await tb.intf.write("STATUS", x[2], index=2)
+    await tb.intf.write("STATUS", x[3], index=3)
+
+    await tb.intf.read("STATUS", x[0], index=0)
+    await tb.intf.read("STATUS", x[1], index=1)
+    await tb.intf.read("STATUS", x[2], index=2)
+    await tb.intf.read("STATUS", x[3], index=3)
+
+    await tb.intf.read("STATUS", x[0])
+    await tb.intf.read("BUSY", x[1])
+    await tb.intf.read("CONFIG", x[2])
+    await tb.intf.read("INTERRUPT", x[3])
+
+    await tb.cr.wait_clkn(200)
