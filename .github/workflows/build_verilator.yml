@@ -24,7 +24,7 @@ jobs:
     needs: [build_dep]
     steps:
       - name: Cache Verilator
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ${{ needs.build_dep.outputs.cache_dir }}
           key: ${{ needs.build_dep.outputs.cache_key }}
