@@ -16,7 +16,7 @@ jobs:
 #     needs: build_ghdl
 #     steps:
 #       - name: Cache GHDL
-#         uses: actions/cache@v4
+#         uses: actions/cache@v5
 #         with:
 #           path: ${{ needs.build_ghdl.outputs.cache_dir }}
 #           key: ${{ needs.build_ghdl.outputs.cache_key }}
@@ -34,7 +34,7 @@ jobs:
     needs: build_verilator
     steps:
       - name: Cache verilator
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ${{ needs.build_verilator.outputs.cache_dir }}
           key: ${{ needs.build_verilator.outputs.cache_key }}
@@ -52,7 +52,7 @@ jobs:
     needs: build_icarus
     steps:
       - name: Cache Icarus
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ${{ needs.build_icarus.outputs.cache_dir }}
           key: ${{ needs.build_icarus.outputs.cache_key }}
