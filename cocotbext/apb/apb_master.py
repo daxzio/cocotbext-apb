@@ -1,6 +1,6 @@
 """
 
-Copyright (c) 2024-2025 Daxzio
+Copyright (c) 2024-2026 Daxzio
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -153,8 +153,10 @@ class ApbMaster(ApbBase):
         addr: int,
         data: Union[int, bytes] = bytes(),
         device: int = 0,
+        index: int = -1,
     ) -> None:
-        self.log.info(f"Poll :  0x{addr:08x}")
+        self.addr = self.calc_address(addr, device, index)
+        self.log.info(f"Poll  0x{self.addr:08x}")
         level_num = self.log.getEffectiveLevel()
         self.log.setLevel(logging.WARNING)
         if isinstance(data, int):
@@ -330,6 +332,9 @@ class ApbMaster(ApbBase):
                             raise Exception(msg)
                         else:
                             self.log.warning(msg)
+                elif error_expected:
+                    msg = "Expecting an error, but there is no PLSVERR present in bus!"
+                    raise Exception(msg)
 
                 if not write:
                     ret = resolve_x_int(self.bus.prdata)
