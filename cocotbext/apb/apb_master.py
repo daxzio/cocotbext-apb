@@ -48,7 +48,6 @@ class ApbMaster(ApbBase):
 
         self.timeout_max = timeout_max
         self.exception_enabled = True
-        self.exception_occurred = False
 
         self.queue_tx: Deque[
             Tuple[bool, int, bytes, int, ApbProt, bool, int, int]
@@ -326,12 +325,7 @@ class ApbMaster(ApbBase):
                             msg = "PSLVERR expected not detected!"
                         if self.pprot_present:
                             msg += f" PPROT - {ApbProt(self.bus.pprot.value).name}"
-                        self.exception_occurred = True
-                        if self.exception_enabled:
-                            self.log.critical(msg)
-                            raise Exception(msg)
-                        else:
-                            self.log.warning(msg)
+                        raise Exception(msg)
                 elif error_expected:
                     msg = "Expecting an error, but there is no PLSVERR present in bus!"
                     raise Exception(msg)

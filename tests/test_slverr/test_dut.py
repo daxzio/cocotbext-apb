@@ -73,7 +73,7 @@ async def test_dut_proper_err(dut):
     await tb.cr.end_test(200)
 
 
-@test()
+@test(expect_error=Exception)
 async def test_dut_incorrect_write_err(dut):
     tb = testbench(dut, reset_sense=1)
 
@@ -82,36 +82,22 @@ async def test_dut_incorrect_write_err(dut):
     # Read constant value
     await tb.intf.read(0x4, 80)
 
-    tb.intf.exception_enabled = False
-    assert (
-        tb.intf.exception_occurred == False
-    ), "Exception occurred when it should not have"
-    # Try to write (should error)
-    await tb.intf.write(0x4, 81, error_expected=False)
-    assert (
-        tb.intf.exception_occurred == True
-    ), "Exception did not occur when it should have"
+    await tb.intf.write(0x4, 81, error_expected=True)
 
-    await tb.cr.end_test(200)
+    await tb.intf.write(0x4, 81)
 
 
-@test()
+@test(expect_error=Exception)
 async def test_dut_incorrect_read_err(dut):
     tb = testbench(dut, reset_sense=1)
 
     await tb.cr.wait_clkn(200)
 
-    # Read constant value
+    # This is a succesful write to a write only register
     await tb.intf.write(0x8, 101)
 
-    tb.intf.exception_enabled = False
-    assert (
-        tb.intf.exception_occurred == False
-    ), "Exception occurred when it should not have"
-    # Try to write (should error)
-    await tb.intf.read(0x8, 0, error_expected=False)
-    assert (
-        tb.intf.exception_occurred == True
-    ), "Exception did not occur when it should have"
+    await tb.intf.read(0x8, 0, error_expected=True)
 
-    await tb.cr.end_test(200)
+    # This is a read to a write only register, and we are not expecting an error,
+    # this should raise an exception
+    await tb.intf.read(0x8, 0)
