@@ -62,7 +62,7 @@ jobs:
           cache: 'pip'
       - name: Setup Verilator
         if: matrix.target == 'verilator'
-        uses: veryl-lang/setup-verilator@v1
+        uses: veryl-lang/setup-verilator@v2
       - name: Install dependency for ghdl
         if: matrix.target == 'ghdl'
         uses: ghdl/setup-ghdl@v1
@@ -124,7 +124,7 @@ jobs:
           cache: 'pip'
       - name: Setup Verilator
         if: matrix.target == 'verilator'
-        uses: veryl-lang/setup-verilator@v1
+        uses: veryl-lang/setup-verilator@v2
       - name: Install dependency for ghdl
         if: matrix.target == 'ghdl'
         uses: ghdl/setup-ghdl@v1
