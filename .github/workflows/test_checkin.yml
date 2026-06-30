@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
@@ -42,12 +42,12 @@ jobs:
       CI_TARGET: ${{ matrix.target }}
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Report Environment
         run: |
           echo "Runing tests with env set to : ${CI_TARGET}"
       - name: Cache Icarus
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: ${{ needs.build_icarus_linux.outputs.cache_dir }}
           key: ${{ needs.build_icarus_linux.outputs.cache_key }}
@@ -62,7 +62,7 @@ jobs:
           cache: 'pip'
       - name: Setup Verilator
         if: matrix.target == 'verilator'
-        uses: veryl-lang/setup-verilator@v1
+        uses: veryl-lang/setup-verilator@v2
       - name: Install dependency for ghdl
         if: matrix.target == 'ghdl'
         uses: ghdl/setup-ghdl@v1
@@ -104,12 +104,12 @@ jobs:
       CI_TARGET: ${{ matrix.target }}
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Report Environment
         run: |
           echo "Runing tests with env set to : ${CI_TARGET}"
       - name: Cache Icarus
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: ${{ needs.build_icarus_linux.outputs.cache_dir }}
           key: ${{ needs.build_icarus_linux.outputs.cache_key }}
@@ -124,7 +124,7 @@ jobs:
           cache: 'pip'
       - name: Setup Verilator
         if: matrix.target == 'verilator'
-        uses: veryl-lang/setup-verilator@v1
+        uses: veryl-lang/setup-verilator@v2
       - name: Install dependency for ghdl
         if: matrix.target == 'ghdl'
         uses: ghdl/setup-ghdl@v1
@@ -162,7 +162,7 @@ jobs:
     permissions:
       id-token: write  # IMPORTANT: this permission is mandatory for trusted publishing
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Make PyPi dist release
         run: make dist
       - name: Publish Python distribution to PyPI
