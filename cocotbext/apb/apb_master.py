@@ -58,6 +58,7 @@ class ApbMaster(ApbBase):
         self.ret: Union[bytes, None] = None
         self.intra_delay: int = 0
         self.addrmap: Dict[int, Dict[str, int]] = {}
+        self._addr_label_width = 10
 
         self._idle = Event()
 
@@ -103,6 +104,36 @@ class ApbMaster(ApbBase):
 
     def addaddrmap(self, addrmap, device: int = 0):
         self.addrmap[device] = addrmap
+        self._update_addr_label_width()
+
+    def _update_addr_label_width(self) -> None:
+        width = 10
+        for device_map in self.addrmap.values():
+            for name in device_map:
+                width = max(width, len(name), len(name) + 4)
+        self._addr_label_width = width
+
+    def _format_addr_col(self, label: str, apb: str = "") -> str:
+        """Pad address/register label so read/write data columns align."""
+        width = self._addr_label_width + (4 if self.multi_device else 0)
+        return f"{apb}{label}".ljust(width)
+
+    def format_addr(self, addr: int, device: int = 0) -> str:
+        """Resolve a byte address to a register name when addrmap is configured."""
+        if device not in self.addrmap or not self.addrmap[device]:
+            return f"0x{addr:08x}"
+
+        best_name = None
+        best_base = -1
+        for name, base in self.addrmap[device].items():
+            if addr < base or (addr - base) % self.wbytes:
+                continue
+            if base > best_base:
+                idx = (addr - base) // self.wbytes
+                best_name = name if idx == 0 else f"{name}[{idx}]"
+                best_base = base
+
+        return best_name if best_name is not None else f"0x{addr:08x}"
 
     async def write(
         self,
@@ -155,7 +186,8 @@ class ApbMaster(ApbBase):
         index: int = -1,
     ) -> None:
         self.addr = self.calc_address(addr, device, index)
-        self.log.info(f"Poll  0x{self.addr:08x}")
+        label = self.format_addr(self.addr, device)
+        self.log.info(f"Poll  {self._format_addr_col(label)}")
         level_num = self.log.getEffectiveLevel()
         self.log.setLevel(logging.WARNING)
         if isinstance(data, int):
@@ -293,7 +325,11 @@ class ApbMaster(ApbBase):
                     self.bus.penable.value = 0
                 if write:
                     data = int.from_bytes(data, byteorder="little")
-                    self.log.info(f"Write {apb}0x{addr:08x}: 0x{data:08x}{extra_text}")
+                    label = self.format_addr(addr, device)
+                    self.log.info(
+                        f"Write {self._format_addr_col(label, apb)}: "
+                        f"0x{data:08x}{extra_text}"
+                    )
                     self.bus.pwdata.value = data & self.wdata_mask
                     self.bus.pwrite.value = 1
                     if self.pstrb_present:
@@ -312,9 +348,14 @@ class ApbMaster(ApbBase):
                     if self.timeout_max != -1:
                         timeout += 1
                         if timeout >= self.timeout_max:
-                            self.log.info(f"Read  {apb}0x{addr:08x}:{extra_text}")
+                            label = self.format_addr(addr, device)
+                            self.log.info(
+                                f"Read  {self._format_addr_col(label, apb)}:{extra_text}"
+                            )
                             raise TimeoutError(
-                                f"APB transaction timeout: pready not asserted within {self.timeout_max} clock cycles (addr: 0x{addr:08x})"
+                                f"APB transaction timeout: pready not asserted within "
+                                f"{self.timeout_max} clock cycles "
+                                f"(addr: {self.format_addr(addr, device)})"
                             )
 
                 if self.pslverr_present:
@@ -335,8 +376,10 @@ class ApbMaster(ApbBase):
                     ret_slice = (
                         ret >> (device * self.rwidth[device])
                     ) & self.rdata_mask[device]
+                    label = self.format_addr(addr, device)
                     self.log.info(
-                        f"Read  {apb}0x{addr:08x}: 0x{ret_slice:08x}{extra_text}"
+                        f"Read  {self._format_addr_col(label, apb)}: "
+                        f"0x{ret_slice:08x}{extra_text}"
                     )
                     if not data == bytes():
                         data_int = int.from_bytes(data, byteorder="little")

@@ -25,6 +25,8 @@ THE SOFTWARE.
 from .version import __version__
 
 from .apb_bus import ApbBus, Apb3Bus, Apb4Bus, Apb5Bus
+
+# from .apb_interface import Apb4Interface
 from .apb_master import ApbMaster
 from .apb_monitor import ApbMonitor
 from .apb_slave import ApbSlave
@@ -42,6 +44,7 @@ __all__ = [
     "ApbBus",
     "Apb3Bus",
     "Apb4Bus",
+    #     "Apb4Interface",
     "Apb5Bus",
     "ApbMaster",
     "ApbMonitor",
