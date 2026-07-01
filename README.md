@@ -86,19 +86,12 @@ Once the module is instantiated, read and write operations can be initiated in a
 
 #### Address Mapping
 
-The `ApbMaster` supports address mapping through the `addrmap` attribute, which allows using string names instead of numeric addresses in read and write operations. This makes testbenches more readable and maintainable by using register names instead of hardcoded addresses.
+The `ApbMaster` supports address mapping through its `addrmap` attribute, an
+[`AddressMap`](#addressmap) instance. Register names can be used instead of
+numeric addresses in `read()`, `write()`, `read_nowait()`, `write_nowait()`, and
+`poll()`, which makes testbenches easier to read and maintain.
 
-The `addrmap` attribute is a dictionary that maps register names (strings) to their corresponding addresses (integers). When a string is passed as the `addr` parameter to `read()`, `write()`, `read_nowait()`, `write_nowait()`, or `poll()` methods, the master will automatically look up the address in the `addrmap` dictionary.
-
-**Indexed Register Access:**
-
-For registers that are arrays or need indexed access, you can use either:
-1. String format with bracket notation: `"STATUS[0]"`, `"STATUS[1]"`, etc.
-2. The `index` parameter: `read("STATUS", data, index=0)`, `write("STATUS", data, index=1)`, etc.
-
-Both methods add an offset to the base register address equal to `index * wbytes` (where `wbytes` is the bus width in bytes). The `index` parameter is particularly useful when using a variable index in loops.
-
-Example:
+Configure the map with `addaddrmap()` or by assigning directly to a device index:
 
 ```python
 from cocotbext.apb import ApbMaster, ApbBus
@@ -106,12 +99,16 @@ from cocotbext.apb import ApbMaster, ApbBus
 bus = ApbBus.from_prefix(dut, "s_apb")
 apb_driver = ApbMaster(bus, dut.clk)
 
-apb_driver.addrmap = {
+# Preferred: addaddrmap() updates log column alignment automatically
+apb_driver.addaddrmap({
     'STATUS'    : 0x00,
     'BUSY'      : 0x04,
     'CONFIG'    : 0x08,
     'INTERRUPT' : 0x0c,
-}
+})
+
+# Equivalent for device 0:
+# apb_driver.addrmap[0] = { ... }
 
 # Use string names instead of numeric addresses
 await apb_driver.write('STATUS', 0x12)
@@ -127,6 +124,19 @@ for i in range(4):
     await apb_driver.read('STATUS', expected[i], index=i)
 ```
 
+When a map is configured, transaction logs show register names instead of raw
+addresses (for example `Read  STATUS    : 0x00000012` rather than
+`Read  0x00000000: 0x00000012`). See [tests/test_addrmap](tests/test_addrmap)
+for a complete cocotb example.
+
+**Indexed register access:** for register arrays, use either bracket notation
+(`"STATUS[0]"`, `"STATUS[1]"`, …) or the `index` parameter
+(`read("STATUS", data, index=0)`). Both add `index * wbytes` to the base address,
+where `wbytes` is the bus data width in bytes.
+
+**Multi-device:** pass `device=N` to `addaddrmap()` or assign `addrmap[N] = {...}`
+for each slave. Use the `device` parameter on read/write calls to select the target.
+
 #### Methods
 * `enable_logging()`: Enable debug logging
 * `disable_logging()`: Disable debug logging
@@ -138,17 +148,112 @@ for i in range(4):
 * `read(addr, data=bytes(), prot=ApbProt.NONSECURE, error_expected=False, device=0, index=-1, length=-1)`: read bytes, at _addr_ (int or string when `addrmap` is configured), if _data_ supplied check for match, wait for result. If an slverr is experienced a critical warning will be issued by default, but will reduced this to an info warning if `error_expected=True`. If _data_ is wider than the bus width, it will automatically be split into multiple sequential APB read accesses at consecutive addresses. The optional _length_ parameter can override the automatic length calculation, should be a multiple of the number of bytes in the wdata bus. The optional _device_ parameter specifies the slave index to target. The optional _index_ parameter adds an offset to the address equal to `index * wbytes`, useful for accessing indexed registers (alternative to using string format like `"STATUS[0]"`).
 * `read_nowait(addr, data=bytes(), prot=ApbProt.NONSECURE, error_expected=False, device=0, index=-1, length=-1)`: read bytes, at _addr_ (int or string when `addrmap` is configured), if _data_ supplied check for match, submit to queue. If an slverr is experienced a critical warning will be issued by default, but will reduced this to an info warning if `error_expected=True`. If _data_ is wider than the bus width, it will automatically be split into multiple sequential APB read accesses at consecutive addresses. The optional _length_ parameter can override the automatic length calculation, should be a multiple of the number of bytes in the wdata bus. The optional _device_ parameter specifies the slave index to target. The optional _index_ parameter adds an offset to the address equal to `index * wbytes`, useful for accessing indexed registers (alternative to using string format like `"STATUS[0]"`).
 * `poll(addr, data=bytes(), device=0)`: poll address, at _addr_ (int or string when `addrmap` is configured), until data at address matches _data_. The optional _device_ parameter specifies the slave index to target.
+* `addaddrmap(addrmap, device=0)`: register a name-to-address map for _device_. Preferred over direct assignment because it updates log column alignment.
+* `format_addr(addr, device=0)`: reverse lookup — return the register name for _addr_, or `0x........` if unmapped.
 
+### AddressMap
 
-Example:
+`AddressMap` is a protocol-agnostic helper for name-to-address resolution on
+memory-mapped register maps. It is used internally by `ApbMaster` (via the
+`addrmap` attribute) and is also exported for standalone use or integration with
+other bus masters (for example OBI).
+
+Import:
 
 ```python
-# Write to slave 0
-await tb.intf.write(0x100, 0xDEADBEEF, device=0)
-
-# Read from slave 1
-val = await tb.intf.read(0x200, device=1)
+from cocotbext.apb import AddressMap
 ```
+
+#### Data model
+
+`AddressMap` is a `dict` subclass keyed by **device index**. Each value is a
+plain `dict` mapping **register name** (`str`) to **byte address** (`int`):
+
+```
+AddressMap
+├── 0 → {"STATUS": 0x00, "CONFIG": 0x08, ...}   # device 0
+├── 1 → {"CTRL": 0x1000, ...}                   # device 1 (multi-device)
+└── word_bytes, multi_device, _label_width      # configuration
+```
+
+Constructor parameters:
+
+* _word_bytes_: bus data width in bytes (default `4`). Used for indexed register
+  offsets and reverse lookup alignment.
+* _multi_device_: reserve extra column width in log output when multiple slaves
+  are present (default `False`).
+
+#### Forward lookup (name → address)
+
+`resolve(addr, device=0, index=-1)` converts a register name or integer address
+to a byte address:
+
+* If `addr` is an `int`, it is returned unchanged (plus any `index` offset).
+* If `addr` is a `str`, the base name is looked up in the map for _device_.
+  Bracket notation adds `N * word_bytes` for each `[N]` suffix
+  (e.g. `"AES_KEY_SHARE0[3]"` → base + 3 × word_bytes).
+* If `index != -1`, `index * word_bytes` is added after name resolution.
+
+```python
+am = AddressMap(word_bytes=4)
+am.add({"STATUS": 0x00, "CONFIG": 0x08})
+
+am.resolve(0x08)              # 0x08  (integer passthrough)
+am.resolve("STATUS")          # 0x00
+am.resolve("STATUS[2]")       # 0x08
+am.resolve("STATUS", index=1) # 0x04
+```
+
+#### Reverse lookup (address → name)
+
+`format(addr, device=0)` returns the register name for a byte address. When the
+address falls within a mapped register array (aligned to `word_bytes`), bracket
+notation is used for non-zero indices. Unmapped addresses are formatted as
+`0x........`.
+
+```python
+am.format(0x00)   # "STATUS"
+am.format(0x08)   # "STATUS[2]"  (if STATUS base is 0x00, word_bytes=4)
+am.format(0x99)   # "0x00000099" (unmapped)
+```
+
+#### Registering maps
+
+* `add(addrmap, device=0)`: store a name→address dict for _device_ and recompute
+  log column width. This is what `ApbMaster.addaddrmap()` delegates to.
+* Direct assignment `am[device] = {...}` also works (dict subclass), but does not
+  update column width unless `add()` or `_update_label_width()` is called.
+
+#### Log formatting
+
+`format_col(label, prefix="")` pads a register label so read/write data columns
+align in log output. `ApbMaster` uses this internally when logging transactions.
+
+#### Standalone example
+
+```python
+from cocotbext.apb import AddressMap
+
+REGS = {
+    "STATUS": 0x00,
+    "BUSY": 0x04,
+    "CONFIG": 0x08,
+}
+
+am = AddressMap(word_bytes=4)
+am.add(REGS)
+
+# Forward lookup for a custom driver
+addr = am.resolve("CONFIG")
+
+# Reverse lookup for debug output
+label = am.format(addr)          # "CONFIG"
+col = am.format_col(label)         # padded for aligned columns
+```
+
+Unit tests for reverse lookup live in
+[tests/test_format_addr.py](tests/test_format_addr.py). Cocotb integration tests
+are in [tests/test_addrmap](tests/test_addrmap).
 
 ### APB Monitor
 

@@ -30,6 +30,45 @@ class AddressMap(dict):
 
     Maps register names to byte addresses per device. Supports indexed
     register access (``NAME[idx]``) and reverse lookup for logging.
+
+    This class is protocol-agnostic: it has no bus-specific dependencies and
+    can be used standalone or embedded in any memory-mapped bus master.
+
+    Data model
+    ----------
+    The object is keyed by device index (``int``). Each value is a ``dict``
+    mapping register name (``str``) to byte address (``int``).
+
+    Parameters
+    ----------
+    word_bytes:
+        Bus data width in bytes. Used for ``NAME[N]`` index offsets and for
+        reverse lookup alignment. Default ``4``.
+    multi_device:
+        When ``True``, reserve extra column width in ``format_col()`` output
+        for multi-slave log prefixes. Default ``False``.
+
+    Methods
+    -------
+    add(addrmap, device=0):
+        Register a name→address dict for *device* and update label width.
+    resolve(addr, device=0, index=-1):
+        Forward lookup: register name or int → byte address.
+    format(addr, device=0):
+        Reverse lookup: byte address → register name (or ``0x........``).
+    format_col(label, prefix=""):
+        Pad *label* for aligned read/write log columns.
+
+    Examples
+    --------
+    >>> am = AddressMap(word_bytes=4)
+    >>> am.add({"STATUS": 0x00, "CONFIG": 0x08})
+    >>> am.resolve("STATUS")
+    0
+    >>> am.resolve("STATUS[2]")
+    8
+    >>> am.format(0x08)
+    'CONFIG'
     """
 
     def __init__(self, word_bytes=4, multi_device=False):
