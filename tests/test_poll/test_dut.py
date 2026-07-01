@@ -7,7 +7,6 @@ from cocotbext.apb import ApbMaster
 from cocotbext.apb import ApbBus
 from cocotbext.apb import ApbMonitor
 
-
 # def returned_val(read_op):
 #     return int.from_bytes(read_op, byteorder="little")
 

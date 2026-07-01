@@ -48,9 +48,9 @@ class ApbMaster(ApbBase):
         self.timeout_max = timeout_max
         self.exception_enabled = True
 
-        self.queue_tx: Deque[
-            Tuple[bool, int, bytes, int, ApbProt, bool, int, int]
-        ] = deque()
+        self.queue_tx: Deque[Tuple[bool, int, bytes, int, ApbProt, bool, int, int]] = (
+            deque()
+        )
         self.queue_rx: Deque[Tuple[bytes, int]] = deque()
         self.tx_id = 0
         self.return_int = False

@@ -29,7 +29,7 @@ mypy:
 	mypy cocotbext
 
 format:
-	black cocotbext
+	black cocotbext tests
 
 checks: format lint mypy
 

@@ -7,6 +7,7 @@ This example shows:
 3. Proper file path handling
 4. Error handling
 """
+
 import pytest
 from cocotb_test.simulator import run
 import os

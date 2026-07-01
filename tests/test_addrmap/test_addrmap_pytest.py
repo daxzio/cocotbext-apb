@@ -4,6 +4,7 @@ Example pytest-based test for test_addrmap with parameterization.
 This demonstrates how to migrate from Makefile-based cocotb tests to pytest
 with cocotb-test, including parameterization for different elaboration-time values.
 """
+
 import pytest
 from cocotb_test.simulator import run
 import os
