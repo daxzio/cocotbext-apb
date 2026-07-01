@@ -1,5 +1,4 @@
 cocotb
-cocotb-bus
 cocotb-test
 pytest
 pyflakes

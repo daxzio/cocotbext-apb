@@ -383,3 +383,7 @@ class ApbMaster(ApbBase):
                 self.bus.pwdata.value = 0
                 if self.pstrb_present:
                     self.bus.pstrb.value = 0
+
+
+class ApbHost(ApbMaster):
+    pass

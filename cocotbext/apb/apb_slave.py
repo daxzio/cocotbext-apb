@@ -154,3 +154,7 @@ class ApbSlave(ApbBase):
                 self.bus.prdata.value = 0
                 if self.pslverr_present:
                     self.bus.pslverr.value = 0
+
+
+class ApbDevice(ApbSlave):
+    pass
