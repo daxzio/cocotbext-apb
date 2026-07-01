@@ -22,7 +22,6 @@ THE SOFTWARE.
 
 """
 
-import re
 import logging
 import math
 
@@ -35,9 +34,9 @@ from typing import Deque
 from typing import Tuple
 from typing import Any
 from typing import Union
-from typing import Dict
 
 from .apb_base import ApbBase
+from .address_map import AddressMap
 from .constants import ApbProt
 from .utils import resolve_x_int
 
@@ -57,8 +56,9 @@ class ApbMaster(ApbBase):
         self.return_int = False
         self.ret: Union[bytes, None] = None
         self.intra_delay: int = 0
-        self.addrmap: Dict[int, Dict[str, int]] = {}
-        self._addr_label_width = 10
+        self.addrmap = AddressMap(
+            word_bytes=self.wbytes, multi_device=self.multi_device
+        )
 
         self._idle = Event()
 
@@ -91,49 +91,22 @@ class ApbMaster(ApbBase):
         return length
 
     def calc_address(self, addr, device: int = 0, index: int = -1):
-        self.addr = addr
-        if not 0 == len(self.addrmap) and isinstance(addr, str):
-            h = re.findall(r"\[(\d+)\]", addr)
-            addr = re.sub(r"\[.+", "", addr)
-            self.addr = self.addrmap[device][addr]
-            for g in h:
-                self.addr += int(g) * self.wbytes
-        if index != -1:
-            self.addr += index * self.wbytes
+        self.addr = self.addrmap.resolve(addr, device, index)
         return self.addr
 
     def addaddrmap(self, addrmap, device: int = 0):
-        self.addrmap[device] = addrmap
-        self._update_addr_label_width()
+        self.addrmap.add(addrmap, device)
 
     def _update_addr_label_width(self) -> None:
-        width = 10
-        for device_map in self.addrmap.values():
-            for name in device_map:
-                width = max(width, len(name), len(name) + 4)
-        self._addr_label_width = width
+        self.addrmap._update_label_width()
 
     def _format_addr_col(self, label: str, apb: str = "") -> str:
         """Pad address/register label so read/write data columns align."""
-        width = self._addr_label_width + (4 if self.multi_device else 0)
-        return f"{apb}{label}".ljust(width)
+        return self.addrmap.format_col(label, apb)
 
     def format_addr(self, addr: int, device: int = 0) -> str:
         """Resolve a byte address to a register name when addrmap is configured."""
-        if device not in self.addrmap or not self.addrmap[device]:
-            return f"0x{addr:08x}"
-
-        best_name = None
-        best_base = -1
-        for name, base in self.addrmap[device].items():
-            if addr < base or (addr - base) % self.wbytes:
-                continue
-            if base > best_base:
-                idx = (addr - base) // self.wbytes
-                best_name = name if idx == 0 else f"{name}[{idx}]"
-                best_base = base
-
-        return best_name if best_name is not None else f"0x{addr:08x}"
+        return self.addrmap.format(addr, device)
 
     async def write(
         self,

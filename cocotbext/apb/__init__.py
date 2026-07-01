@@ -38,6 +38,7 @@ from .constants import APBSlvErr, APBPrivilegedErr, APBInstructionErr
 from .address_space import MemoryInterface, Window, WindowPool
 from .address_space import Region, MemoryRegion, SparseMemoryRegion, PeripheralRegion
 from .address_space import AddressSpace, Pool
+from .address_map import AddressMap
 
 __all__ = [
     "__version__",
@@ -63,4 +64,5 @@ __all__ = [
     "PeripheralRegion",
     "AddressSpace",
     "Pool",
+    "AddressMap",
 ]
