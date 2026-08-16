@@ -23,16 +23,16 @@ THE SOFTWARE.
 """
 
 import math
-from typing import Any, Deque, Tuple
 from collections import deque
+from typing import Any
 
 from cocotb import start_soon
-from cocotb.triggers import RisingEdge, ReadOnly
+from cocotb.triggers import ReadOnly, RisingEdge
 from cocotb.utils import get_sim_time
 
+from .apb_base import ApbBase
 from .constants import ApbProt
 from .utils import resolve_x_int
-from .apb_base import ApbBase
 
 
 class ApbMonitor(ApbBase):
@@ -42,10 +42,10 @@ class ApbMonitor(ApbBase):
         self.timeout_max = 1000
         self.timeout = 0
 
-        for i, j in self.bus._signals.items():
+        for i in self.bus._signals:
             setattr(self, i, 0)
 
-        self.queue_txn: Deque[Tuple[bool, int, bytes, int, ApbProt, int]] = deque()
+        self.queue_txn: deque[tuple[bool, int, bytes, int, ApbProt, int]] = deque()
         self.txn_id = 0
 
         self._run_coroutine_obj: Any = None
@@ -97,7 +97,7 @@ class ApbMonitor(ApbBase):
 
     async def _resolve_signals(self):
         while True:
-            for i, j in self.bus._signals.items():
+            for i in self.bus._signals:
                 setattr(self, i, resolve_x_int(getattr(self.bus, i)))
             await RisingEdge(self.clock)
 
@@ -110,9 +110,9 @@ class ApbMonitor(ApbBase):
             await RisingEdge(self.clock)
             self.timeout = 0
 
-            if not 0 == self.psel:
+            if self.psel != 0:
                 device = int(math.log2(self.psel))
-                if not self.psel == 2**device:
+                if self.psel != 2**device:
                     self.log.critical(f"incorrect formatted psel {self.psel}")
 
                 if self.paddr < 0 or self.paddr >= 2**self.address_width:
@@ -148,7 +148,7 @@ class ApbMonitor(ApbBase):
                     await RisingEdge(self.clock)
                     self.timeout += 1
                     if self.timeout >= self.timeout_max:
-                        raise Exception(
+                        raise TimeoutError(
                             f"pready wait has exceed timout {self.timeout_max}"
                         )
 

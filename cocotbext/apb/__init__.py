@@ -22,47 +22,51 @@ THE SOFTWARE.
 
 """
 
-from .version import __version__
-
-from .apb_bus import ApbBus, Apb3Bus, Apb4Bus, Apb5Bus
+from .address_map import AddressMap
+from .address_space import (
+    AddressSpace,
+    MemoryInterface,
+    MemoryRegion,
+    PeripheralRegion,
+    Pool,
+    Region,
+    SparseMemoryRegion,
+    Window,
+    WindowPool,
+)
+from .apb_bus import Apb3Bus, Apb4Bus, Apb5Bus, ApbBus
 
 # from .apb_interface import Apb4Interface
 from .apb_master import ApbMaster
 from .apb_monitor import ApbMonitor
-from .apb_slave import ApbSlave
 from .apb_ram import ApbRam
-
-from .constants import ApbProt
-from .constants import APBSlvErr, APBPrivilegedErr, APBInstructionErr
-
-from .address_space import MemoryInterface, Window, WindowPool
-from .address_space import Region, MemoryRegion, SparseMemoryRegion, PeripheralRegion
-from .address_space import AddressSpace, Pool
-from .address_map import AddressMap
+from .apb_slave import ApbSlave
+from .constants import APBInstructionErr, APBPrivilegedErr, ApbProt, APBSlvErr
+from .version import __version__
 
 __all__ = [
-    "__version__",
-    "ApbBus",
+    "APBInstructionErr",
+    "APBPrivilegedErr",
+    "APBSlvErr",
+    "AddressMap",
+    "AddressSpace",
     "Apb3Bus",
     "Apb4Bus",
-    #     "Apb4Interface",
+    # "Apb4Interface",
     "Apb5Bus",
+    "ApbBus",
     "ApbMaster",
     "ApbMonitor",
-    "ApbSlave",
-    "ApbRam",
     "ApbProt",
-    "APBSlvErr",
-    "APBPrivilegedErr",
-    "APBInstructionErr",
+    "ApbRam",
+    "ApbSlave",
     "MemoryInterface",
+    "MemoryRegion",
+    "PeripheralRegion",
+    "Pool",
+    "Region",
+    "SparseMemoryRegion",
     "Window",
     "WindowPool",
-    "Region",
-    "MemoryRegion",
-    "SparseMemoryRegion",
-    "PeripheralRegion",
-    "AddressSpace",
-    "Pool",
-    "AddressMap",
+    "__version__",
 ]

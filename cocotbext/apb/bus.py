@@ -34,7 +34,7 @@ class Bus:
         entity,
         name,
         signals,
-        optional_signals=[],
+        optional_signals=None,
         bus_separator="_",
         case_insensitive=True,
         array_idx=None,
@@ -59,6 +59,8 @@ class Bus:
                 Defaults to True.
             array_idx (int or None, optional): Optional index when signal is an array.
         """
+        if optional_signals is None:
+            optional_signals = []
         self._entity = entity
         self._name = name
         self._signals = {}
@@ -77,12 +79,12 @@ class Bus:
             else:
                 signame = sig_name
             # Signal matching on optional attributes needs to be also case insensitive
-            self._entity._log.debug("Signal name {}".format(signame))
+            self._entity._log.debug(f"Signal name {signame}")
             if self._caseInsensGetattr(entity, signame) is not None:
                 self._add_signal(attr_name, signame, array_idx, case_insensitive)
             else:
                 self._entity._log.debug(
-                    "Ignoring optional missing signal %s on bus %s" % (sig_name, name)
+                    f"Ignoring optional missing signal {sig_name} on bus {name}"
                 )
 
     def _caseInsensGetattr(self, obj, attr):
@@ -92,7 +94,7 @@ class Bus:
         return None
 
     def _add_signal(self, attr_name, signame, array_idx=None, case_insensitive=True):
-        self._entity._log.debug("Signal name {}, idx {}".format(signame, array_idx))
+        self._entity._log.debug(f"Signal name {signame}, idx {array_idx}")
         if case_insensitive:
             handle = self._caseInsensGetattr(self._entity, signame)
         else:
@@ -116,13 +118,8 @@ class Bus:
             if not hasattr(obj, attr_name):
                 if strict:
                     msg = (
-                        "Unable to drive onto {0}.{1} because {2} is missing "
-                        "attribute {3}".format(
-                            self._entity._name,
-                            self._name,
-                            type(obj).__qualname__,
-                            attr_name,
-                        )
+                        f"Unable to drive onto {self._entity._name}.{self._name} because {type(obj).__qualname__} is missing "
+                        f"attribute {attr_name}"
                     )
                     raise AttributeError(msg)
                 else:
@@ -146,7 +143,7 @@ class Bus:
                 if name in self:
                     return self[name]
                 else:
-                    raise RuntimeError("Signal {} not present in bus".format(name))
+                    raise RuntimeError(f"Signal {name} not present in bus")
 
             def __setattr__(self, name, value):
                 raise RuntimeError("Modifying a bus capture is not supported")
@@ -175,13 +172,8 @@ class Bus:
             if not hasattr(obj, attr_name):
                 if strict:
                     msg = (
-                        "Unable to sample from {0}.{1} because {2} is missing "
-                        "attribute {3}".format(
-                            self._entity._name,
-                            self._name,
-                            type(obj).__qualname__,
-                            attr_name,
-                        )
+                        f"Unable to sample from {self._entity._name}.{self._name} because {type(obj).__qualname__} is missing "
+                        f"attribute {attr_name}"
                     )
                     raise AttributeError(msg)
                 else:

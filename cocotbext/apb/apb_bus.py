@@ -10,7 +10,7 @@ from .bus import Bus
 
 
 class Apb3Bus(Bus):
-    _signals = [
+    _signals = [  # noqa: RUF012
         "psel",
         "pwrite",
         "paddr",
@@ -18,7 +18,7 @@ class Apb3Bus(Bus):
         "pready",
         "prdata",
     ]
-    _optional_signals = ["penable"]
+    _optional_signals = ["penable"]  # noqa: RUF012
 
     def __init__(
         self, entity=None, prefix=None, signals=None, optional_signals=None, **kwargs

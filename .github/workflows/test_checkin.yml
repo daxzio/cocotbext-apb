@@ -32,7 +32,7 @@ jobs:
     strategy:
       fail-fast: false # So that one fail doesn't stop remaining tests
       matrix:
-        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
         cocotb-version: ["v1.9.2", "v2.0.0"]
         target: [icarus, verilator, ghdl]
     runs-on: ubuntu-latest
@@ -94,7 +94,7 @@ jobs:
     strategy:
       fail-fast: false # So that one fail doesn't stop remaining tests
       matrix:
-        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13", "3.14"]
+        python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
         cocotb-version: ["master"]
         target: [icarus, verilator, ghdl]
     runs-on: ubuntu-latest

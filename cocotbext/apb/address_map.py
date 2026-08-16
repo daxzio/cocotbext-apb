@@ -84,7 +84,7 @@ class AddressMap(dict):
     def resolve(self, addr, device=0, index=-1):
         """Resolve a register name or integer address to a byte address."""
         resolved = addr
-        if not 0 == len(self) and isinstance(addr, str):
+        if len(self) != 0 and isinstance(addr, str):
             h = re.findall(r"\[(\d+)\]", addr)
             addr = re.sub(r"\[.+", "", addr)
             resolved = self[device][addr]

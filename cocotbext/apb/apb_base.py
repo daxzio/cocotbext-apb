@@ -22,8 +22,8 @@ THE SOFTWARE.
 
 """
 
-import logging
 import datetime
+import logging
 from random import randint, seed
 
 from .version import __version__
@@ -41,7 +41,9 @@ class ApbBase:
         self.log.setLevel(logging.INFO)
         self.log.info(f"APB {self.name}")
         self.log.info(f"cocotbext-apb version {__version__}")
-        self.log.info(f"Copyright (c) 2024-{datetime.datetime.now().year} Daxzio")
+        self.log.info(
+            f"Copyright (c) 2024-{datetime.datetime.now(datetime.timezone.utc).year} Daxzio"
+        )
         self.log.info("https://github.com/daxzio/cocotbext-apb")
 
         self.total_devices = len(self.bus.psel)
@@ -77,9 +79,7 @@ class ApbBase:
         self.log.info(f"  Data width: {self.wwidth} bits ({self.byte_lanes} bytes)")
 
         self.log.info("APB signals:")
-        for sig in sorted(
-            list(set().union(self.bus._signals, self.bus._optional_signals))
-        ):
+        for sig in sorted(set().union(self.bus._signals, self.bus._optional_signals)):
             if hasattr(self.bus, sig):
                 self.log.info(f"  {sig} width: {len(getattr(self.bus, sig))} bits")
             else:

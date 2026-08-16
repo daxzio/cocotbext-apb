@@ -24,20 +24,15 @@ THE SOFTWARE.
 
 import logging
 import math
+from collections import deque
+from typing import Any
 
 from cocotb import start_soon
-from cocotb.triggers import RisingEdge, FallingEdge
+from cocotb.triggers import Event, FallingEdge, RisingEdge
 
-from collections import deque
-from cocotb.triggers import Event
-from typing import Deque
-from typing import Tuple
-from typing import Any
-from typing import Union
-
-from .apb_base import ApbBase
 from .address_map import AddressMap
-from .constants import ApbProt
+from .apb_base import ApbBase
+from .constants import ApbProt, APBSlvErr
 from .utils import resolve_x_int
 
 
@@ -48,13 +43,13 @@ class ApbMaster(ApbBase):
         self.timeout_max = timeout_max
         self.exception_enabled = True
 
-        self.queue_tx: Deque[Tuple[bool, int, bytes, int, ApbProt, bool, int, int]] = (
+        self.queue_tx: deque[tuple[bool, int, bytes, int, ApbProt, bool, int, int]] = (
             deque()
         )
-        self.queue_rx: Deque[Tuple[bytes, int]] = deque()
+        self.queue_rx: deque[tuple[bytes, int]] = deque()
         self.tx_id = 0
         self.return_int = False
-        self.ret: Union[bytes, None] = None
+        self.ret: bytes | None = None
         self.intra_delay: int = 0
         self.addrmap = AddressMap(
             word_bytes=self.wbytes, multi_device=self.multi_device
@@ -79,8 +74,8 @@ class ApbMaster(ApbBase):
     def calc_length(self, length, data):
         if -1 == length:
             length = self.wbytes
-        if not 0 == length % self.wbytes:
-            raise Exception(
+        if length % self.wbytes != 0:
+            raise ValueError(
                 f"Length needs to be a multiple of the byte width: {length}%{self.wbytes}"
             )
         if isinstance(data, int):
@@ -111,7 +106,7 @@ class ApbMaster(ApbBase):
     async def write(
         self,
         addr: int,
-        data: Union[int, bytes],
+        data: int | bytes,
         strb: int = -1,
         prot: ApbProt = ApbProt.NONSECURE,
         error_expected: bool = False,
@@ -127,7 +122,7 @@ class ApbMaster(ApbBase):
     def write_nowait(
         self,
         addr: int,
-        data: Union[int, bytes],
+        data: int | bytes,
         strb: int = -1,
         prot: ApbProt = ApbProt.NONSECURE,
         error_expected: bool = False,
@@ -135,7 +130,6 @@ class ApbMaster(ApbBase):
         length: int = -1,
         index: int = -1,
     ) -> None:
-        """ """
         self._idle.clear()
         self.addr = self.calc_address(addr, device, index)
         self.loop = self.calc_length(length, data)
@@ -154,7 +148,7 @@ class ApbMaster(ApbBase):
     async def poll(
         self,
         addr: int,
-        data: Union[int, bytes] = bytes(),
+        data: int | bytes = b"",
         device: int = 0,
         index: int = -1,
     ) -> None:
@@ -168,20 +162,20 @@ class ApbMaster(ApbBase):
         else:
             datab = data
         self.ret = None
-        while not self.ret == datab:
+        while self.ret != datab:
             await self.read(addr, device=device)
         self.log.setLevel(level_num)
 
     async def read(
         self,
         addr: int,
-        data: Union[int, bytes] = bytes(),
+        data: int | bytes = b"",
         prot: ApbProt = ApbProt.NONSECURE,
         error_expected: bool = False,
         device: int = 0,
         index: int = -1,
         length: int = -1,
-    ) -> Union[bytes, int]:
+    ) -> bytes | int:
         rx_id = self.read_nowait(
             addr, data, prot, error_expected, device, index, length
         )
@@ -204,7 +198,7 @@ class ApbMaster(ApbBase):
     def read_nowait(
         self,
         addr: int,
-        data: Union[int, bytes] = bytes(),
+        data: int | bytes = b"",
         prot: ApbProt = ApbProt.NONSECURE,
         error_expected: bool = False,
         device: int = 0,
@@ -332,17 +326,17 @@ class ApbMaster(ApbBase):
                             )
 
                 if self.pslverr_present:
-                    if not bool(self.bus.pslverr.value) == error_expected:
+                    if bool(self.bus.pslverr.value) != error_expected:
                         if bool(self.bus.pslverr.value):
                             msg = "PSLVERR detected not expected!"
                         else:
                             msg = "PSLVERR expected not detected!"
                         if self.pprot_present:
                             msg += f" PPROT - {ApbProt(self.bus.pprot.value).name}"
-                        raise Exception(msg)
+                        raise APBSlvErr(msg)
                 elif error_expected:
                     msg = "Expecting an error, but there is no PLSVERR present in bus!"
-                    raise Exception(msg)
+                    raise APBSlvErr(msg)
 
                 if not write:
                     ret = resolve_x_int(self.bus.prdata)
@@ -354,14 +348,14 @@ class ApbMaster(ApbBase):
                         f"Read  {self._format_addr_col(label, apb)}: "
                         f"0x{ret_slice:08x}{extra_text}"
                     )
-                    if not data == bytes():
+                    if data != b"":
                         data_int = int.from_bytes(data, byteorder="little")
-                        if not data_int == ret_slice:
+                        if data_int != ret_slice:
                             self.bus.psel.value = 0
                             await RisingEdge(self.clock)
                             await RisingEdge(self.clock)
                             await RisingEdge(self.clock)
-                            raise Exception(
+                            raise ValueError(
                                 f"Expected 0x{data_int:08x} doesn't match returned 0x{ret_slice:08x}"
                             )
                     self.queue_rx.append(

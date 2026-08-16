@@ -22,16 +22,13 @@ THE SOFTWARE.
 
 """
 
+from typing import Any
+
 from cocotb import start_soon
 from cocotb.triggers import RisingEdge
 
 from .apb_base import ApbBase
-from .constants import ApbProt
-from .constants import APBPrivilegedErr, APBInstructionErr
-
-# from .reset import Reset
-#
-from typing import Any
+from .constants import APBInstructionErr, APBPrivilegedErr, ApbProt
 
 
 class InvalidAccess(Exception):
@@ -67,15 +64,15 @@ class ApbSlave(ApbBase):
                         raise exception
                 elif isinstance(addrs, (list, tuple)):
                     if addrs[1] < addrs[0]:
-                        raise Exception(
+                        raise ValueError(
                             f"Address range needs to be increasing , {addrs}"
                         )
-                    if not 2 == len(addrs):
-                        raise Exception(f"Address range needs to be 2 value , {addrs}")
+                    if len(addrs) != 2:
+                        raise ValueError(f"Address range needs to be 2 value , {addrs}")
                     if addrs[0] <= address < addrs[1]:
                         raise exception
                 else:
-                    raise Exception(f"Unknown addr type , {addrs}")
+                    raise TypeError(f"Unknown addr type , {addrs}")
 
     def check_permission(self, address, prot):
         self.check_address(

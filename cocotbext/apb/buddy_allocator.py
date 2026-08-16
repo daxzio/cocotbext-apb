@@ -62,7 +62,7 @@ class BuddyAllocator:
 
             break
 
-        raise Exception("out of memory")
+        raise MemoryError("out of memory")
 
     def free(self, addr):
         if addr not in self.allocations:
@@ -89,4 +89,4 @@ class BuddyAllocator:
                 self.free_lists[bucket].append(addr)
                 return
 
-        raise Exception("failed to free memory")
+        raise RuntimeError("failed to free memory")

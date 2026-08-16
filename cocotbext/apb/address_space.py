@@ -313,10 +313,10 @@ class AddressSpace(Region):
         regions = self.find_regions(address, length)
         data = bytearray()
         if not regions:
-            raise Exception("Invalid address")
+            raise ValueError("Invalid address")
         for base, size, offset, region in regions:
             if base > address:
-                raise Exception("Invalid address")
+                raise ValueError("Invalid address")
             seg_addr = address - base
             seg_len = min(size - seg_addr, length)
             if offset is None:
@@ -326,7 +326,7 @@ class AddressSpace(Region):
             address += seg_len
             length -= seg_len
         if length > 0:
-            raise Exception("Invalid address")
+            raise ValueError("Invalid address")
         return bytes(data)
 
     async def write(self, address, data, **kwargs):
@@ -334,10 +334,10 @@ class AddressSpace(Region):
         length = len(data)
         regions = self.find_regions(address, length)
         if not regions:
-            raise Exception("Invalid address")
+            raise ValueError("Invalid address")
         for base, size, offset, region in regions:
             if base > address:
-                raise Exception("Invalid address")
+                raise ValueError("Invalid address")
             seg_addr = address - base
             seg_len = min(size - seg_addr, length)
             if offset is None:
@@ -350,7 +350,7 @@ class AddressSpace(Region):
             start += seg_len
             length -= seg_len
         if length > 0:
-            raise Exception("Invalid address")
+            raise ValueError("Invalid address")
 
     def create_pool(self, base=None, size=None, pool_type=None, region_type=None):
         if base is None:
