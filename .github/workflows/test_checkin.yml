@@ -102,6 +102,8 @@ jobs:
 
     env:
       CI_TARGET: ${{ matrix.target }}
+      # cocotb 2.0.x from requirements.txt refuses 3.14; master is then installed over it
+      COCOTB_IGNORE_PYTHON_REQUIRES: "1"
 
     steps:
       - uses: actions/checkout@v7
