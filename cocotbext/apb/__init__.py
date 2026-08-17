@@ -36,8 +36,8 @@ from .address_space import (
 )
 from .apb_bus import Apb3Bus, Apb4Bus, Apb5Bus, ApbBus
 from .apb_device import ApbDevice
-from .apb_interface import HAVE_COCOTBEXT_INTERFACE, Apb4Interface
 from .apb_host import ApbHost
+from .apb_interface import HAVE_COCOTBEXT_INTERFACE, Apb4Interface
 from .apb_master import ApbMaster
 from .apb_monitor import ApbMonitor
 from .apb_ram import ApbRam
@@ -46,10 +46,10 @@ from .constants import APBInstructionErr, APBPrivilegedErr, ApbProt, APBSlvErr
 from .version import __version__
 
 __all__ = [
+    "HAVE_COCOTBEXT_INTERFACE",
     "APBInstructionErr",
     "APBPrivilegedErr",
     "APBSlvErr",
-    "HAVE_COCOTBEXT_INTERFACE",
     "AddressMap",
     "AddressSpace",
     "Apb3Bus",
