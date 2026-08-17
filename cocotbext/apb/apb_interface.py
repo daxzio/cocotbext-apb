@@ -22,29 +22,26 @@ THE SOFTWARE.
 
 """
 
-from cocotb.handle import LogicArrayObject, LogicObject
-
 try:
+    from cocotb.handle import LogicArrayObject, LogicObject
     from cocotbext.interface import Interface  # type: ignore[import]
-
-    HAVE_COCOTBEXT_INTERFACE = True
 except ImportError as _import_error:  # pragma: no cover - exercised without the dep
     HAVE_COCOTBEXT_INTERFACE = False
     _INTERFACE_IMPORT_ERROR = _import_error
 
     _MISSING_MSG = (
-        "Apb4Interface requires the optional 'cocotbext-interface' package, "
-        "which is not installed. Install it with:\n\n"
-        "    pip install cocotbext-interface\n\n"
+        "Apb4Interface requires cocotb 2.x and the optional "
+        "'cocotbext-interface' package. Install with:\n\n"
+        "    pip install 'cocotb>=2' cocotbext-interface\n\n"
         "Alternatively use ApbBus / Apb4Bus, which have no extra dependencies."
     )
 
     class Apb4Interface:  # type: ignore[no-redef]
-        """Placeholder used when ``cocotbext-interface`` is not installed.
+        """Placeholder used when Apb4Interface cannot be constructed.
 
-        Importing :mod:`cocotbext.apb` still succeeds so the rest of the
-        package works without the optional dependency; any attempt to
-        construct or connect this bus raises a clear, actionable error.
+        Either ``cocotbext-interface`` is not installed, or this cocotb
+        version does not provide ``LogicArrayObject`` (needs cocotb 2.x).
+        Importing :mod:`cocotbext.apb` still succeeds; construction raises.
         """
 
         def __init__(self, *args, **kwargs):
@@ -59,6 +56,7 @@ except ImportError as _import_error:  # pragma: no cover - exercised without the
             raise ImportError(_MISSING_MSG) from _INTERFACE_IMPORT_ERROR
 
 else:
+    HAVE_COCOTBEXT_INTERFACE = True
 
     class Apb4Interface(Interface):  # type: ignore[no-redef]
         """APB4 bus using cocotbext-interface.
