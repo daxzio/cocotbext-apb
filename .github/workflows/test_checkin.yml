@@ -82,7 +82,13 @@ jobs:
         run: |
           unset PYTHONHOME
           make verilog SIM=${CI_TARGET}
+      - name: Run Tests verilog with cocotbext-interface
+        if: matrix.target == 'icarus' || matrix.target == 'verilator'
+        #continue-on-error: true
+        run: |
           pip install cocotbext-interface
+          python -m pip uninstall -y cocotb
+          python -m pip install --upgrade git+https://github.com/cocotb/cocotb.git@${{ matrix.cocotb-version }}
           make verilog SIM=${CI_TARGET}
       - name: Run Tests VHDL
         if: matrix.target == 'ghdl'
@@ -148,7 +154,13 @@ jobs:
         run: |
           unset PYTHONHOME
           make verilog SIM=${CI_TARGET}
+      - name: Run Tests verilog with cocotbext-interface
+        if: matrix.target == 'icarus' || matrix.target == 'verilator'
+        #continue-on-error: true
+        run: |
           pip install cocotbext-interface
+          python -m pip uninstall -y cocotb
+          python -m pip install --upgrade git+https://github.com/cocotb/cocotb.git@${{ matrix.cocotb-version }}
           make verilog SIM=${CI_TARGET}
       - name: Run Tests VHDL
         if: matrix.target == 'ghdl'
