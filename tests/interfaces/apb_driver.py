@@ -1,4 +1,4 @@
-from cocotbext.apb import ApbMaster, Apb4Bus
+from cocotbext.apb import ApbHost, Apb4Bus
 
 # import math
 import logging
@@ -14,9 +14,9 @@ class ApbDriver:
         self.enable_logging()
         self.bus = Apb4Bus.from_prefix(dut, apb_prefix)
         if reset_name is None:
-            self.intf = ApbMaster(dut, self.bus, getattr(dut, clk_name))
+            self.intf = ApbHost(dut, self.bus, getattr(dut, clk_name))
         else:
-            self.intf = ApbMaster(
+            self.intf = ApbHost(
                 dut, self.bus, getattr(dut, clk_name), getattr(dut, reset_name)
             )
         self.intf.log.setLevel(logging.WARNING)

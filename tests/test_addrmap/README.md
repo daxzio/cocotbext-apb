@@ -1,7 +1,7 @@
 # test_addrmap — register name address mapping
 
 This directory exercises [`AddressMap`](../../cocotbext/apb/address_map.py)
-integration with `ApbMaster`: using register names instead of numeric addresses
+integration with `ApbHost`: using register names instead of numeric addresses
 for reads and writes, indexed register access, and name-based transaction logging.
 
 See the main [README AddressMap section](../../README.md#addressmap) for API

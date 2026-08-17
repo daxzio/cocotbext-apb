@@ -3,7 +3,7 @@ from cocotb import test
 
 from interfaces.clkrst import ClkReset
 
-from cocotbext.apb import ApbMaster
+from cocotbext.apb import ApbHost
 from cocotbext.apb import ApbBus
 from cocotbext.apb import ApbMonitor
 
@@ -26,7 +26,7 @@ class testbench:
         apb_prefix = "s_apb"
         self.bus = ApbBus.from_prefix(dut, apb_prefix)
         clk_name = "clk"
-        self.intf = ApbMaster(self.bus, getattr(dut, clk_name))
+        self.intf = ApbHost(self.bus, getattr(dut, clk_name))
         self.apb_mon = ApbMonitor(self.bus, getattr(dut, "clk"))
         self.apb_mon.enable_logging()
 

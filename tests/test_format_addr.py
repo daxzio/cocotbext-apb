@@ -1,6 +1,6 @@
-"""Unit tests for ApbMaster.format_addr reverse lookup."""
+"""Unit tests for ApbHost.format_addr reverse lookup."""
 
-from cocotbext.apb.apb_master import ApbMaster
+from cocotbext.apb.apb_host import ApbHost
 from cocotbext.apb.address_map import AddressMap
 
 
@@ -22,22 +22,31 @@ class _StubClock:
     pass
 
 
-def _master_with_map(addrmap):
-    m = ApbMaster.__new__(ApbMaster)
+def _host_with_map(addrmap):
+    h = ApbHost.__new__(ApbHost)
     am = AddressMap(word_bytes=4, multi_device=False)
     am.update({0: addrmap})
-    m.addrmap = am
-    return m
+    h.addrmap = am
+    return h
+
+
+def test_legacy_aliases():
+    from cocotbext.apb import ApbDevice, ApbHost, ApbMaster, ApbSlave
+
+    assert issubclass(ApbMaster, ApbHost)
+    assert issubclass(ApbSlave, ApbDevice)
+    assert ApbMaster.__mro__[1] is ApbHost
+    assert ApbSlave.__mro__[1] is ApbDevice
 
 
 def test_format_addr_exact():
-    m = _master_with_map({"STATUS": 0x84, "CTRL": 0x74})
+    m = _host_with_map({"STATUS": 0x84, "CTRL": 0x74})
     assert m.format_addr(0x84) == "STATUS"
     assert m.format_addr(0x74) == "CTRL"
 
 
 def test_format_addr_indexed():
-    m = _master_with_map({"AES_KEY_SHARE0": 0x04, "AES_KEY_SHARE1": 0x24})
+    m = _host_with_map({"AES_KEY_SHARE0": 0x04, "AES_KEY_SHARE1": 0x24})
     assert m.format_addr(0x04) == "AES_KEY_SHARE0"
     assert m.format_addr(0x08) == "AES_KEY_SHARE0[1]"
     assert m.format_addr(0x24) == "AES_KEY_SHARE1"
@@ -45,12 +54,12 @@ def test_format_addr_indexed():
 
 
 def test_format_addr_unknown():
-    m = _master_with_map({"STATUS": 0x84})
+    m = _host_with_map({"STATUS": 0x84})
     assert m.format_addr(0x00) == "0x00000000"
 
 
 def test_format_addr_col_alignment():
-    m = _master_with_map(
+    m = _host_with_map(
         {
             "AES_STATUS": 0x84,
             "AES_CTRL_AUX_SHADOWED": 0x78,

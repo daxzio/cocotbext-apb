@@ -3,11 +3,11 @@ from cocotb import test
 
 from interfaces.clkrst import ClkReset
 
-from cocotbext.apb import ApbMaster
+from cocotbext.apb import ApbHost
 from cocotbext.apb import Apb4Bus
 from cocotbext.apb import ApbMonitor
 from cocotbext.apb import ApbRam
-from cocotbext.apb import ApbSlave
+from cocotbext.apb import ApbDevice
 from cocotbext.apb import MemoryRegion
 from cocotbext.apb import ApbProt
 from cocotbext.apb import APBSlvErr, APBPrivilegedErr, APBInstructionErr
@@ -25,7 +25,7 @@ class testbench:
         self.sbus = Apb4Bus.from_prefix(dut, "s_apb")
         self.mbus = Apb4Bus.from_prefix(dut, "m_apb")
         clk_name = "clk"
-        self.m = ApbMaster(self.sbus, getattr(dut, clk_name))
+        self.m = ApbHost(self.sbus, getattr(dut, clk_name))
 
         self.apb_mon = ApbMonitor(self.sbus, getattr(dut, "clk"))
         self.apb_mon.enable_logging()
@@ -34,7 +34,7 @@ class testbench:
 @test()
 async def test_apb_pprot(dut):
     tb = testbench(dut, reset_sense=1)
-    tb.s = ApbSlave(tb.mbus, getattr(dut, "clk"))
+    tb.s = ApbDevice(tb.mbus, getattr(dut, "clk"))
     region = MemoryRegion(2**tb.s.address_width)
     tb.s.target = region
     tb.s.privileged_addrs = [[0x1000, 0x1FFF], 0x3000]
@@ -73,7 +73,7 @@ async def test_apb_pprot(dut):
 @test()
 async def test_apb_memdump(dut):
     tb = testbench(dut, reset_sense=1)
-    tb.s = ApbSlave(tb.mbus, getattr(dut, "clk"))
+    tb.s = ApbDevice(tb.mbus, getattr(dut, "clk"))
     region = MemoryRegion(2**tb.s.address_width)
     tb.s.target = region
 
@@ -119,9 +119,9 @@ async def test_apb_memdump(dut):
 
 
 @test()
-async def test_apb_slave(dut):
+async def test_apb_device(dut):
     tb = testbench(dut, reset_sense=1)
-    tb.s = ApbSlave(tb.mbus, getattr(dut, "clk"))
+    tb.s = ApbDevice(tb.mbus, getattr(dut, "clk"))
     region = MemoryRegion(2**tb.s.address_width)
     tb.s.target = region
 

@@ -74,7 +74,7 @@ See `example_pytest_migration.md` for detailed migration instructions.
 
 - `test_*_pytest.py` - pytest wrapper files that call `cocotb_test.simulator.run()`
 - `test_dut.py` - Your actual test code (unchanged from Makefile version)
-- `test_format_addr.py` - unit tests for `AddressMap.format()` / `ApbMaster.format_addr()`
+- `test_format_addr.py` - unit tests for `AddressMap.format()` / `ApbHost.format_addr()`
 - `conftest.py` - Shared pytest fixtures and configuration
 
 ## Benefits

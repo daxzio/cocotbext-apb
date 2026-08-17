@@ -37,6 +37,8 @@ from .address_space import (
 from .apb_bus import Apb3Bus, Apb4Bus, Apb5Bus, ApbBus
 
 # from .apb_interface import Apb4Interface
+from .apb_device import ApbDevice
+from .apb_host import ApbHost
 from .apb_master import ApbMaster
 from .apb_monitor import ApbMonitor
 from .apb_ram import ApbRam
@@ -55,6 +57,8 @@ __all__ = [
     # "Apb4Interface",
     "Apb5Bus",
     "ApbBus",
+    "ApbDevice",
+    "ApbHost",
     "ApbMaster",
     "ApbMonitor",
     "ApbProt",

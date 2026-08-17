@@ -22,11 +22,11 @@ THE SOFTWARE.
 
 """
 
-from .apb_slave import ApbSlave
+from .apb_device import ApbDevice
 from .memory import Memory
 
 
-class ApbRam(ApbSlave, Memory):
+class ApbRam(ApbDevice, Memory):
     def __init__(
         self,
         bus,
@@ -38,7 +38,7 @@ class ApbRam(ApbSlave, Memory):
         **kwargs
     ):
         Memory.__init__(self, size, mem, **kwargs)
-        ApbSlave.__init__(self, bus, clock, **kwargs)
+        ApbDevice.__init__(self, bus, clock, **kwargs)
 
     async def _write(self, address, data, strb=None, prot=None):
         self.check_permission(address, prot)

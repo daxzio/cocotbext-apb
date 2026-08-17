@@ -56,24 +56,26 @@ The `APBBus` is used to map to a APB interface on the `dut`.  Class methods `fro
 * _pprot_
 * _pslverr_
 
-### APB Master
+### APB Host
 
-The `ApbMaster` class implement a APB driver and is capable of generating read and write operations against APB slaves.
+The `ApbHost` class implements an APB driver and is capable of generating read and write operations against APB devices.
 
-The master automatically handles data wider than the bus width by splitting transactions into multiple sequential APB accesses at consecutive addresses. This allows seamless transfers of wide data values across narrower APB interfaces.
+The host automatically handles data wider than the bus width by splitting transactions into multiple sequential APB accesses at consecutive addresses. This allows seamless transfers of wide data values across narrower APB interfaces.
 
 To use these modules, import the one you need and connect it to the DUT:
 
-    from cocotbext.apb import ApbMaster, ApbBus
+    from cocotbext.apb import ApbHost, ApbBus
 
     bus = ApbBus.from_prefix(dut, "s_apb")
-    apb_driver = ApbMaster(bus, dut.clk)
+    apb_driver = ApbHost(bus, dut.clk)
 
 The first argument to the constructor accepts an `ApbBus` object.  These objects are containers for the interface signals and include class methods to automate connections.
 
 Once the module is instantiated, read and write operations can be initiated in a couple of different ways.
 
-#### `ApbMaster`constructor parameters
+`ApbMaster` is a subclass of `ApbHost` and remains available for existing testbenches.
+
+#### `ApbHost` constructor parameters
 * _bus_: `ApbBus` object containing APB interface signals
 * _clock_: clock signal
 * _timeout_max_: Maximum clock cycles to wait for `pready` signal before timing out (optional, default `1000`). Set to `-1` to disable timeout.
@@ -81,12 +83,12 @@ Once the module is instantiated, read and write operations can be initiated in a
 * _reset_active_level_: reset active level (optional, default `True`)
 
 
-#### Additional optional arguments for `ApbMaster`
+#### Additional optional arguments for `ApbHost`
 * _seednum_: For random testing a seed can be supplied, default `None`, random seed.
 
 #### Address Mapping
 
-The `ApbMaster` supports address mapping through its `addrmap` attribute, an
+The `ApbHost` supports address mapping through its `addrmap` attribute, an
 [`AddressMap`](#addressmap) instance. Register names can be used instead of
 numeric addresses in `read()`, `write()`, `read_nowait()`, `write_nowait()`, and
 `poll()`, which makes testbenches easier to read and maintain.
@@ -94,10 +96,10 @@ numeric addresses in `read()`, `write()`, `read_nowait()`, `write_nowait()`, and
 Configure the map with `addaddrmap()` or by assigning directly to a device index:
 
 ```python
-from cocotbext.apb import ApbMaster, ApbBus
+from cocotbext.apb import ApbHost, ApbBus
 
 bus = ApbBus.from_prefix(dut, "s_apb")
-apb_driver = ApbMaster(bus, dut.clk)
+apb_driver = ApbHost(bus, dut.clk)
 
 # Preferred: addaddrmap() updates log column alignment automatically
 apb_driver.addaddrmap({
@@ -154,7 +156,7 @@ for each slave. Use the `device` parameter on read/write calls to select the tar
 ### AddressMap
 
 `AddressMap` is a protocol-agnostic helper for name-to-address resolution on
-memory-mapped register maps. It is used internally by `ApbMaster` (via the
+memory-mapped register maps. It is used internally by `ApbHost` (via the
 `addrmap` attribute) and is also exported for standalone use or integration with
 other bus masters (for example OBI).
 
@@ -220,14 +222,14 @@ am.format(0x99)   # "0x00000099" (unmapped)
 #### Registering maps
 
 * `add(addrmap, device=0)`: store a name→address dict for _device_ and recompute
-  log column width. This is what `ApbMaster.addaddrmap()` delegates to.
+  log column width. This is what `ApbHost.addaddrmap()` delegates to.
 * Direct assignment `am[device] = {...}` also works (dict subclass), but does not
   update column width unless `add()` or `_update_label_width()` is called.
 
 #### Log formatting
 
 `format_col(label, prefix="")` pads a register label so read/write data columns
-align in log output. `ApbMaster` uses this internally when logging transactions.
+align in log output. `ApbHost` uses this internally when logging transactions.
 
 #### Standalone example
 
@@ -271,7 +273,7 @@ The `ApbMonitor` class tracks APB bus transactions and verifies signal synchroni
 
 ### Multi-Device Support
 
-The `ApbMaster` supports multiple slave devices on the same bus instance. To use this feature:
+The `ApbHost` supports multiple devices on the same bus instance. To use this feature:
 
 1.  **Signal Connection**:
     *   `psel` must be a vector (e.g., `[1:0]` for 2 slaves).
@@ -279,7 +281,7 @@ The `ApbMaster` supports multiple slave devices on the same bus instance. To use
 
 2.  **Access**:
     *   Use the `device` parameter in `read`, `write`, `read_nowait`, and `write_nowait` methods to specify the target slave index (integer).
-    *   The `ApbMaster` will assert the corresponding bit in `psel` (`1 << device`) and slice the `prdata` appropriately.
+    *   The `ApbHost` will assert the corresponding bit in `psel` (`1 << device`) and slice the `prdata` appropriately.
 
 Example:
 
@@ -291,23 +293,25 @@ await tb.intf.write(0x100, 0xDEADBEEF, device=0)
 val = await tb.intf.read(0x200, device=1)
 ```
 
-### APB slave
+### APB Device
 
-The `ApbSlave` classe implement an APB slaves and is capable of completing read and write operations from upstream APB masters.  This modules can either be used to perform memory reads and writes on a `MemoryInterface` on behalf of the DUT, or they can be extended to implement customized functionality.
+The `ApbDevice` class implements an APB device and is capable of completing read and write operations from upstream APB hosts.  This module can either be used to perform memory reads and writes on a `MemoryInterface` on behalf of the DUT, or it can be extended to implement customized functionality.
 
 To use these modules, import the one you need and connect it to the DUT:
 
-    from cocotbext.apb import ApbBus, ApbSlave, MemoryRegion
+    from cocotbext.apb import ApbBus, ApbDevice, MemoryRegion
 
-    apb_slave = ApbSlave(ApbBus.from_prefix(dut, "m_apb"), dut.clk, dut.rst)
-    region = MemoryRegion(2**apb_slave.read_if.address_width)
-    apb_slave.target = region
+    apb_device = ApbDevice(ApbBus.from_prefix(dut, "m_apb"), dut.clk, dut.rst)
+    region = MemoryRegion(2**apb_device.read_if.address_width)
+    apb_device.target = region
 
 The first argument to the constructor accepts an `ApbBus` object.  These objects are containers for the interface signals and include class methods to automate connections.
 
 It is also possible to extend these modules; operation can be customized by overriding the internal `_read()` and `_write()` methods.  See `ApbRam` for an example.
 
-#### `ApbSlave` constructor parameters
+`ApbSlave` is a subclass of `ApbDevice` and remains available for existing testbenches.
+
+#### `ApbDevice` constructor parameters
 
 * _bus_: `ApbBus` object containing APB interface signals
 * _clock_: clock signal
@@ -315,11 +319,11 @@ It is also possible to extend these modules; operation can be customized by over
 * _reset_active_level_: reset active level (optional, default `True`)
 * _target_: target region (optional, default `None`)
 
-#### `ApbSlave` editable attibutes
+#### `ApbDevice` editable attibutes
 
-It is possible to set area of addressable memory to be treated a priviledged address space or instruction address space.  If an APB master tries to access these regions, but has not set the correct `prot` value, `NONSECURE` for example, the `ApbSlave` will issue a `slverr` duting the `pready` phase of it response.
+It is possible to set area of addressable memory to be treated a priviledged address space or instruction address space.  If an APB host tries to access these regions, but has not set the correct `prot` value, `NONSECURE` for example, the `ApbDevice` will issue a `slverr` duting the `pready` phase of it response.
 
-The `ApbSlave` has two attributes that can be edited by the user to allocate addresses and/or address ranges to the priviledged or instruction space.
+The `ApbDevice` has two attributes that can be edited by the user to allocate addresses and/or address ranges to the priviledged or instruction space.
 
 * _privileged_addrs_
 * _instruction_addrs_
@@ -335,7 +339,7 @@ If there is a read or a write with an address in this space, and the prot from t
 
 ### APB RAM
 
-The `ApbRam` class implements APB RAMs and is capable of completing read and write operations from upstream APB masters.  These modules are extensions of the corresponding `ApbSlave` module.  Internally, `SparseMemory` is used to support emulating very large memories.
+The `ApbRam` class implements APB RAMs and is capable of completing read and write operations from upstream APB hosts.  These modules are extensions of `ApbDevice`.  Internally, `SparseMemory` is used to support emulating very large memories.
 
 To use these modules, import and connect it to the DUT:
 
