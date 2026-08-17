@@ -82,6 +82,8 @@ jobs:
         run: |
           unset PYTHONHOME
           make verilog SIM=${CI_TARGET}
+          pip install cocotbext-interface
+          make verilog SIM=${CI_TARGET}
       - name: Run Tests VHDL
         if: matrix.target == 'ghdl'
         #continue-on-error: true
@@ -145,6 +147,8 @@ jobs:
         #continue-on-error: true
         run: |
           unset PYTHONHOME
+          make verilog SIM=${CI_TARGET}
+          pip install cocotbext-interface
           make verilog SIM=${CI_TARGET}
       - name: Run Tests VHDL
         if: matrix.target == 'ghdl'

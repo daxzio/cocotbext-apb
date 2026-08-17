@@ -5,11 +5,11 @@ default: verilog vhdl
 verilog:
 	cd tests/test_basic ; make clean sim WAVES=0 && ../rtlflo/combine_results.py
 	cd tests/test_basic_64 ; make clean sim WAVES=0 && ../rtlflo/combine_results.py
-	cd tests/test_slave ; make clean sim WAVES=0 && ../rtlflo/combine_results.py
-	cd tests/test_slave_noenable ; make clean sim WAVES=0 && ../rtlflo/combine_results.py
-	cd tests/test_slave_noprot ; make clean sim WAVES=0 && ../rtlflo/combine_results.py
-	cd tests/test_slave_noslverr ; make clean sim WAVES=0 && ../rtlflo/combine_results.py
-	cd tests/test_slave_nostrb ; make clean sim WAVES=0 && ../rtlflo/combine_results.py
+	cd tests/test_device ; make clean sim WAVES=0 && ../rtlflo/combine_results.py
+	cd tests/test_device_noenable ; make clean sim WAVES=0 && ../rtlflo/combine_results.py
+	cd tests/test_device_noprot ; make clean sim WAVES=0 && ../rtlflo/combine_results.py
+	cd tests/test_device_noslverr ; make clean sim WAVES=0 && ../rtlflo/combine_results.py
+	cd tests/test_device_nostrb ; make clean sim WAVES=0 && ../rtlflo/combine_results.py
 	cd tests/test_slverr ; make clean sim WAVES=0 && ../rtlflo/combine_results.py
 	cd tests/test_multi_device ; make clean sim WAVES=0 && ../rtlflo/combine_results.py
 	cd tests/test_poll ; make clean sim WAVES=0 && ../rtlflo/combine_results.py
@@ -17,6 +17,8 @@ verilog:
 	cd tests/test_addrmap ; make clean sim WAVES=0 RDL_ARGS="-P REGWIDTH=8" && ../rtlflo/combine_results.py
 	cd tests/test_addrmap ; make clean sim WAVES=0 RDL_ARGS="-P REGWIDTH=16" && ../rtlflo/combine_results.py
 	cd tests/test_addrmap ; make clean sim WAVES=0 RDL_ARGS="-P REGWIDTH=32" && ../rtlflo/combine_results.py
+	cd tests/test_interface ; make clean sim WAVES=0 && ../rtlflo/combine_results.py
+	cd tests/test_interface_noenable ; make clean sim WAVES=0 && ../rtlflo/combine_results.py
 
 vhdl:
 	# VHDL tests would go here if any are added

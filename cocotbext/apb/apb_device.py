@@ -57,7 +57,9 @@ class ApbDevice(ApbBase):
         self._run_coroutine_obj = start_soon(self._run())
 
     def check_address(self, address, prot, addresses, prot_type, exception):
-        if prot is not None and int(prot) != prot_type:
+        if prot is not None:
+            prot = int(prot.value) if hasattr(prot, "value") else int(prot)
+        if prot is not None and prot != prot_type:
             for addrs in addresses:
                 if isinstance(addrs, int):
                     if addrs == address:
@@ -107,7 +109,7 @@ class ApbDevice(ApbBase):
             await RisingEdge(self.clock)
             pprot = None
             if self.pprot_present:
-                pprot = self.bus.pprot
+                pprot = int(self.bus.pprot.value)
             pstrb = None
             if self.pstrb_present:
                 pstrb = self.bus.pstrb

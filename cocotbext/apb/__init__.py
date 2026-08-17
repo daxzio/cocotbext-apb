@@ -35,9 +35,8 @@ from .address_space import (
     WindowPool,
 )
 from .apb_bus import Apb3Bus, Apb4Bus, Apb5Bus, ApbBus
-
-# from .apb_interface import Apb4Interface
 from .apb_device import ApbDevice
+from .apb_interface import HAVE_COCOTBEXT_INTERFACE, Apb4Interface
 from .apb_host import ApbHost
 from .apb_master import ApbMaster
 from .apb_monitor import ApbMonitor
@@ -50,11 +49,12 @@ __all__ = [
     "APBInstructionErr",
     "APBPrivilegedErr",
     "APBSlvErr",
+    "HAVE_COCOTBEXT_INTERFACE",
     "AddressMap",
     "AddressSpace",
     "Apb3Bus",
     "Apb4Bus",
-    # "Apb4Interface",
+    "Apb4Interface",
     "Apb5Bus",
     "ApbBus",
     "ApbDevice",
