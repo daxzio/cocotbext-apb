@@ -33,7 +33,7 @@ jobs:
       fail-fast: false # So that one fail doesn't stop remaining tests
       matrix:
         python-version: ["3.10", "3.11", "3.12", "3.13"]
-        cocotb-version: ["v1.9.2", "v2.0.0"]
+        cocotb-version: ["v1.9.2", "v2.0.1"]
         target: [icarus, verilator, ghdl]
     runs-on: ubuntu-latest
     needs: [run_lint, build_icarus_linux]
