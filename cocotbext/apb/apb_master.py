@@ -22,10 +22,24 @@ THE SOFTWARE.
 
 """
 
+import warnings
+
 from .apb_host import ApbHost
 
 __all__ = ["ApbHost", "ApbMaster"]
 
 
 class ApbMaster(ApbHost):
-    """Legacy alias for :class:`ApbHost`."""
+    """Legacy alias for :class:`ApbHost`.
+
+    .. deprecated::
+        Use :class:`ApbHost` instead.
+    """
+
+    def __init__(self, *args, **kwargs):
+        warnings.warn(
+            "ApbMaster is deprecated, use ApbHost instead",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        super().__init__(*args, **kwargs)

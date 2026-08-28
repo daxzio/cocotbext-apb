@@ -24,7 +24,7 @@ THE SOFTWARE.
 
 import datetime
 import logging
-from random import randint, seed
+from random import Random, randint
 
 from .version import __version__
 
@@ -90,14 +90,14 @@ class ApbBase:
             self.base_seed = seednum
         else:
             self.base_seed = randint(0, 0xFFFFFF)
-        seed(self.base_seed)
+        self._rng = Random(self.base_seed)
         self.log.debug(f"Seed is set to {self.base_seed}")
 
     @property
     def delay(self):
         if self.backpressure:
-            if 0 == randint(0, 0x3):
-                return randint(0, 0x8)
+            if 0 == self._rng.randint(0, 0x3):
+                return self._rng.randint(0, 0x8)
             else:
                 return 0
         else:
@@ -113,6 +113,7 @@ class ApbBase:
         self.backpressure = True
         if seednum is not None:
             self.base_seed = seednum
+            self._rng.seed(seednum)
 
     def disable_backpressure(self):
         self.backpressure = False

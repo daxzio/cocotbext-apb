@@ -95,11 +95,15 @@ class ApbMonitor(ApbBase):
                         f"which is not aligned with the last clock edge at {self._last_clk_time}"
                     )
 
+    def _capture_bus(self):
+        for i in self.bus._signals:
+            setattr(self, i, resolve_x_int(getattr(self.bus, i)))
+
     async def _resolve_signals(self):
         while True:
-            for i in self.bus._signals:
-                setattr(self, i, resolve_x_int(getattr(self.bus, i)))
             await RisingEdge(self.clock)
+            await ReadOnly()
+            self._capture_bus()
 
     @property
     def empty_txn(self) -> bool:
@@ -108,6 +112,8 @@ class ApbMonitor(ApbBase):
     async def _run(self):
         while True:
             await RisingEdge(self.clock)
+            await ReadOnly()
+            self._capture_bus()
             self.timeout = 0
 
             if self.psel != 0:
@@ -140,12 +146,16 @@ class ApbMonitor(ApbBase):
 
                 wdata = self.pwdata
                 await RisingEdge(self.clock)
+                await ReadOnly()
+                self._capture_bus()
                 if self.penable_present and 0 == self.penable:
                     self.log.critical(
                         f"penable is not asserted in the second cycle after psel {self.penable}"
                     )
                 while 0 == (self.pready and self.psel):
                     await RisingEdge(self.clock)
+                    await ReadOnly()
+                    self._capture_bus()
                     self.timeout += 1
                     if self.timeout >= self.timeout_max:
                         raise TimeoutError(

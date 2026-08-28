@@ -30,6 +30,15 @@ def _host_with_map(addrmap):
     return h
 
 
+def test_public_api():
+    import cocotbext.apb as apb
+
+    assert "ApbHost" in apb.__all__
+    assert "ApbDevice" in apb.__all__
+    assert "ApbMaster" not in apb.__all__
+    assert "ApbSlave" not in apb.__all__
+
+
 def test_legacy_aliases():
     from cocotbext.apb import ApbDevice, ApbHost, ApbMaster, ApbSlave
 

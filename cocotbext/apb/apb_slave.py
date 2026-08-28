@@ -22,10 +22,24 @@ THE SOFTWARE.
 
 """
 
+import warnings
+
 from .apb_device import ApbDevice, InvalidAccess
 
 __all__ = ["ApbDevice", "ApbSlave", "InvalidAccess"]
 
 
 class ApbSlave(ApbDevice):
-    """Legacy alias for :class:`ApbDevice`."""
+    """Legacy alias for :class:`ApbDevice`.
+
+    .. deprecated::
+        Use :class:`ApbDevice` instead.
+    """
+
+    def __init__(self, *args, **kwargs):
+        warnings.warn(
+            "ApbSlave is deprecated, use ApbDevice instead",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        super().__init__(*args, **kwargs)
