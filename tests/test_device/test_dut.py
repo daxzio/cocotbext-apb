@@ -71,6 +71,64 @@ async def test_apb_pprot(dut):
 
 
 @test()
+async def test_apb_ro_wo(dut):
+    tb = testbench(dut, reset_sense=1)
+    tb.s = ApbDevice(tb.mbus, getattr(dut, "clk"))
+    region = MemoryRegion(2**tb.s.address_width)
+    tb.s.target = region
+    tb.s.ro_addrs = [[0x1000, 0x1FFF], 0x3000]
+    tb.s.wo_addrs = [[0x2000, 0x2FFF], 0x4000]
+
+    await tb.cr.wait_clkn(20)
+
+    await tb.m.write(0x0010, 0x87654321)
+    await tb.m.read(0x0010, 0x87654321)
+
+    await tb.s.target.write(0x1000, (0x74568562).to_bytes(4, "little"))
+    await tb.m.read(0x1000, 0x74568562)
+    await tb.m.write(0x1000, 0x52346325, error_expected=True)
+    await tb.m.read(0x1000, 0x74568562)
+
+    await tb.s.target.write(0x3000, (0x11111111).to_bytes(4, "little"))
+    await tb.m.read(0x3000, 0x11111111)
+    await tb.m.write(0x3000, 0x22222222, error_expected=True)
+    await tb.m.read(0x3000, 0x11111111)
+
+    await tb.m.write(0x2000, 0xA356B3E1)
+    await tb.m.read(0x2000, 0x00000000, error_expected=True)
+    z = await tb.s.target.read(0x2000, 4)
+    assert int.from_bytes(z, "little") == 0xA356B3E1
+
+    await tb.m.write(0x4000, 0x45325533)
+    await tb.m.read(0x4000, 0x00000000, error_expected=True)
+    z = await tb.s.target.read(0x4000, 4)
+    assert int.from_bytes(z, "little") == 0x45325533
+
+    await tb.cr.end_test(20)
+
+
+@test()
+async def test_apb_ram_ro_wo(dut):
+    tb = testbench(dut, reset_sense=1)
+    tb.s = ApbRam(tb.mbus, getattr(dut, "clk"))
+    tb.s.ro_addrs = [[0x1000, 0x1FFF], 0x3000]
+    tb.s.wo_addrs = [[0x2000, 0x2FFF], 0x4000]
+
+    await tb.cr.wait_clkn(20)
+
+    tb.s.write(0x1000, (0x74568562).to_bytes(4, "little"))
+    await tb.m.read(0x1000, 0x74568562)
+    await tb.m.write(0x1000, 0x52346325, error_expected=True)
+    await tb.m.read(0x1000, 0x74568562)
+
+    await tb.m.write(0x2000, 0xA356B3E1)
+    await tb.m.read(0x2000, 0x00000000, error_expected=True)
+    assert int.from_bytes(tb.s.read(0x2000, 4), "little") == 0xA356B3E1
+
+    await tb.cr.end_test(20)
+
+
+@test()
 async def test_apb_memdump(dut):
     tb = testbench(dut, reset_sense=1)
     tb.s = ApbDevice(tb.mbus, getattr(dut, "clk"))

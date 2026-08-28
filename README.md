@@ -73,7 +73,7 @@ The first argument to the constructor accepts an `ApbBus` object.  These objects
 
 Once the module is instantiated, read and write operations can be initiated in a couple of different ways.
 
-`ApbMaster` is a subclass of `ApbHost` and remains available for existing testbenches.
+`ApbMaster` is a deprecated subclass of `ApbHost` and remains available for existing testbenches.
 
 #### `ApbHost` constructor parameters
 * _bus_: `ApbBus` object containing APB interface signals
@@ -309,7 +309,7 @@ The first argument to the constructor accepts an `ApbBus` object.  These objects
 
 It is also possible to extend these modules; operation can be customized by overriding the internal `_read()` and `_write()` methods.  See `ApbRam` for an example.
 
-`ApbSlave` is a subclass of `ApbDevice` and remains available for existing testbenches.
+`ApbSlave` is a deprecated subclass of `ApbDevice` and remains available for existing testbenches.
 
 #### `ApbDevice` constructor parameters
 
@@ -319,21 +319,48 @@ It is also possible to extend these modules; operation can be customized by over
 * _reset_active_level_: reset active level (optional, default `True`)
 * _target_: target region (optional, default `None`)
 
-#### `ApbDevice` editable attibutes
+#### `ApbDevice` editable attributes
 
-It is possible to set area of addressable memory to be treated a priviledged address space or instruction address space.  If an APB host tries to access these regions, but has not set the correct `prot` value, `NONSECURE` for example, the `ApbDevice` will issue a `slverr` duting the `pready` phase of it response.
-
-The `ApbDevice` has two attributes that can be edited by the user to allocate addresses and/or address ranges to the priviledged or instruction space.
-
-* _privileged_addrs_
-* _instruction_addrs_
-
-Both attributes are arrays, and each element can be a single address, or a two element list, with a low address to a high address:
+`ApbDevice` and `ApbRam` accept address lists that cause the device to assert
+`pslverr` when an access is not allowed. Each list is an array whose elements
+are a single address or a two-element range `[low, high)` (low inclusive, high
+exclusive):
 
     tb.ram.privileged_addrs =  [[0x1000, 0x1fff], 0x3000]
     tb.ram.instruction_addrs = [[0x2000, 0x2fff], 0x4000]
+    tb.ram.ro_addrs = [[0x5000, 0x5fff], 0x7000]
+    tb.ram.wo_addrs = [[0x6000, 0x6fff], 0x8000]
 
-If there is a read or a write with an address in this space, and the prot from the master does not match, it will report the type of error, as a warning, and assert `slverr`. The access will also be unsuccessful, the write will not occur and a read will result in all zeros being returned.
+A rejected access is logged as a warning. If `pslverr` is present it is asserted
+for the `pready` cycle. The write is not applied and a rejected read returns
+zeros. On the host, pass `error_expected=True` so the `slverr` is treated as
+expected rather than a test failure.
+
+* _privileged_addrs_: require `prot=ApbProt.PRIVILEGED`; mismatch raises `APBPrivilegedErr`
+* _instruction_addrs_: require `prot=ApbProt.INSTRUCTION`; mismatch raises `APBInstructionErr`
+* _ro_addrs_: writes are rejected (`APBReadOnlyErr`); reads succeed
+* _wo_addrs_: reads are rejected (`APBWriteOnlyErr`); writes succeed
+
+`APBPrivilegedErr`, `APBInstructionErr`, `APBReadOnlyErr`, and `APBWriteOnlyErr`
+are subclasses of `APBSlvErr`.
+
+Protection example (`pprot` must match):
+
+    await host.write(0x1000, 0x74568562, prot=ApbProt.PRIVILEGED)
+    await host.read(0x1000, 0x74568562, prot=ApbProt.PRIVILEGED)
+    await host.write(0x1000, 0x52346325, prot=ApbProt.NONSECURE, error_expected=True)
+    await host.read(0x1000, 0x00000000, prot=ApbProt.NONSECURE, error_expected=True)
+
+Read-only / write-only example:
+
+    await host.read(0x5000, 0x11111111)
+    await host.write(0x5000, 0x22222222, error_expected=True)
+    await host.read(0x5000, 0x11111111)
+
+    await host.write(0x6000, 0xA356B3E1)
+    await host.read(0x6000, 0x00000000, error_expected=True)
+
+See `tests/test_device` (`test_apb_pprot`, `test_apb_ro_wo`, `test_apb_ram_ro_wo`).
 
 ![APB Write Error](https://github.com/daxzio/cocotbext-apb/raw/main/assets/apb_write_error.png)
 
@@ -396,3 +423,20 @@ Multi-port memories can be constructed by passing the `mem` object of the first 
 * `hexdump(address, length, prefix='')`: print hex dump of _length_ bytes starting from _address_, prefix lines with optional _prefix_
 * `hexdump_line(address, length, prefix='')`: return hex dump (list of str) of _length_ bytes starting from _address_, prefix lines with optional _prefix_
 * `hexdump_str(address, length, prefix='')`: return hex dump (str) of _length_ bytes starting from _address_, prefix lines with optional _prefix_
+
+### Optional `Apb4Interface` (cocotbext-interface)
+
+[`cocotbext-interface`](https://github.com/RasmusGOlsen/cocotbext-interface) is **not** required to use this package. `pip install cocotbext-apb` still only needs `cocotb`. Hosts, devices, monitors, and `ApbBus` work as they always have.
+
+If you want a SystemVerilog-style `Interface` connection instead of `ApbBus`, install the extra (needs **cocotb 2.x**):
+
+    $ pip install cocotbext-apb[interface]
+
+`Apb4Interface` is a drop-in for `ApbBus` / `Apb4Bus`: same signal names, `from_prefix` / `from_entity`, and the same `ApbHost` / `ApbMonitor` / `ApbDevice` classes.
+
+    from cocotbext.apb import Apb4Interface, ApbHost, HAVE_COCOTBEXT_INTERFACE
+
+    bus = Apb4Interface.from_prefix(dut, "s_apb")
+    apb_driver = ApbHost(bus, dut.clk)
+
+`HAVE_COCOTBEXT_INTERFACE` is `True` only when both cocotb 2.x handle types and `cocotbext-interface` imported successfully. Otherwise `import cocotbext.apb` still succeeds, but constructing `Apb4Interface` raises `ImportError` with the install command. Tests that need the extra skip when the flag is false (`tests/test_interface`, `tests/test_interface_noenable`).

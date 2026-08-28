@@ -1,4 +1,8 @@
-"""
+"""APB verification IP for cocotb.
+
+Primary drivers: :class:`ApbHost` (initiator) and :class:`ApbDevice` (target).
+Legacy names :class:`ApbMaster` and :class:`ApbSlave` remain importable but are
+not listed in :data:`__all__`; they emit :class:`DeprecationWarning` on use.
 
 Copyright (c) 2024-2026 Daxzio
 
@@ -42,14 +46,23 @@ from .apb_master import ApbMaster
 from .apb_monitor import ApbMonitor
 from .apb_ram import ApbRam
 from .apb_slave import ApbSlave
-from .constants import APBInstructionErr, APBPrivilegedErr, ApbProt, APBSlvErr
+from .constants import (
+    APBInstructionErr,
+    APBPrivilegedErr,
+    ApbProt,
+    APBReadOnlyErr,
+    APBSlvErr,
+    APBWriteOnlyErr,
+)
 from .version import __version__
 
 __all__ = [
     "HAVE_COCOTBEXT_INTERFACE",
     "APBInstructionErr",
     "APBPrivilegedErr",
+    "APBReadOnlyErr",
     "APBSlvErr",
+    "APBWriteOnlyErr",
     "AddressMap",
     "AddressSpace",
     "Apb3Bus",
@@ -59,11 +72,9 @@ __all__ = [
     "ApbBus",
     "ApbDevice",
     "ApbHost",
-    "ApbMaster",
     "ApbMonitor",
     "ApbProt",
     "ApbRam",
-    "ApbSlave",
     "MemoryInterface",
     "MemoryRegion",
     "PeripheralRegion",

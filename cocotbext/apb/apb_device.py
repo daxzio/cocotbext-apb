@@ -28,7 +28,14 @@ from cocotb import start_soon
 from cocotb.triggers import RisingEdge
 
 from .apb_base import ApbBase
-from .constants import APBInstructionErr, APBPrivilegedErr, ApbProt
+from .constants import (
+    APBInstructionErr,
+    APBPrivilegedErr,
+    ApbProt,
+    APBReadOnlyErr,
+    APBSlvErr,
+    APBWriteOnlyErr,
+)
 
 
 class InvalidAccess(Exception):
@@ -42,6 +49,8 @@ class ApbDevice(ApbBase):
         self.target = target
         self.privileged_addrs = []
         self.instruction_addrs = []
+        self.ro_addrs = []
+        self.wo_addrs = []
 
         self.bus.pready.value = 0
         self.bus.prdata.value = 0
@@ -56,25 +65,31 @@ class ApbDevice(ApbBase):
             self._run_coroutine_obj.kill()
         self._run_coroutine_obj = start_soon(self._run())
 
+    def _address_in(self, address, addresses):
+        for addrs in addresses:
+            if isinstance(addrs, int):
+                if addrs == address:
+                    return True
+            elif isinstance(addrs, (list, tuple)):
+                if addrs[1] < addrs[0]:
+                    raise ValueError(f"Address range needs to be increasing , {addrs}")
+                if len(addrs) != 2:
+                    raise ValueError(f"Address range needs to be 2 value , {addrs}")
+                if addrs[0] <= address < addrs[1]:
+                    return True
+            else:
+                raise TypeError(f"Unknown addr type , {addrs}")
+        return False
+
     def check_address(self, address, prot, addresses, prot_type, exception):
         if prot is not None:
             prot = int(prot.value) if hasattr(prot, "value") else int(prot)
-        if prot is not None and prot != prot_type:
-            for addrs in addresses:
-                if isinstance(addrs, int):
-                    if addrs == address:
-                        raise exception
-                elif isinstance(addrs, (list, tuple)):
-                    if addrs[1] < addrs[0]:
-                        raise ValueError(
-                            f"Address range needs to be increasing , {addrs}"
-                        )
-                    if len(addrs) != 2:
-                        raise ValueError(f"Address range needs to be 2 value , {addrs}")
-                    if addrs[0] <= address < addrs[1]:
-                        raise exception
-                else:
-                    raise TypeError(f"Unknown addr type , {addrs}")
+        if (
+            prot is not None
+            and prot != prot_type
+            and self._address_in(address, addresses)
+        ):
+            raise exception
 
     def check_permission(self, address, prot):
         self.check_address(
@@ -88,8 +103,15 @@ class ApbDevice(ApbBase):
             APBInstructionErr,
         )
 
+    def check_rw_access(self, address, write):
+        if write and self._address_in(address, self.ro_addrs):
+            raise APBReadOnlyErr
+        if not write and self._address_in(address, self.wo_addrs):
+            raise APBWriteOnlyErr
+
     async def _write(self, address, data, strb=None, prot=None):
         self.check_permission(address, prot)
+        self.check_rw_access(address, True)
         if strb is None:
             await self.target.write(address, data)
         else:
@@ -101,21 +123,27 @@ class ApbDevice(ApbBase):
 
     async def _read(self, address, length, prot=None):
         self.check_permission(address, prot)
+        self.check_rw_access(address, False)
         return await self.target.read(address, length)
 
     async def _run(self):
         await RisingEdge(self.clock)
         while True:
             await RisingEdge(self.clock)
-            pprot = None
-            if self.pprot_present:
-                pprot = int(self.bus.pprot.value)
-            pstrb = None
-            if self.pstrb_present:
-                pstrb = self.bus.pstrb
             if bool(self.bus.psel.value):
+                # PWDATA is only required to be valid in ACCESS. With
+                # registered-write bridges that is one cycle after SETUP.
+                if self.penable_present and not bool(self.bus.penable.value):
+                    await RisingEdge(self.clock)
+
                 addr = int(self.bus.paddr.value)
                 pwrite = bool(self.bus.pwrite.value)
+                pprot = None
+                if self.pprot_present:
+                    pprot = int(self.bus.pprot.value)
+                pstrb = None
+                if self.pstrb_present:
+                    pstrb = self.bus.pstrb
 
                 if addr < 0 or addr >= 2**self.address_width:
                     raise ValueError("Address out of range")
@@ -123,7 +151,9 @@ class ApbDevice(ApbBase):
                 for i in range(self.delay):
                     await RisingEdge(self.clock)
 
-                self.bus.pready.value = 1
+                slverr = False
+                rdata = 0
+                wdata = 0
                 try:
                     if pwrite:
                         wdata = int(self.bus.pwdata.value)
@@ -133,21 +163,29 @@ class ApbDevice(ApbBase):
                             pstrb,
                             pprot,
                         )
-                        self.log.debug(f"Write 0x{addr:08x} 0x{wdata:08x}")
                     else:
-                        self.bus.prdata.value = 0
                         x = await self._read(addr, self.byte_lanes, pprot)
                         rdata = int.from_bytes(x, byteorder="little")
-                        self.bus.prdata.value = rdata
+                except APBSlvErr as e:
+                    slverr = True
+                    err_name = type(e).__name__.removeprefix("APB")
+                    self.log.warning(f"Access 0x{addr:08x} Invalid, {err_name}")
+
+                # Registered slave: outputs update after this posedge and are
+                # sampled on the next. Drive PSLVERR before PREADY so combo
+                # masters that complete on pready & ~pslverr cannot see an
+                # OKAY glitch in the same delta.
+                if slverr and self.pslverr_present:
+                    self.bus.pslverr.value = 1
+                if not pwrite:
+                    self.bus.prdata.value = 0 if slverr else rdata
+                self.bus.pready.value = 1
+                if not slverr:
+                    if pwrite:
+                        self.log.debug(f"Write 0x{addr:08x} 0x{wdata:08x}")
+                    else:
                         self.log.debug(f"Read  0x{addr:08x} 0x{rdata:08x}")
-                except APBPrivilegedErr:
-                    self.log.warning(f"Access 0x{addr:08x} Invalid, PrivilegedErr")
-                    if self.pslverr_present:
-                        self.bus.pslverr.value = 1
-                except APBInstructionErr:
-                    self.log.warning(f"Access 0x{addr:08x} Invalid, InstructionErr")
-                    if self.pslverr_present:
-                        self.bus.pslverr.value = 1
+
                 await RisingEdge(self.clock)
                 self.bus.pready.value = 0
                 self.bus.prdata.value = 0

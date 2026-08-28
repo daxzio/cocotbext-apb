@@ -42,6 +42,7 @@ class ApbRam(ApbDevice, Memory):
 
     async def _write(self, address, data, strb=None, prot=None):
         self.check_permission(address, prot)
+        self.check_rw_access(address, True)
         if strb is None:
             self.write((address % self.size), data)
         else:
@@ -51,4 +52,5 @@ class ApbRam(ApbDevice, Memory):
 
     async def _read(self, address, length, prot=None):
         self.check_permission(address, prot)
+        self.check_rw_access(address, False)
         return self.read(address % self.size, length)

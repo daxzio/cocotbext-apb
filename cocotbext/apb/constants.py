@@ -13,6 +13,14 @@ class APBInstructionErr(APBSlvErr):
     pass
 
 
+class APBReadOnlyErr(APBSlvErr):
+    pass
+
+
+class APBWriteOnlyErr(APBSlvErr):
+    pass
+
+
 # Protection bits
 # PPROT
 class ApbProt(enum.IntFlag):
