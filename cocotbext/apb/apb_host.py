@@ -151,6 +151,7 @@ class ApbHost(ApbBase):
         data: int | bytes = b"",
         device: int = 0,
         index: int = -1,
+        timeout: int | None = None,
     ) -> None:
         self.addr = self.calc_address(addr, device, index)
         label = self.format_addr(self.addr, device)
@@ -161,9 +162,19 @@ class ApbHost(ApbBase):
             datab = data.to_bytes(self.rbytes[device], "little")
         else:
             datab = data
+        if timeout is None:
+            timeout = self.timeout_max
         self.ret = None
+        attempts = 0
         while self.ret != datab:
-            await self.read(addr, device=device)
+            if timeout != -1 and attempts >= timeout:
+                self.log.setLevel(level_num)
+                raise TimeoutError(
+                    f"Poll of {label} timed out after {timeout} attempts "
+                    f"(last value: {self.ret!r}, expected: {datab!r})"
+                )
+            await self.read(addr, device=device, index=index)
+            attempts += 1
         self.log.setLevel(level_num)
 
     async def read(
@@ -345,9 +356,7 @@ class ApbHost(ApbBase):
 
                 if not write:
                     ret = resolve_x_int(self.bus.prdata)
-                    ret_slice = (
-                        ret >> (device * self.rwidth[device])
-                    ) & self.rdata_mask[device]
+                    ret_slice = self.device_rdata(ret, device)
                     label = self.format_addr(addr, device)
                     self.log.info(
                         f"Read  {self._format_addr_col(label, apb)}: "
