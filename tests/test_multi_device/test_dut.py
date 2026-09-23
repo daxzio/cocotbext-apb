@@ -67,4 +67,16 @@ async def test_dut_multi_device_random(dut):
         # The read method verifies the expected data if provided
         await tb.intf.read(addr, value & mask, device=device)
 
+    # Monitor must slice concatenated prdata with per-device rwidth
+    mon_reads = [t for t in tb.apb_mon.queue_txn if not t[0]]
+    assert len(mon_reads) == len(read_order)
+    for (_pwrite, addr, data, _pstrb, _pprot, _tid), (
+        exp_addr,
+        mask,
+        value,
+        _device,
+    ) in zip(mon_reads, read_order):
+        assert addr == exp_addr
+        assert data == (value & mask)
+
     await tb.cr.end_test(20)
