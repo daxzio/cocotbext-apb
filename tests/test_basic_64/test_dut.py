@@ -101,18 +101,33 @@ async def test_dut_basic(dut):
     x = randint(0, 0xFFFFFFFFFFFFFFFF)
     await tb.intf.write(0x0000, x, length=8)
     await tb.intf.read(0x0000, x, length=8)
+    read_op = await tb.intf.read(0x0000, length=8)
+    assert x == returned_val(read_op)
+    bytesdata = x.to_bytes(8, "little")
+    read_op = await tb.intf.read(0x0000, bytesdata, length=8)
+    assert bytesdata == read_op
     x = randint(0xFFFFFFFF, 0xFFFFFFFFFFFFFFFF)
     await tb.intf.write(0x0000, x)
     await tb.intf.read(0x0000, x)
     x = randint(0x0, 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF)
     await tb.intf.write(0x0000, x, length=16)
     await tb.intf.read(0x0000, x, length=16)
+    read_op = await tb.intf.read(0x0000, length=16)
+    assert x == returned_val(read_op)
+    bytesdata = x.to_bytes(16, "little")
+    read_op = await tb.intf.read(0x0000, bytesdata, length=16)
+    assert bytesdata == read_op
     x = randint(0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF)
     await tb.intf.write(0x0000, x)
     await tb.intf.read(0x0000, x)
     x = randint(0x0, 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF)
     await tb.intf.write(0x0000, x, length=32)
     await tb.intf.read(0x0000, x, length=32)
+    read_op = await tb.intf.read(0x0000, length=32)
+    assert x == returned_val(read_op)
+    bytesdata = x.to_bytes(32, "little")
+    read_op = await tb.intf.read(0x0000, bytesdata, length=32)
+    assert bytesdata == read_op
     x = randint(
         0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF,
         0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF,

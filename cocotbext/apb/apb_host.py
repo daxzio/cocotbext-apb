@@ -176,19 +176,24 @@ class ApbHost(ApbBase):
         index: int = -1,
         length: int = -1,
     ) -> bytes | int:
-        rx_id = self.read_nowait(
+        last_id = self.read_nowait(
             addr, data, prot, error_expected, device, index, length
         )
-        found = False
-        while not found:
+        n_beats = self.loop
+        first_id = last_id - n_beats + 1
+        needed = set(range(first_id, last_id + 1))
+        results: dict[int, bytes] = {}
+        while needed:
             while self.queue_rx:
                 ret, tx_id = self.queue_rx.popleft()
-                if rx_id == tx_id:
-                    found = True
-                    break
-            await self._idle.wait()
+                if tx_id in needed:
+                    results[tx_id] = ret
+                    needed.discard(tx_id)
+            if needed:
+                await self._idle.wait()
         for i in range(self.intra_delay):
             await RisingEdge(self.clock)
+        ret = b"".join(results[i] for i in range(first_id, last_id + 1))
         self.ret = ret
         if self.return_int:
             return int.from_bytes(ret, byteorder="little")
@@ -214,7 +219,7 @@ class ApbHost(ApbBase):
                 subdata = (data >> self.rwidth[device] * i) & self.rdata_mask[device]
                 datab = subdata.to_bytes(self.rbytes[device], "little")
             else:
-                datab = data
+                datab = data[i * self.rbytes[device] : (i + 1) * self.rbytes[device]]
             self.tx_id += 1
             self.queue_tx.append(
                 (False, addrb, datab, -1, prot, error_expected, device, self.tx_id)
