@@ -56,6 +56,10 @@ from .constants import (
 )
 from .version import __version__
 
+# Keep legacy aliases bound for `from cocotbext.apb import ApbMaster` /
+# `ApbSlave`. Intentionally omitted from __all__.
+_LEGACY_ALIASES = (ApbMaster, ApbSlave)
+
 __all__ = [
     "HAVE_COCOTBEXT_INTERFACE",
     "APBInstructionErr",
