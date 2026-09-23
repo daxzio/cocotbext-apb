@@ -219,9 +219,7 @@ class ApbHost(ApbBase):
                 subdata = (data >> self.rwidth[device] * i) & self.rdata_mask[device]
                 datab = subdata.to_bytes(self.rbytes[device], "little")
             else:
-                datab = data[
-                    i * self.rbytes[device] : (i + 1) * self.rbytes[device]
-                ]
+                datab = data[i * self.rbytes[device] : (i + 1) * self.rbytes[device]]
             self.tx_id += 1
             self.queue_tx.append(
                 (False, addrb, datab, -1, prot, error_expected, device, self.tx_id)
