@@ -118,6 +118,10 @@ class ApbBase:
     def disable_backpressure(self):
         self.backpressure = False
 
+    def device_rdata(self, prdata: int, device: int = 0) -> int:
+        """Extract one device's slice from a concatenated ``prdata`` vector."""
+        return (prdata >> (device * self.rwidth[device])) & self.rdata_mask[device]
+
 
 #     def _handle_reset(self, state):
 #         if state:

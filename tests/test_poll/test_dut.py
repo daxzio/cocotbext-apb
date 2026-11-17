@@ -71,3 +71,33 @@ async def test_dut_poll3(dut):
     await tb.intf.poll(0x04, b"\x00\x00\x00\x00")
 
     await tb.cr.end_test(20)
+
+
+@test()
+async def test_dut_poll_index(dut):
+    tb = testbench(dut)
+    tb.intf.addaddrmap({"START": 0x00, "BUSY": 0x04})
+
+    await tb.cr.wait_clkn(20)
+
+    await tb.intf.read(0x04, 0)
+    await tb.intf.write(0x00, 1)
+    # BUSY is one word after START; index=1 must poll 0x04, not 0x00
+    await tb.intf.poll(0x00, 0, index=1)
+    await tb.intf.read("BUSY", 0)
+
+    await tb.cr.end_test(20)
+
+
+@test()
+async def test_dut_poll_named_index(dut):
+    tb = testbench(dut)
+    tb.intf.addaddrmap({"START": 0x00})
+
+    await tb.cr.wait_clkn(20)
+
+    await tb.intf.read(0x04, 0)
+    await tb.intf.write("START", 1)
+    await tb.intf.poll("START", 0, index=1)
+
+    await tb.cr.end_test(20)
